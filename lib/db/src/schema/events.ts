@@ -16,6 +16,11 @@ export const eventsTable = pgTable("events", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertEventSchema = createInsertSchema(eventsTable).omit({ id: true, createdAt: true, rsvpCount: true });
+const coerceDate = z.union([z.date(), z.string().transform((s) => new Date(s))]);
+
+export const insertEventSchema = createInsertSchema(eventsTable, {
+  eventDate: coerceDate,
+  endDate: coerceDate.nullable().optional(),
+}).omit({ id: true, createdAt: true, rsvpCount: true });
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Event = typeof eventsTable.$inferSelect;

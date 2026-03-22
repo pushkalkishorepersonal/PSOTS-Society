@@ -7,23 +7,20 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 export default defineConfig(async ({ command }) => {
   const isDev = command === "serve";
 
-  let port = 3000;
-  if (isDev) {
-    const rawPort = process.env.PORT;
-    if (!rawPort) {
-      throw new Error("PORT environment variable is required but was not provided.");
-    }
-    const parsed = Number(rawPort);
-    if (Number.isNaN(parsed) || parsed <= 0) {
-      throw new Error(`Invalid PORT value: "${rawPort}"`);
-    }
-    port = parsed;
-  }
+  // PORT env var is optional locally — default to 5173 for frontend, 4000 for API
+  const rawPort = process.env.PORT;
+  const parsed = rawPort ? Number(rawPort) : null;
+  const port = parsed && !Number.isNaN(parsed) && parsed > 0 ? parsed : 5173;
 
   const basePath = process.env.BASE_PATH ?? "/";
 
+  // API server port for the dev proxy (backend runs on API_PORT or 4000)
+  const apiPort = process.env.API_PORT ?? "4000";
+
   return {
     base: basePath,
+    // Load .env from the workspace root so pnpm dev:web reads it automatically
+    envDir: path.resolve(import.meta.dirname, "../.."),
     plugins: [
       react(),
       tailwindcss(),
@@ -59,6 +56,15 @@ export default defineConfig(async ({ command }) => {
         strict: true,
         deny: ["**/.*"],
       },
+      // In dev, proxy /api calls to the Express API server
+      ...(isDev && {
+        proxy: {
+          "/api": {
+            target: `http://localhost:${apiPort}`,
+            changeOrigin: true,
+          },
+        },
+      }),
     },
     preview: {
       port,
