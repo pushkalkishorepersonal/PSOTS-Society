@@ -1,0 +1,18 @@
+packages:
+  "framer-motion": "For smooth page transitions, list animations, and collapsibles"
+  "date-fns": "For formatting dates and calculating expiries"
+  "clsx": "For conditional class names"
+  "tailwind-merge": "For merging tailwind classes safely"
+  "@hookform/resolvers": "For Zod form validation"
+  "react-hook-form": "For robust form handling"
+  "zod": "For schema validation"
+  "lucide-react": "For beautiful icons"
+
+images:
+  - path: "artifacts/psots/public/images/hero-bg.png"
+    description: "A beautiful, warm, golden hour shot of a modern premium residential apartment complex with lush green landscaping, soft glowing lights from windows, clean architectural lines, very welcoming and community-focused"
+    aspect_ratio: "16:9"
+
+notes:
+  - "Assuming React Query is set up at the App level."
+  - "Using generated hooks from @workspace/api-client-react."
