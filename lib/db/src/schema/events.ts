@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -11,6 +11,8 @@ export const eventsTable = pgTable("events", {
   endDate: timestamp("end_date"),
   organizer: text("organizer").notNull(),
   rsvpCount: integer("rsvp_count").notNull().default(0),
+  imageUrl: text("image_url"),          // Optional cover photo URL
+  isFeatured: boolean("is_featured").notNull().default(false), // Pinned to Festival Spotlight
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

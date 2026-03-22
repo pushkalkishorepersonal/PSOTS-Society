@@ -24,8 +24,10 @@ PSOTS - Prestige Song of the South community portal. A full-stack web applicatio
 - **Marketplace** - Self-managed classifieds (sell/buy/rent/free) with 30-day auto-expiry; Mark Sold / Close Ad buttons
 - **Emergency Contacts** - Click-to-call contacts with search; official PSOTSAOA channels (Helpdesk, EC, Finance) as static section
 - **Community Guide** (/guide) - Resident handbook sourced from official PSOTS Rules of Residency v2.0 (Oct 2025): official channels, 4-level escalation path, daily rules (vehicles, waste, conduct), all 25+ amenity timings/rules (The Opera Clubhouse), penalty quick reference table
-- **Home Dashboard** - Real PSOTS hero photo (sunset), pinned notices, upcoming events, recent listings, photo gallery, Telegram bot CTA, community stats (2,300+ families, 14 towers, 33 acres, 25+ amenities, 24/7 security)
-- **Telegram Bot** (@psots_telegram_bot) - Commands: /notice, /event, /sell, /buy, /free, /rules, /mylistings, /sold <id>, /close <id>; group moderation
+- **Home Dashboard** - Real PSOTS hero photo (sunset), pinned notices, upcoming events, recent listings, photo gallery, Telegram bot CTA, community stats (2,300+ families, 14 towers, 33 acres, 25+ amenities, 24/7 security); **Festival Spotlight** section (appears when featured events exist)
+- **Chhath Puja Page** (/chhath, also served at chhath.psots.in) - Dedicated festival page with countdown timer, 4-day schedule (Nahay Khay → Kharna → Sanjha Arghya → Subahe Arghya), venue info, community event RSVP cards, volunteer CTA
+- **Event Enhancements** - Events now support `imageUrl` (cover photo) and `isFeatured` (Festival Spotlight pin); image shown on event card if provided
+- **Telegram Bot** (@psots_telegram_bot) - Commands: /notice, /event, /sell, /buy, /free, /rules, /events, /chhath, /mylistings, /sold <id>, /close <id>; group moderation
 - **Auto-scheduler** - Runs every 6 hours; archives old notices, expires old listings
 - **Real Photos** - 8 actual PSOTS resident photos used across site (hero, gallery, Telegram section)
 
@@ -58,6 +60,8 @@ Each group the bot joins can be configured independently. Configuration is store
 | `/sold <ID>` | Mark your listing as sold |
 | `/close <ID>` | Remove your listing |
 | `/rules` | Show group-specific etiquettes |
+| `/events` | List next 5 upcoming community events |
+| `/chhath` | Show Chhath Puja 2026 schedule, dates & venue |
 | `/mystatus` | Check your own persistent strike count |
 
 ### Admin Moderation Commands

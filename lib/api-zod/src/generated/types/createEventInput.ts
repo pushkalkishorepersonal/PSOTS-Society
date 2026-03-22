@@ -13,4 +13,6 @@ export interface CreateEventInput {
   eventDate: Date;
   endDate?: Date | null;
   organizer: string;
+  imageUrl?: string | null;
+  isFeatured?: boolean;
 }

@@ -15,5 +15,7 @@ export interface Event {
   endDate?: Date | null;
   organizer: string;
   rsvpCount: number;
+  imageUrl?: string | null;
+  isFeatured: boolean;
   createdAt: Date;
 }

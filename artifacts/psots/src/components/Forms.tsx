@@ -180,6 +180,8 @@ const eventSchema = z.object({
   location: z.string().min(3),
   eventDate: z.string().min(1),
   organizer: z.string().min(2),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  isFeatured: z.boolean().default(false),
   flatNumber: z.string().min(1, "Flat number required for verification"),
 });
 
@@ -191,8 +193,13 @@ export function CreateEventModal() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ resolver: zodResolver(eventSchema) });
 
   const onSubmit = (data: any) => {
-    const { flatNumber: _fn, ...rest } = data;
-    const payload = { ...rest, eventDate: new Date(rest.eventDate).toISOString() };
+    const { flatNumber: _fn, imageUrl, isFeatured, ...rest } = data;
+    const payload = {
+      ...rest,
+      eventDate: new Date(rest.eventDate).toISOString(),
+      imageUrl: imageUrl || null,
+      isFeatured: isFeatured ?? false,
+    };
     createMutation.mutate({ data: payload }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListEventsQueryKey() });
@@ -228,6 +235,26 @@ export function CreateEventModal() {
               <FieldError message={errors.flatNumber?.message as string} />
             </div>
           </div>
+
+          <div>
+            <input
+              {...register("imageUrl")}
+              placeholder="Cover photo URL (optional)"
+              className="w-full px-4 py-3 bg-secondary/50 rounded-xl outline-none transition-all focus:bg-card"
+            />
+            <FieldError message={errors.imageUrl?.message as string} />
+            <p className="text-[11px] text-muted-foreground mt-1 px-1 flex items-center gap-1">
+              <Info className="w-3 h-3 shrink-0" /> Paste a public image URL to show a cover photo on the event card.
+            </p>
+          </div>
+
+          <label className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl cursor-pointer">
+            <input type="checkbox" {...register("isFeatured")} className="w-5 h-5 rounded accent-amber-500 focus:ring-amber-400" />
+            <div>
+              <span className="text-sm font-semibold text-amber-800">Feature this event</span>
+              <p className="text-[11px] text-amber-700/70 mt-0.5">Displays in the Festival Spotlight section on the home page.</p>
+            </div>
+          </label>
 
           <button type="submit" disabled={createMutation.isPending} className="w-full py-3.5 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-colors flex justify-center items-center">
             {createMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Event"}

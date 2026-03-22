@@ -108,6 +108,17 @@ function EventCard({ event, index, isPast }: { event: any; index: number; isPast
           : "bg-white border-border hover:shadow-xl hover:border-primary/20 group"
       )}
     >
+      {/* Cover image (if available) */}
+      {event.imageUrl && !isPast && (
+        <div className="h-40 overflow-hidden">
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        </div>
+      )}
+
       {/* Card Top — date banner */}
       <div className={cn(
         "flex items-center gap-4 p-5 border-b",

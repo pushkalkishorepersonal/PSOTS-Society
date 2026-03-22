@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Menu, X, Send, Phone, Calendar, ShoppingBag, Megaphone, ChevronRight, BookOpen } from "lucide-react";
+import { Menu, X, Send, Phone, Calendar, ShoppingBag, Megaphone, ChevronRight, BookOpen, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/notices", label: "Notices" },
   { href: "/events", label: "Events" },
+  { href: "/chhath", label: "🪔 Chhath" },
   { href: "/marketplace", label: "Marketplace" },
   { href: "/contacts", label: "Contacts" },
   { href: "/guide", label: "Guide" },
@@ -177,6 +178,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   { href: "/marketplace", icon: ShoppingBag, label: "Marketplace" },
                   { href: "/contacts", icon: Phone, label: "Emergency Contacts" },
                   { href: "/guide", icon: BookOpen, label: "Community Guide" },
+                  { href: "/chhath", icon: Sun, label: "Chhath Puja" },
                 ].map(({ href, icon: Icon, label }) => (
                   <li key={href}>
                     <Link href={href} className="flex items-center gap-2.5 text-sm text-white/60 hover:text-white transition-colors">

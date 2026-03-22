@@ -39,6 +39,8 @@ export interface Event {
   endDate?: string | null;
   organizer: string;
   rsvpCount: number;
+  imageUrl?: string | null;
+  isFeatured?: boolean;
   createdAt: string;
 }
 
@@ -49,6 +51,8 @@ export interface CreateEventInput {
   eventDate: string;
   endDate?: string | null;
   organizer: string;
+  imageUrl?: string | null;
+  isFeatured?: boolean;
 }
 
 export interface Listing {

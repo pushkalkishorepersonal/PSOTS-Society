@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, Store, Pin, Send, Bell, ShoppingBag, Shield, Users, Clock, ChevronRight } from "lucide-react";
+import { ArrowRight, Calendar, Store, Pin, Send, Bell, ShoppingBag, Shield, Users, ChevronRight, Star, Flame } from "lucide-react";
 import { format } from "date-fns";
 import { useListNotices, useListEvents, useListListings } from "@workspace/api-client-react";
 
@@ -28,6 +28,7 @@ export function Home() {
   const pinnedNotices = notices?.filter(n => n.isPinned && !n.archivedAt).slice(0, 3) || [];
   const upcomingEvents = events?.slice(0, 3) || [];
   const recentListings = listings?.slice(0, 4) || [];
+  const featuredEvents = events?.filter(e => e.isFeatured).slice(0, 3) || [];
 
   return (
     <div className="pb-28">
@@ -183,6 +184,71 @@ export function Home() {
           </div>
         </div>
       </div>
+
+      {/* ─── Festival Spotlight ───────────────────────────────────────────── */}
+      {featuredEvents.length > 0 && (
+        <div className="bg-gradient-to-br from-amber-950 to-orange-950 py-16">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center">
+                  <Flame className="w-4 h-4 text-amber-400" />
+                </div>
+                <h2 className="font-display text-2xl font-semibold text-white">Festival Spotlight</h2>
+              </div>
+              <Link href="/events" className="flex items-center gap-1 text-sm font-medium text-amber-400/80 hover:text-amber-300 transition-colors group">
+                All Events <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {featuredEvents.map((event, i) => {
+                const d = new Date(event.eventDate);
+                return (
+                  <Link key={event.id} href="/events">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.07 }}
+                      className="rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-amber-400/30 hover:bg-white/8 transition-all group cursor-pointer"
+                    >
+                      {event.imageUrl ? (
+                        <div className="h-36 overflow-hidden">
+                          <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                      ) : (
+                        <div className="h-24 bg-gradient-to-br from-amber-500/30 via-orange-500/20 to-red-600/20 flex items-center justify-center">
+                          <Star className="w-8 h-8 text-amber-400/50" />
+                        </div>
+                      )}
+                      <div className="p-5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2.5 py-1 rounded-lg">
+                            Featured
+                          </span>
+                          <span className="text-[10px] text-white/40 font-medium">{format(d, "MMM d")}</span>
+                        </div>
+                        <h3 className="font-display font-semibold text-base text-white mb-1 group-hover:text-amber-300 transition-colors leading-snug line-clamp-1">{event.title}</h3>
+                        <p className="text-white/45 text-xs line-clamp-2">{event.description}</p>
+                        <div className="flex items-center gap-1.5 mt-3 text-[10px] text-white/35 font-medium">
+                          <Users className="w-3 h-3" /> {event.rsvpCount} attending
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="mt-8 text-center">
+              <Link
+                href="/chhath"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-amber-400 text-amber-900 rounded-xl font-bold text-sm hover:bg-amber-300 transition-all shadow-xl hover:-translate-y-0.5"
+              >
+                🪔 View Chhath Puja Page <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── Marketplace ──────────────────────────────────────────────── */}
       <div className="bg-secondary/40 py-20">

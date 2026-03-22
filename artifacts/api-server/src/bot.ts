@@ -6,7 +6,7 @@ import {
   DEFAULT_ANNOUNCEMENTS_CONFIG,
   type GroupConfig,
 } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 import { logger } from "./lib/logger";
 
 const EXPIRY_DAYS = 30;
@@ -1098,6 +1098,61 @@ export function startBot() {
     await db.update(listingsTable).set({ status: "closed", isActive: false }).where(eq(listingsTable.id, id));
     send(chatId, `🔒 *"${listing.title}"* (ID: ${id}) has been *closed* and removed from the marketplace.`);
     logger.info({ id }, "Listing closed via bot");
+  });
+
+  // ─── /events ──────────────────────────────────────────────────────────────
+  bot.onText(/^\/events/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      const now = new Date();
+      const upcoming = await db
+        .select()
+        .from(eventsTable)
+        .where(gte(eventsTable.eventDate, now))
+        .orderBy(eventsTable.eventDate)
+        .limit(5);
+
+      if (upcoming.length === 0) {
+        send(chatId,
+          `📅 *No upcoming events right now.*\n\nBe the first to create one!\n\nUse: \`/event Title | Date | Venue | Description\`\n\nOr visit psots\\.in/events`
+        );
+        return;
+      }
+
+      const lines = upcoming.map((e, i) => {
+        const d = new Date(e.eventDate);
+        const dateStr = d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+        const timeStr = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+        return `${i + 1}\\. *${e.title}*\n   📍 ${e.location}\n   🕐 ${dateStr} · ${timeStr}\n   👥 ${e.rsvpCount} attending`;
+      }).join("\n\n");
+
+      send(chatId,
+        `📅 *Upcoming Events at PSOTS*\n\n${lines}\n\n_Full details & RSVP → psots\\.in/events_`
+      );
+      logger.info({ count: upcoming.length }, "Events listed via bot command");
+    } catch (err) {
+      logger.error({ err }, "Failed to list events via bot");
+      send(chatId, "❌ Could not fetch events. Please try again.");
+    }
+  });
+
+  // ─── /chhath ──────────────────────────────────────────────────────────────
+  bot.onText(/^\/chhath/, async (msg) => {
+    const chatId = msg.chat.id;
+    const CHHATH_YEAR = 2026;
+    send(chatId,
+      `🪔 *Chhath Puja ${CHHATH_YEAR} — PSOTS*\n\n` +
+      `Chhath Puja ${CHHATH_YEAR} dates at Prestige Song of the South:\n\n` +
+      `*Day 1 — Nahay Khay*\n📅 Tue, Nov 3 · Holy dip & preparations\n\n` +
+      `*Day 2 — Kharna*\n📅 Wed, Nov 4 · Kheer prasad, all-day fast\n\n` +
+      `*Day 3 — Sanjha Arghya*\n📅 Thu, Nov 5 · 🌅 Sunset offerings \\(\\~5:30 PM\\)\n\n` +
+      `*Day 4 — Subahe Arghya*\n📅 Fri, Nov 6 · 🌄 Sunrise offerings \\(\\~6:10 AM\\)\n\n` +
+      `📍 *Venue:* Tower 8 Garden Ghat & Pool Deck\n` +
+      `🎶 Chhath geet, prasad for all residents\n\n` +
+      `_All residents welcome, regardless of background_ 🙏\n\n` +
+      `*Full details & RSVP:*\npsots\\.in/chhath`
+    );
+    logger.info("Chhath info sent via bot command");
   });
 
   bot.on("polling_error", (err) => {
