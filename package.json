@@ -10,6 +10,8 @@
     "dev": "concurrently --names \"api,web\" --prefix-colors \"cyan,magenta\" \"pnpm --filter @workspace/api-server run dev\" \"pnpm --filter @workspace/psots run dev\"",
     "dev:api": "pnpm --filter @workspace/api-server run dev",
     "dev:web": "pnpm --filter @workspace/psots run dev",
+    "build:prod": "pnpm --filter @workspace/psots run build && pnpm --filter @workspace/api-server run build",
+    "start:prod": "NODE_ENV=production node --enable-source-maps artifacts/api-server/dist/index.mjs",
     "db:push": "pnpm --filter @workspace/db run push",
     "db:push-force": "pnpm --filter @workspace/db run push-force"
   },
