@@ -1,9 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { Menu, X, Send, Phone, Calendar, ShoppingBag, Megaphone, ChevronRight, BookOpen, LogIn, LogOut, Loader2 } from "lucide-react";
+import { Menu, X, Send, Phone, Calendar, ShoppingBag, Megaphone, ChevronRight, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -14,143 +13,10 @@ const NAV_LINKS = [
   { href: "/guide", label: "Guide" },
 ];
 
-const ROLE_LABELS: Record<string, string> = {
-  resident: "Resident",
-  committee: "Committee",
-  admin: "Admin",
-};
-
-// ─── Login Modal ──────────────────────────────────────────────────────────────
-
-function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [email, setEmail] = useState("");
-  const [flatNumber, setFlatNumber] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-
-  function reset() {
-    setEmail("");
-    setFlatNumber("");
-    setStatus("idle");
-    setErrorMsg("");
-  }
-
-  function handleClose() {
-    reset();
-    onClose();
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email || !flatNumber) return;
-    setStatus("loading");
-    setErrorMsg("");
-
-    try {
-      const res = await fetch("/api/auth/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), flatNumber: flatNumber.trim() }),
-      });
-      const data = await res.json() as { ok?: boolean; error?: string };
-      if (res.ok && data.ok) {
-        setStatus("sent");
-      } else {
-        setStatus("error");
-        setErrorMsg(typeof data.error === "string" ? data.error : "Something went wrong.");
-      }
-    } catch {
-      setStatus("error");
-      setErrorMsg("Could not connect to server. Please try again.");
-    }
-  }
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-card w-full max-w-sm rounded-3xl shadow-2xl border overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-display font-bold">Log in to PSOTS</h2>
-          <button onClick={handleClose} className="p-2 hover:bg-secondary rounded-full transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-6">
-          {status === "sent" ? (
-            <div className="text-center py-4">
-              <div className="text-4xl mb-3">📬</div>
-              <h3 className="font-display text-lg font-semibold mb-1">Check your inbox</h3>
-              <p className="text-sm text-muted-foreground">
-                If your email and flat number match our records, a login link has been sent. It expires in 15 minutes.
-              </p>
-              <button
-                onClick={handleClose}
-                className="mt-5 w-full py-2.5 bg-secondary text-foreground rounded-xl font-medium text-sm hover:bg-secondary/80 transition-colors"
-              >
-                Got it
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Enter your registered email and flat number — we'll send a one-click login link.
-              </p>
-
-              <div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  required
-                  className="w-full px-4 py-3 bg-secondary/50 rounded-xl outline-none transition-all focus:bg-card text-sm"
-                />
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  value={flatNumber}
-                  onChange={(e) => setFlatNumber(e.target.value)}
-                  placeholder="Flat number (e.g. 1203)"
-                  required
-                  className="w-full px-4 py-3 bg-secondary/50 rounded-xl outline-none transition-all focus:bg-card text-sm"
-                />
-              </div>
-
-              {status === "error" && (
-                <p className="text-sm text-destructive px-1">{errorMsg}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors flex justify-center items-center gap-2"
-              >
-                {status === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send login link"}
-              </button>
-
-              <p className="text-[11px] text-muted-foreground text-center">
-                Only registered residents can log in. Contact the Society Office to get registered.
-              </p>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Layout ───────────────────────────────────────────────────────────────────
-
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const { user, isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -216,35 +82,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Send className="w-3.5 h-3.5" />
               Telegram Bot
             </a>
-
-            {isLoggedIn && user ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/8 border border-primary/15 rounded-lg">
-                  <div className="w-6 h-6 rounded-md bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex flex-col leading-none">
-                    <span className="text-xs font-semibold text-foreground">{user.name}</span>
-                    <span className="text-[10px] text-muted-foreground capitalize">{ROLE_LABELS[user.role]}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={logout}
-                  title="Log out"
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setLoginOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                Log in
-              </button>
-            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -292,30 +129,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               >
                 <Send className="w-4 h-4" /> Open Telegram Bot
               </a>
-
-              {isLoggedIn && user ? (
-                <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-primary/8 border border-primary/15">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold">{user.name}</div>
-                      <div className="text-[10px] text-muted-foreground capitalize">{ROLE_LABELS[user.role]}</div>
-                    </div>
-                  </div>
-                  <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="text-xs text-muted-foreground font-medium flex items-center gap-1 hover:text-foreground">
-                    <LogOut className="w-3.5 h-3.5" /> Log out
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => { setLoginOpen(true); setMobileMenuOpen(false); }}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors"
-                >
-                  <LogIn className="w-4 h-4" /> Log in
-                </button>
-              )}
             </nav>
           </motion.div>
         )}
@@ -393,8 +206,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
-
-      <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
     </div>
   );
 }
