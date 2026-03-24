@@ -1,9 +1,5 @@
 import TelegramBot from "node-telegram-bot-api";
-import {
-  db, noticesTable, eventsTable, listingsTable, botGroupsTable, botStrikesTable,
-  towersTable, moderationKeywordsTable, moderationPatternsTable, settingsTable,
-  SETTING_KEYS,
-} from "@workspace/db";
+import { db, noticesTable, eventsTable, listingsTable, botGroupsTable, botStrikesTable } from "@workspace/db";
 import {
   DEFAULT_GENERAL_CONFIG,
   DEFAULT_MARKETPLACE_CONFIG,
@@ -15,97 +11,118 @@ import { logger } from "./lib/logger";
 
 const EXPIRY_DAYS = 30;
 
-// ─── Tower config (seeded from DB on startup) ─────────────────────────────────
-let VALID_TOWERS: string[] = [
+// ─── Tower config ─────────────────────────────────────────────────────────────
+const VALID_TOWERS = [
   "Tower 1","Tower 2","Tower 3","Tower 4","Tower 5",
   "Tower 8","Tower 9","Tower 10","Tower 11","Tower 12",
   "Tower 14","Tower 15","Tower 16","Tower 17",
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ███  MODERATION PATTERNS (rebuilt from DB on startup) ███
+// ███  MODERATION PATTERNS  ███
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Default hardcoded values — replaced by DB values on startup
-let FOUL_REGEX = /\b(fuck|shit|bitch|asshole|bastard)\b/i;
-let PERSONAL_ATTACK_REGEX = /(you are stupid|you're stupid|shut up|get lost)/i;
-let AD_REGEX = /(earn money|work from home|mlm|network marketing)/i;
-let POLITICAL_REGEX = /\b(bjp|congress|aap|modi|election)\b/i;
-let RELIGIOUS_REGEX = /(cow slaughter|beef ban|halal|jihad)/i;
-let SENSITIVE_REGEX = /(pet owners|communal issue|north indian|south indian)/i;
-let SOCIAL_REGEX = /\b(happy birthday|congratulations|good morning|good night)\b/i;
-let THREAT_REGEX = /(will report you|take legal action|you will regret)/i;
+const FOUL_WORDS = [
+  "fuck","shit","bitch","asshole","bastard","cunt","dick","pussy","cock","whore",
+  "slut","nigger","faggot","motherfucker","idiot","stupid","moron","loser","dumbass",
+  "retard","imbecile","jackass","dipshit","prick","twat",
+  "madarchod","behenchod","bhosdike","chutiya","chutiye","randi","haramzada",
+  "gaandu","bkl","bc","mc","mf","maderchod","bhosdi","loda","lund","lavda",
+  "harami","kamina","kuttiya","kutte","saala","sala","bakwaas","bakwas",
+  "gadha","ullu","andha","gandu","chod","teri maa","teri behen",
+  "sale kamine","haramkhor","namard","napunsak",
+  "thika","tunne","sule","hogli","nayi","myskin","siggilla","ninna amma",
+  "ninna akka","ooru bidappa","hodi","bidi","ninage gottilla",
+  "poda","ommala","pundek","sunni","otha",
+];
+const FOUL_REGEX = new RegExp(`\\b(${FOUL_WORDS.join("|")})\\b`, "i");
+
+const PERSONAL_ATTACK_PHRASES = [
+  "you are stupid","you're stupid","ur stupid","you idiot","shut up","get lost",
+  "go away","you fool","what a fool","you are useless","pathetic person",
+  "mind your business","none of your business","who are you to","stay in your lane",
+  "you don't know anything","you know nothing","stop talking","keep quiet",
+  "you are shameless","bloody fool","go to hell","drop dead","you are a liar",
+  "you are a fraud","stop interfering","not your problem","butt out",
+  "back off","shut your mouth","you are toxic","you are a problem",
+  "tu kya samjhta hai","apna kaam kar","teri aukat kya hai","besharam",
+  "tere ko kya","naalyak","nalayak","bekaar","ghatiya","neech",
+];
+const PERSONAL_ATTACK_REGEX = new RegExp(
+  `(${PERSONAL_ATTACK_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"
+);
 
 const PHONE_PATTERN = /(?:^|\s)(?:\+?91[-.\s]?)?[6-9]\d{9}(?:\s|$)/m;
 const PRICE_INLINE_PATTERN = /(?:₹|rs\.?|inr)\s*[\d,]+|[\d,]+\s*(?:₹|rs|rupees)/i;
-let PROMO_LINK_REGEX = /(?:t\.me\/(?!psots_telegram_bot)[a-zA-Z0-9_+]+|wa\.me\/|chat\.whatsapp\.com\/|whatsapp\.com\/channel)/i;
-let EXTERNAL_LINK_REGEX = /https?:\/\/(?!(?:psots\.in|t\.me\/psots_telegram_bot|youtube\.com|youtu\.be|maps\.google\.com|goo\.gl\/maps))[^\s]+/gi;
 
-// ─── Load config from DB ──────────────────────────────────────────────────────
-function buildWordRegex(words: string[], boundary = true): RegExp {
-  if (!words.length) return /(?!)/; // never-match
-  const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  return boundary
-    ? new RegExp(`\\b(${escaped.join("|")})\\b`, "i")
-    : new RegExp(`(${escaped.join("|")})`, "i");
-}
+const AD_KEYWORDS = [
+  "earn money","work from home","make money online","investment opportunity",
+  "guaranteed returns","join my team","mlm","network marketing",
+  "limited offer","hurry up","act now","free gift","win prize","lucky draw",
+  "loan offer","credit card offer","insurance plan","mutual fund","real estate deal",
+  "contact for price","dm for details","whatsapp for details","call for price",
+  "best price guaranteed","discount offer","cashback offer","referral bonus",
+  "business opportunity","passive income","financial freedom","double your money",
+  "no investment required","work 2 hours a day","be your own boss",
+  "register now","sign up for free","click the link","follow the link",
+  "call now","call me for","text me for","message me for","ping me",
+  "property for sale","flat for sale","flat for rent","apartment for rent",
+  "pg available","room available for rent","house for rent",
+  "interior designer","carpenter available","painting service","cleaning service",
+  "maid available","cook available","driver available","security guard",
+  "pest control","plumber available","electrician available","ac service",
+];
+const AD_REGEX = new RegExp(`(${AD_KEYWORDS.join("|")})`, "i");
 
-async function loadBotConfigFromDb() {
-  try {
-    // Load towers
-    const towerRows = await db.select().from(towersTable).where(eq(towersTable.isActive, true));
-    if (towerRows.length > 0) {
-      VALID_TOWERS = towerRows.map(t => t.name);
-    }
+const PROMO_LINK_REGEX = /(?:t\.me\/(?!psots_telegram_bot)[a-zA-Z0-9_+]+|wa\.me\/|chat\.whatsapp\.com\/|whatsapp\.com\/channel)/i;
+const EXTERNAL_LINK_REGEX = /https?:\/\/(?!(?:psots\.in|t\.me\/psots_telegram_bot|youtube\.com|youtu\.be|maps\.google\.com|goo\.gl\/maps))[^\s]+/gi;
 
-    // Load keywords by category
-    const keywords = await db.select().from(moderationKeywordsTable).where(eq(moderationKeywordsTable.isActive, true));
-    const byCategory = (cat: string) => keywords.filter(k => k.category === cat).map(k => k.keyword);
+const POLITICAL_KEYWORDS = [
+  "bjp","congress","aap","modi","rahul gandhi","kejriwal","election","vote for",
+  "political party","manifesto","parliament","government policy","ruling party",
+  "opposition","mla","mp candidat","propaganda","jai shri ram","pakistan zindabad",
+  "bharat mata","anti national","urban naxal","liberal","woke",
+  "hindu rashtra","secular","reservation politics","caste vote","communal politics",
+  "godi media","presstitutes","bhakt","libtard",
+];
+const RELIGIOUS_KEYWORDS = [
+  "religion is","muslims are","hindus are","christians are","sikhs are",
+  "islam is","hinduism is","temple vs","mosque vs","church vs",
+  "cow slaughter","beef ban","halal","haram","kafir","jihad",
+  "mandir wahi banayenge","love jihad","religious conversion","communal riot",
+  "minority appeasement","majority community","religious superiority",
+];
+const POLITICAL_REGEX = new RegExp(`\\b(${POLITICAL_KEYWORDS.join("|")})\\b`, "i");
+const RELIGIOUS_REGEX = new RegExp(`(${RELIGIOUS_KEYWORDS.join("|")})`, "i");
 
-    const foul = byCategory("foul");
-    const personal = byCategory("personal_attack");
-    const ad = byCategory("ad");
-    const political = byCategory("political");
-    const religious = byCategory("religious");
-    const communal = byCategory("communal");
-    const threat = byCategory("threat");
-    const social = byCategory("social");
+const SENSITIVE_TOPICS = [
+  "pet owners","non-pet owners","dog owners should","cat owners should",
+  "pets in lift","pets in elevator","pets in common area","ban pets",
+  "communal issue","caste discrimination","north indian","south indian",
+  "outsiders in bangalore","locals vs outsiders","language issue",
+  "marathi vs","kannada vs","hindi imposition","anti kannada","anti hindi",
+  "north south divide","migrant workers","bhaiyya","madrasi",
+];
+const SENSITIVE_REGEX = new RegExp(`(${SENSITIVE_TOPICS.join("|")})`, "i");
 
-    if (foul.length) FOUL_REGEX = buildWordRegex(foul, true);
-    if (personal.length) PERSONAL_ATTACK_REGEX = buildWordRegex(personal, false);
-    if (ad.length) AD_REGEX = buildWordRegex(ad, false);
-    if (political.length) POLITICAL_REGEX = buildWordRegex(political, true);
-    if (religious.length) RELIGIOUS_REGEX = buildWordRegex(religious, false);
-    if (communal.length) SENSITIVE_REGEX = buildWordRegex(communal, false);
-    if (threat.length) THREAT_REGEX = buildWordRegex(threat, false);
-    if (social.length) SOCIAL_REGEX = buildWordRegex(social, true);
+const SOCIAL_PHRASES = [
+  "happy birthday","hbd","wish you","many happy returns","congratulations","congrats",
+  "well done","good morning","good evening","good night","gm everyone","gn everyone",
+  "happy diwali","happy holi","happy new year","happy anniversary","happy wedding",
+  "best wishes","advance wishes","have a great","have a wonderful",
+  "subah ki","शुभ प्रभात","goodnight all","morning all","evening all",
+];
+const SOCIAL_REGEX = new RegExp(`\\b(${SOCIAL_PHRASES.join("|")})\\b`, "i");
 
-    // Load regex patterns
-    const patterns = await db.select().from(moderationPatternsTable).where(eq(moderationPatternsTable.isActive, true));
-    for (const p of patterns) {
-      try {
-        if (p.name === "promo_link") PROMO_LINK_REGEX = new RegExp(p.pattern, p.flags);
-        if (p.name === "external_link") EXTERNAL_LINK_REGEX = new RegExp(p.pattern, p.flags);
-      } catch { /* keep default if pattern is invalid */ }
-    }
-
-    // Load thresholds from settings
-    const settings = await db.select().from(settingsTable);
-    const getSetting = (key: string, fallback: number) => {
-      const row = settings.find(s => s.key === key);
-      return row ? Number(row.value) || fallback : fallback;
-    };
-    // Expose via module-level vars used by bot handlers
-    botFloodWindowMs = getSetting(SETTING_KEYS.FLOOD_WINDOW_MS, 30_000);
-    botFloodMaxMessages = getSetting(SETTING_KEYS.FLOOD_MAX_MESSAGES, 5);
-    botHardWarningsBeforeMute = getSetting(SETTING_KEYS.STRIKE_THRESHOLD_BEFORE_MUTE, 3);
-    botMuteDurationSeconds = getSetting(SETTING_KEYS.botMuteDurationSeconds, 3600);
-
-    logger.info({ towers: VALID_TOWERS.length, keywords: keywords.length }, "Bot config loaded from DB");
-  } catch (err) {
-    logger.warn({ err }, "Could not load bot config from DB — using compiled defaults");
-  }
-}
+const THREAT_PATTERNS = [
+  "will report you","will file complaint","lodge complaint against you",
+  "see you in court","drag you to court","take legal action","teach you a lesson",
+  "you will regret","you'll regret","i will make your life","maza chakha dunga",
+  "dekh lena","dekh lunga","kaafi dekha hai",
+];
+const THREAT_REGEX = new RegExp(
+  `(${THREAT_PATTERNS.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"
+);
 
 // ─── Marketplace: detect listing-like messages (so off-topic check isn't too aggressive) ──
 const LISTING_SIGNAL_REGEX = /(?:sell|selling|sale|available|for sale|rent|renting|buy|buying|looking for|wanted|free|giveaway|give away|₹|rs\.|inr|\d+k\b|offer|price|contact|call|whatsapp|dm me|message me|ping me)/i;
@@ -137,30 +154,26 @@ function isContextualAd(text: string): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ███  CONFIGURABLE THRESHOLDS (overwritten by loadBotConfigFromDb)  ███
-// ═══════════════════════════════════════════════════════════════════════════════
-let botFloodWindowMs = 30_000;
-let botFloodMaxMessages = 5;
-let botHardWarningsBeforeMute = 3;
-let botMuteDurationSeconds = 3600;
-
-// ═══════════════════════════════════════════════════════════════════════════════
 // ███  FLOOD DETECTION  ███
 // ═══════════════════════════════════════════════════════════════════════════════
+const FLOOD_WINDOW_MS = 30_000;
+const FLOOD_MAX_MESSAGES = 5;
 const userMessageTimes = new Map<string, number[]>();
 
 function isFlooding(chatId: string, userId: number): boolean {
   const key = `${chatId}:${userId}`;
   const now = Date.now();
-  const times = (userMessageTimes.get(key) ?? []).filter(t => now - t < botFloodWindowMs);
+  const times = (userMessageTimes.get(key) ?? []).filter(t => now - t < FLOOD_WINDOW_MS);
   times.push(now);
   userMessageTimes.set(key, times);
-  return times.length > botFloodMaxMessages;
+  return times.length > FLOOD_MAX_MESSAGES;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ███  GROUP CONFIG CACHE  ███
 // ═══════════════════════════════════════════════════════════════════════════════
+const HARD_WARNINGS_BEFORE_MUTE = 3;
+const MUTE_DURATION_SECONDS = 3600;
 
 const groupConfigCache = new Map<string, GroupConfig>();
 const strikeCache = new Map<string, number>();
@@ -476,9 +489,6 @@ export function startBot() {
     logger.info("Telegram bot started with long polling");
   }
 
-  // Load towers, keywords, and thresholds from DB before starting
-  loadBotConfigFromDb().catch(err => logger.warn({ err }, "Bot DB config load failed — using defaults"));
-
   initPolling().catch(err => logger.error({ err }, "Failed to start bot polling"));
 
   const send = (chatId: number | string, text: string, extra?: TelegramBot.SendMessageOptions) =>
@@ -659,15 +669,15 @@ export function startBot() {
       const count = prev + 1;
       await setStrikes(chatIdStr, userIdStr, count);
 
-      const remaining = botHardWarningsBeforeMute - count;
+      const remaining = HARD_WARNINGS_BEFORE_MUTE - count;
       logger.info({ userId, displayName, violation: violation.type, warnings: count }, "Message moderated (hard)");
 
-      if (count >= botHardWarningsBeforeMute) {
-        const muted = await muteUser(chatId, userId, botMuteDurationSeconds);
+      if (count >= HARD_WARNINGS_BEFORE_MUTE) {
+        const muted = await muteUser(chatId, userId, MUTE_DURATION_SECONDS);
         await setStrikes(chatIdStr, userIdStr, 0);
         if (muted) {
           await send(chatId,
-            `🚫 *${displayName}* has been *muted for 1 hour* after ${botHardWarningsBeforeMute} violations.\n\nLast offence: ${violation.ruleNumber} — _${violation.type}_\n\nPlease review /rules carefully before your mute lifts.`
+            `🚫 *${displayName}* has been *muted for 1 hour* after ${HARD_WARNINGS_BEFORE_MUTE} violations.\n\nLast offence: ${violation.ruleNumber} — _${violation.type}_\n\nPlease review /rules carefully before your mute lifts.`
           );
         } else {
           await send(chatId,
@@ -675,9 +685,9 @@ export function startBot() {
           );
         }
       } else {
-        const strikeBar = "🔴".repeat(count) + "⚪".repeat(botHardWarningsBeforeMute - count);
+        const strikeBar = "🔴".repeat(count) + "⚪".repeat(HARD_WARNINGS_BEFORE_MUTE - count);
         await send(chatId,
-          `⚠️ *Message removed* — ${mention}\n\n*${violation.ruleNumber}:* _${violation.type}_\n${violation.rule}\n\n${strikeBar} Strike ${count}/${botHardWarningsBeforeMute}` +
+          `⚠️ *Message removed* — ${mention}\n\n*${violation.ruleNumber}:* _${violation.type}_\n${violation.rule}\n\n${strikeBar} Strike ${count}/${HARD_WARNINGS_BEFORE_MUTE}` +
           `${remaining > 0 ? ` — ${remaining} more before a 1-hour mute.` : ""}\n\nType /rules for full etiquettes.`
         );
       }
@@ -720,11 +730,11 @@ export function startBot() {
     if (!msg.from) { send(msg.chat.id, "❌ Could not identify you."); return; }
     const count = await getStrikes(String(msg.chat.id), String(msg.from.id));
     const strikeBar = count > 0
-      ? "🔴".repeat(count) + "⚪".repeat(Math.max(0, botHardWarningsBeforeMute - count))
+      ? "🔴".repeat(count) + "⚪".repeat(Math.max(0, HARD_WARNINGS_BEFORE_MUTE - count))
       : "✅ Clean record";
     send(msg.chat.id,
-      `📊 *Your Moderation Status*\n\n${strikeBar}\nStrikes: *${count}/${botHardWarningsBeforeMute}*\n` +
-      `${count === 0 ? "You have a clean record. Keep it up!" : `${botHardWarningsBeforeMute - count} more violation(s) before a 1-hour mute.`}\n\n_Strikes persist across restarts. Type /rules to review etiquettes._`
+      `📊 *Your Moderation Status*\n\n${strikeBar}\nStrikes: *${count}/${HARD_WARNINGS_BEFORE_MUTE}*\n` +
+      `${count === 0 ? "You have a clean record. Keep it up!" : `${HARD_WARNINGS_BEFORE_MUTE - count} more violation(s) before a 1-hour mute.`}\n\n_Strikes persist across restarts. Type /rules to review etiquettes._`
     );
   });
 
@@ -879,7 +889,7 @@ export function startBot() {
     const userId = match?.[1];
     if (!userId) { send(chatId, "Usage: `/strikes <userId>`"); return; }
     const count = await getStrikes(String(chatId), userId);
-    send(chatId, `📊 User ${userId} has *${count}/${botHardWarningsBeforeMute}* strikes in this group.`);
+    send(chatId, `📊 User ${userId} has *${count}/${HARD_WARNINGS_BEFORE_MUTE}* strikes in this group.`);
   });
 
   bot.onText(/^\/resetstrikes(?:\s+(\d+))?/, async (msg, match) => {

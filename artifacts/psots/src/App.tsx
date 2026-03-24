@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
-import { AuthProvider } from "./contexts/AuthContext";
 import { Layout } from "./components/Layout";
 import { Home } from "./pages/Home";
 import { NoticeBoard } from "./pages/NoticeBoard";
@@ -12,8 +11,6 @@ import { Events } from "./pages/Events";
 import { Marketplace } from "./pages/Marketplace";
 import { Contacts } from "./pages/Contacts";
 import { CommunityGuide } from "./pages/CommunityGuide";
-import { WhatsAppAdmin } from "./pages/WhatsAppAdmin";
-import { AuthVerify } from "./pages/AuthVerify";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,8 +31,6 @@ function Router() {
         <Route path="/marketplace" component={Marketplace} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/guide" component={CommunityGuide} />
-        <Route path="/admin/whatsapp" component={WhatsAppAdmin} />
-        <Route path="/auth/verify" component={AuthVerify} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -45,14 +40,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </AuthProvider>
+      <TooltipProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <Router />
+        </WouterRouter>
+        <Toaster />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
