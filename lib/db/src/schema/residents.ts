@@ -11,6 +11,7 @@ export const residentsTable = pgTable("residents", {
   tower: text("tower"),
   phone: text("phone").unique(),
   email: text("email").unique(),
+  role: text("role").notNull().default("resident"), // "resident" | "committee" | "admin"
   verified: boolean("verified").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

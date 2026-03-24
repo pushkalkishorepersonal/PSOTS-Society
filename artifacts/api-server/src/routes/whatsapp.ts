@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, whatsappSubscribersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
 
@@ -56,8 +57,8 @@ router.delete("/whatsapp/subscribers/:id", async (req, res) => {
   res.status(204).send();
 });
 
-// Broadcast a message to all opted-in subscribers via Fonnte
-router.post("/whatsapp/broadcast", async (req, res) => {
+// Broadcast a message to all opted-in subscribers via Fonnte (committee+ only)
+router.post("/whatsapp/broadcast", requireAuth("committee"), async (req, res) => {
   const { message } = req.body as { message: string };
   if (!message) {
     res.status(400).json({ error: "message is required" });

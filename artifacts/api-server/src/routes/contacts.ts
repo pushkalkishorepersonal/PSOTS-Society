@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, contactsTable, insertContactSchema, auditLogsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { postRateLimiter } from "../middlewares/rateLimiter";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
 
@@ -10,7 +11,7 @@ router.get("/contacts", async (_req, res) => {
   res.json(contacts);
 });
 
-router.post("/contacts", postRateLimiter, async (req, res) => {
+router.post("/contacts", postRateLimiter, requireAuth("admin"), async (req, res) => {
   const parsed = insertContactSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.issues }); return; }
 
@@ -20,13 +21,14 @@ router.post("/contacts", postRateLimiter, async (req, res) => {
     action: "create",
     entityType: "contact",
     entityId: contact.id,
+    userId: String(req.user!.sub),
     metadata: { name: contact.name, role: contact.role },
   });
 
   res.status(201).json(contact);
 });
 
-router.patch("/contacts/:id", async (req, res) => {
+router.patch("/contacts/:id", requireAuth("admin"), async (req, res) => {
   const id = Number(req.params.id);
   const parsed = insertContactSchema.partial().safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.issues }); return; }
@@ -40,13 +42,14 @@ router.patch("/contacts/:id", async (req, res) => {
     action: "update",
     entityType: "contact",
     entityId: id,
+    userId: String(req.user!.sub),
     changes: { before: existing, after: contact },
   });
 
   res.json(contact);
 });
 
-router.delete("/contacts/:id", async (req, res) => {
+router.delete("/contacts/:id", requireAuth("admin"), async (req, res) => {
   const id = Number(req.params.id);
   const [existing] = await db.select().from(contactsTable).where(eq(contactsTable.id, id));
   if (!existing) { res.status(404).json({ error: "Contact not found" }); return; }
@@ -57,6 +60,7 @@ router.delete("/contacts/:id", async (req, res) => {
     action: "delete",
     entityType: "contact",
     entityId: id,
+    userId: String(req.user!.sub),
     metadata: { name: existing.name },
   });
 
