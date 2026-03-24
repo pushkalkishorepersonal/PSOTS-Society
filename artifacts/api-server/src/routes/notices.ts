@@ -1,11 +1,16 @@
 import { Router, type IRouter } from "express";
-import { db, noticesTable, insertNoticeSchema } from "@workspace/db";
+import { db, noticesTable, insertNoticeSchema, settingsTable, auditLogsTable, SETTING_KEYS } from "@workspace/db";
 import { eq, desc, isNull, isNotNull } from "drizzle-orm";
 import { postRateLimiter } from "../middlewares/rateLimiter";
 
-const COMMUNITY_PIN = process.env.COMMUNITY_PIN ?? "PSOTS2025";
-
 const router: IRouter = Router();
+
+async function getCommunityPin(): Promise<string> {
+  // Env var takes precedence over DB setting
+  if (process.env.COMMUNITY_PIN) return process.env.COMMUNITY_PIN;
+  const [row] = await db.select().from(settingsTable).where(eq(settingsTable.key, SETTING_KEYS.COMMUNITY_PIN));
+  return row?.value ?? "";
+}
 
 router.get("/notices", async (req, res) => {
   const { tower, category, archived } = req.query;
@@ -35,7 +40,12 @@ router.get("/notices/:id", async (req, res) => {
 router.post("/notices", postRateLimiter, async (req, res) => {
   const { communityPin, ...rest } = req.body;
 
-  if (!communityPin || communityPin.trim() !== COMMUNITY_PIN) {
+  const pin = await getCommunityPin();
+  if (!pin) {
+    res.status(503).json({ error: "Community access code not configured. Contact the Society Office." });
+    return;
+  }
+  if (!communityPin || communityPin.trim() !== pin) {
     res.status(403).json({ error: "Invalid community access code. Please use the code shared by the Society Office." });
     return;
   }
@@ -44,6 +54,14 @@ router.post("/notices", postRateLimiter, async (req, res) => {
   if (!parsed.success) { res.status(400).json({ error: parsed.error.issues }); return; }
 
   const [notice] = await db.insert(noticesTable).values(parsed.data).returning();
+
+  await db.insert(auditLogsTable).values({
+    action: "create",
+    entityType: "notice",
+    entityId: notice.id,
+    metadata: { postedBy: parsed.data.postedBy, flatNumber: parsed.data.flatNumber },
+  });
+
   res.status(201).json(notice);
 });
 

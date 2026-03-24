@@ -13,6 +13,9 @@ tags:
   - name: listings
   - name: contacts
   - name: whatsapp
+  - name: towers
+  - name: settings
+  - name: audit
 
 paths:
   /healthz:
@@ -133,20 +136,31 @@ paths:
     post:
       operationId: rsvpEvent
       tags: [events]
-      summary: RSVP to an event
+      summary: RSVP to an event (creates attendee record)
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RsvpInput"
       responses:
         "200":
-          description: Updated event
+          description: Updated event and attendee record
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Event"
+                type: object
+                properties:
+                  event:
+                    $ref: "#/components/schemas/Event"
+                  attendee:
+                    $ref: "#/components/schemas/EventAttendee"
 
   /listings:
     get:
@@ -328,6 +342,198 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Contact"
+    post:
+      operationId: createContact
+      tags: [contacts]
+      summary: Add an emergency contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContactInput"
+      responses:
+        "201":
+          description: Created contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /contacts/{id}:
+    patch:
+      operationId: updateContact
+      tags: [contacts]
+      summary: Update an emergency contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContactInput"
+      responses:
+        "200":
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+    delete:
+      operationId: deleteContact
+      tags: [contacts]
+      summary: Delete an emergency contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /events/{id}/attendees:
+    get:
+      operationId: listEventAttendees
+      tags: [events]
+      summary: List attendees for an event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of attendees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventAttendee"
+
+  /towers:
+    get:
+      operationId: listTowers
+      tags: [towers]
+      summary: List active towers
+      responses:
+        "200":
+          description: List of towers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tower"
+    post:
+      operationId: createTower
+      tags: [towers]
+      summary: Add a tower
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTowerInput"
+      responses:
+        "201":
+          description: Created tower
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tower"
+
+  /towers/{id}:
+    delete:
+      operationId: deactivateTower
+      tags: [towers]
+      summary: Deactivate a tower (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deactivated tower
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tower"
+
+  /settings:
+    get:
+      operationId: listSettings
+      tags: [settings]
+      summary: List all configurable settings
+      responses:
+        "200":
+          description: List of settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Setting"
+
+  /settings/{key}:
+    patch:
+      operationId: updateSetting
+      tags: [settings]
+      summary: Update a setting value by key
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingInput"
+      responses:
+        "200":
+          description: Updated setting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Setting"
+
+  /audit:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit log entries
+      parameters:
+        - name: entityType
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        "200":
+          description: List of audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
 
 components:
   schemas:
@@ -568,3 +774,132 @@ components:
         fonnte:
           type: object
       required: [sent]
+
+    CreateContactInput:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        phone:
+          type: string
+        available:
+          type: string
+      required: [name, role, phone]
+
+    EventAttendee:
+      type: object
+      properties:
+        id:
+          type: integer
+        eventId:
+          type: integer
+        name:
+          type: string
+        flatNumber:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        telegramUserId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [accepted, declined, tentative]
+        registeredAt:
+          type: string
+          format: date-time
+      required: [id, eventId, name, status, registeredAt]
+
+    RsvpInput:
+      type: object
+      properties:
+        name:
+          type: string
+        flatNumber:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        telegramUserId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [accepted, declined, tentative]
+      required: [name]
+
+    Tower:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, isActive, createdAt]
+
+    CreateTowerInput:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+
+    Setting:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        value:
+          type: string
+        description:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, key, value, updatedAt]
+
+    UpdateSettingInput:
+      type: object
+      properties:
+        value:
+          type: string
+      required: [value]
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: integer
+          nullable: true
+        userId:
+          type: string
+          nullable: true
+        changes:
+          type: object
+          nullable: true
+        metadata:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, action, entityType, createdAt]
