@@ -2,17 +2,18 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { 
-  useCreateNotice, 
-  useCreateEvent, 
+import {
+  useCreateNotice,
+  useCreateEvent,
   useCreateListing,
   getListNoticesQueryKey,
   getListEventsQueryKey,
   getListListingsQueryKey
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, X, Loader2, Info, Lock } from "lucide-react";
+import { Plus, X, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TOWERS = ["All", ...[1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 14, 15, 16, 17].map(n => `Tower ${n}`)];
 const NOTICE_CATEGORIES = ["Maintenance", "Security", "Events", "General", "Water/Power"];
@@ -67,7 +68,6 @@ const noticeSchema = z.object({
   isPinned: z.boolean().default(false),
   postedBy: z.string().min(2, "Name required"),
   flatNumber: z.string().min(1, "Flat number required for verification"),
-  communityPin: z.string().min(1, "Community access code required"),
 });
 
 export function CreateNoticeModal() {
@@ -75,10 +75,11 @@ export function CreateNoticeModal() {
   const [serverError, setServerError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const createMutation = useCreateNotice();
-  
+  const { isLoggedIn, hasRole, user } = useAuth();
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(noticeSchema),
-    defaultValues: { isPinned: false, tower: "All", category: "General" }
+    defaultValues: { isPinned: false, tower: "All", category: "General", postedBy: user?.name ?? "" }
   });
 
   const onSubmit = (data: any) => {
@@ -90,11 +91,19 @@ export function CreateNoticeModal() {
         reset();
       },
       onError: (err: any) => {
-        const msg = err?.response?.data?.error;
+        const msg = err?.data?.error ?? err?.message;
         setServerError(typeof msg === "string" ? msg : "Something went wrong. Please try again.");
       }
     });
   };
+
+  if (!isLoggedIn) {
+    return (
+      <p className="text-sm text-muted-foreground italic">
+        <span className="font-medium text-foreground">Log in</span> to post a notice.
+      </p>
+    );
+  }
 
   return (
     <>
@@ -134,27 +143,13 @@ export function CreateNoticeModal() {
             </div>
           </div>
 
-          <div className="rounded-xl bg-amber-50 border border-amber-100 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Lock className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-semibold text-amber-800">Community Access Code</span>
-            </div>
-            <input
-              {...register("communityPin")}
-              type="password"
-              placeholder="Enter the code shared by Society Office"
-              className="w-full px-4 py-3 bg-white rounded-xl border border-amber-200 outline-none focus:border-amber-400 transition-all text-sm"
-            />
-            <FieldError message={errors.communityPin?.message as string} />
-            <p className="text-[11px] text-amber-700 mt-1.5">
-              The access code prevents misuse. Ask your Society Office or Admin for it.
-            </p>
-          </div>
-
-          <label className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl cursor-pointer">
-            <input type="checkbox" {...register("isPinned")} className="w-5 h-5 rounded text-primary focus:ring-primary accent-primary" />
-            <span className="text-sm font-medium">Pin to top of board</span>
-          </label>
+          {/* Pin checkbox — committee/admin only */}
+          {hasRole("committee") && (
+            <label className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl cursor-pointer">
+              <input type="checkbox" {...register("isPinned")} className="w-5 h-5 rounded text-primary focus:ring-primary accent-primary" />
+              <span className="text-sm font-medium">Pin to top of board</span>
+            </label>
+          )}
 
           {serverError && (
             <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
