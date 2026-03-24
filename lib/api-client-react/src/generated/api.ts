@@ -17,6 +17,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AddWhatsappSubscriberInput,
   Contact,
   CreateEventInput,
   CreateListingInput,
@@ -29,6 +30,9 @@ import type {
   Listing,
   Notice,
   UpdateListingInput,
+  WhatsappBroadcastInput,
+  WhatsappBroadcastResult,
+  WhatsappSubscriber,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -1156,3 +1160,289 @@ export function useListContacts<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+// ─── WhatsApp Subscribers ──────────────────────────────────────────────────────
+
+/**
+ * @summary List WhatsApp subscribers
+ */
+export const getListWhatsappSubscribersUrl = () => `/api/whatsapp/subscribers`;
+
+export const listWhatsappSubscribers = async (
+  options?: RequestInit,
+): Promise<WhatsappSubscriber[]> =>
+  customFetch<WhatsappSubscriber[]>(getListWhatsappSubscribersUrl(), {
+    ...options,
+    method: "GET",
+  });
+
+export const getListWhatsappSubscribersQueryKey = () =>
+  [`/api/whatsapp/subscribers`] as const;
+
+export const getListWhatsappSubscribersQueryOptions = <
+  TData = Awaited<ReturnType<typeof listWhatsappSubscribers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listWhatsappSubscribers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey =
+    queryOptions?.queryKey ?? getListWhatsappSubscribersQueryKey();
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listWhatsappSubscribers>>
+  > = ({ signal }) => listWhatsappSubscribers({ signal, ...requestOptions });
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listWhatsappSubscribers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListWhatsappSubscribersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listWhatsappSubscribers>>
+>;
+export type ListWhatsappSubscribersQueryError = ErrorType<unknown>;
+
+export function useListWhatsappSubscribers<
+  TData = Awaited<ReturnType<typeof listWhatsappSubscribers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listWhatsappSubscribers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListWhatsappSubscribersQueryOptions(options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Add or re-subscribe a WhatsApp subscriber
+ */
+export const getAddWhatsappSubscriberUrl = () => `/api/whatsapp/subscribers`;
+
+export const addWhatsappSubscriber = async (
+  addWhatsappSubscriberInput: AddWhatsappSubscriberInput,
+  options?: RequestInit,
+): Promise<WhatsappSubscriber> =>
+  customFetch<WhatsappSubscriber>(getAddWhatsappSubscriberUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(addWhatsappSubscriberInput),
+  });
+
+export const getAddWhatsappSubscriberMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addWhatsappSubscriber>>,
+    TError,
+    { data: BodyType<AddWhatsappSubscriberInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof addWhatsappSubscriber>>,
+  TError,
+  { data: BodyType<AddWhatsappSubscriberInput> },
+  TContext
+> => {
+  const mutationKey = ["addWhatsappSubscriber"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof addWhatsappSubscriber>>,
+    { data: BodyType<AddWhatsappSubscriberInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+    return addWhatsappSubscriber(data, requestOptions);
+  };
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AddWhatsappSubscriberMutationResult = NonNullable<
+  Awaited<ReturnType<typeof addWhatsappSubscriber>>
+>;
+export type AddWhatsappSubscriberMutationError = ErrorType<unknown>;
+
+export const useAddWhatsappSubscriber = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addWhatsappSubscriber>>,
+    TError,
+    { data: BodyType<AddWhatsappSubscriberInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof addWhatsappSubscriber>>,
+  TError,
+  { data: BodyType<AddWhatsappSubscriberInput> },
+  TContext
+> => useMutation(getAddWhatsappSubscriberMutationOptions(options));
+
+/**
+ * @summary Opt-out a WhatsApp subscriber
+ */
+export const getRemoveWhatsappSubscriberUrl = (id: number) =>
+  `/api/whatsapp/subscribers/${id}`;
+
+export const removeWhatsappSubscriber = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> =>
+  customFetch<void>(getRemoveWhatsappSubscriberUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+
+export const getRemoveWhatsappSubscriberMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof removeWhatsappSubscriber>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof removeWhatsappSubscriber>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["removeWhatsappSubscriber"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof removeWhatsappSubscriber>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+    return removeWhatsappSubscriber(id, requestOptions);
+  };
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RemoveWhatsappSubscriberMutationResult = NonNullable<
+  Awaited<ReturnType<typeof removeWhatsappSubscriber>>
+>;
+export type RemoveWhatsappSubscriberMutationError = ErrorType<unknown>;
+
+export const useRemoveWhatsappSubscriber = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof removeWhatsappSubscriber>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof removeWhatsappSubscriber>>,
+  TError,
+  { id: number },
+  TContext
+> => useMutation(getRemoveWhatsappSubscriberMutationOptions(options));
+
+/**
+ * @summary Broadcast a message to all opted-in subscribers via Fonnte
+ */
+export const getWhatsappBroadcastUrl = () => `/api/whatsapp/broadcast`;
+
+export const whatsappBroadcast = async (
+  whatsappBroadcastInput: WhatsappBroadcastInput,
+  options?: RequestInit,
+): Promise<WhatsappBroadcastResult> =>
+  customFetch<WhatsappBroadcastResult>(getWhatsappBroadcastUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(whatsappBroadcastInput),
+  });
+
+export const getWhatsappBroadcastMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof whatsappBroadcast>>,
+    TError,
+    { data: BodyType<WhatsappBroadcastInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof whatsappBroadcast>>,
+  TError,
+  { data: BodyType<WhatsappBroadcastInput> },
+  TContext
+> => {
+  const mutationKey = ["whatsappBroadcast"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof whatsappBroadcast>>,
+    { data: BodyType<WhatsappBroadcastInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+    return whatsappBroadcast(data, requestOptions);
+  };
+  return { mutationFn, ...mutationOptions };
+};
+
+export type WhatsappBroadcastMutationResult = NonNullable<
+  Awaited<ReturnType<typeof whatsappBroadcast>>
+>;
+export type WhatsappBroadcastMutationError = ErrorType<unknown>;
+
+export const useWhatsappBroadcast = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof whatsappBroadcast>>,
+    TError,
+    { data: BodyType<WhatsappBroadcastInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof whatsappBroadcast>>,
+  TError,
+  { data: BodyType<WhatsappBroadcastInput> },
+  TContext
+> => useMutation(getWhatsappBroadcastMutationOptions(options));

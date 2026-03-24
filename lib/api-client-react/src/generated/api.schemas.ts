@@ -103,6 +103,30 @@ export interface Contact {
   available: string;
 }
 
+export interface WhatsappSubscriber {
+  id: number;
+  name: string;
+  phone: string;
+  optedIn: boolean;
+  subscribedAt: string;
+  unsubscribedAt?: string | null;
+}
+
+export interface AddWhatsappSubscriberInput {
+  name: string;
+  phone: string;
+}
+
+export interface WhatsappBroadcastInput {
+  message: string;
+}
+
+export interface WhatsappBroadcastResult {
+  sent: number;
+  message?: string;
+  fonnte?: Record<string, unknown>;
+}
+
 export type ListNoticesParams = {
   tower?: string;
   category?: string;

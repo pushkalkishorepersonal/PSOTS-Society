@@ -12,6 +12,7 @@ tags:
   - name: events
   - name: listings
   - name: contacts
+  - name: whatsapp
 
 paths:
   /healthz:
@@ -247,6 +248,72 @@ paths:
         "204":
           description: Deleted
 
+  /whatsapp/subscribers:
+    get:
+      operationId: listWhatsappSubscribers
+      tags: [whatsapp]
+      summary: List WhatsApp subscribers
+      responses:
+        "200":
+          description: List of subscribers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WhatsappSubscriber"
+    post:
+      operationId: addWhatsappSubscriber
+      tags: [whatsapp]
+      summary: Add or re-subscribe a WhatsApp subscriber
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddWhatsappSubscriberInput"
+      responses:
+        "201":
+          description: Subscriber created or reactivated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhatsappSubscriber"
+
+  /whatsapp/subscribers/{id}:
+    delete:
+      operationId: removeWhatsappSubscriber
+      tags: [whatsapp]
+      summary: Opt-out a WhatsApp subscriber
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Unsubscribed
+
+  /whatsapp/broadcast:
+    post:
+      operationId: whatsappBroadcast
+      tags: [whatsapp]
+      summary: Broadcast a message to all opted-in subscribers via Fonnte
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WhatsappBroadcastInput"
+      responses:
+        "200":
+          description: Broadcast result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhatsappBroadcastResult"
+
   /contacts:
     get:
       operationId: listContacts
@@ -454,3 +521,50 @@ components:
         available:
           type: string
       required: [id, name, role, phone, available]
+
+    WhatsappSubscriber:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        optedIn:
+          type: boolean
+        subscribedAt:
+          type: string
+          format: date-time
+        unsubscribedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required: [id, name, phone, optedIn, subscribedAt]
+
+    AddWhatsappSubscriberInput:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+      required: [name, phone]
+
+    WhatsappBroadcastInput:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    WhatsappBroadcastResult:
+      type: object
+      properties:
+        sent:
+          type: integer
+        message:
+          type: string
+        fonnte:
+          type: object
+      required: [sent]

@@ -11,6 +11,7 @@ import { Events } from "./pages/Events";
 import { Marketplace } from "./pages/Marketplace";
 import { Contacts } from "./pages/Contacts";
 import { CommunityGuide } from "./pages/CommunityGuide";
+import { WhatsAppAdmin } from "./pages/WhatsAppAdmin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/marketplace" component={Marketplace} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/guide" component={CommunityGuide} />
+        <Route path="/admin/whatsapp" component={WhatsAppAdmin} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

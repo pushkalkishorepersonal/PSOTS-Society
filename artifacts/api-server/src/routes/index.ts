@@ -4,6 +4,7 @@ import noticesRouter from "./notices";
 import eventsRouter from "./events";
 import listingsRouter from "./listings";
 import contactsRouter from "./contacts";
+import whatsappRouter from "./whatsapp";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(noticesRouter);
 router.use(eventsRouter);
 router.use(listingsRouter);
 router.use(contactsRouter);
+router.use(whatsappRouter);
 
 export default router;
