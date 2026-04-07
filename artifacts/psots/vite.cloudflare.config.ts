@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
-// Cloudflare Pages build config — no Replit plugins, no PORT requirement
+// Cloudflare Pages build config — outputs to repo root /dist for easy Cloudflare setup
 export default defineConfig({
   base: "/",
   plugins: [react(), tailwindcss()],
@@ -15,7 +15,8 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    // Output to repo root dist/ so Cloudflare Pages output directory = "dist"
+    outDir: path.resolve(import.meta.dirname, "../../dist"),
     emptyOutDir: true,
   },
 });
