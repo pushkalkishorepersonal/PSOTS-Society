@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Menu, X, Send, Phone, Calendar, ShoppingBag, Megaphone, ChevronRight, BookOpen } from "lucide-react";
+import { Menu, X, Phone, Calendar, ShoppingBag, Megaphone, ChevronRight, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -73,15 +73,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <a
-              href="https://t.me/psots_telegram_bot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0088cc] text-white text-sm font-medium hover:bg-[#0077b3] transition-colors shadow-sm"
+            <Link
+              href="/contacts"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
             >
-              <Send className="w-3.5 h-3.5" />
-              Telegram Bot
-            </a>
+              <Phone className="w-3.5 h-3.5" />
+              Emergency Contacts
+            </Link>
           </div>
 
           {/* Mobile Toggle */}
@@ -120,15 +118,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </Link>
               ))}
-              <a
-                href="https://t.me/psots_telegram_bot"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/contacts"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 mt-2 rounded-xl bg-[#0088cc] text-white text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-3 mt-2 rounded-xl bg-primary text-white text-sm font-medium"
               >
-                <Send className="w-4 h-4" /> Open Telegram Bot
-              </a>
+                <Phone className="w-4 h-4" /> Emergency Contacts
+              </Link>
             </nav>
           </motion.div>
         )}
@@ -157,14 +153,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-white/55 text-sm leading-relaxed max-w-xs mb-6">
                 A self-managed community portal for the 2,300 families across 14 towers. Built by residents, for residents.
               </p>
-              <a
-                href="https://t.me/psots_telegram_bot"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 bg-[#0088cc]/90 text-white rounded-lg hover:bg-[#0088cc] transition-colors"
+              <Link
+                href="/contacts"
+                className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 bg-primary/90 text-white rounded-lg hover:bg-primary transition-colors"
               >
-                <Send className="w-4 h-4" /> @psots_telegram_bot
-              </a>
+                <Phone className="w-4 h-4" /> Emergency Contacts
+              </Link>
             </div>
 
             {/* Quick Links */}
@@ -187,15 +181,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </ul>
             </div>
 
-            {/* Bot Commands */}
+            {/* Society Info */}
             <div className="md:col-span-4">
-              <h3 className="font-sans font-semibold text-xs uppercase tracking-[0.15em] text-white/40 mb-5">Telegram Commands</h3>
-              <ul className="grid grid-cols-2 gap-2">
-                {["/notice", "/event", "/sell", "/buy", "/free", "/rules", "/mylistings", "/sold"].map(cmd => (
-                  <li key={cmd}>
-                    <span className="text-[#0af] text-sm font-mono font-medium">{cmd}</span>
-                  </li>
-                ))}
+              <h3 className="font-sans font-semibold text-xs uppercase tracking-[0.15em] text-white/40 mb-5">Society</h3>
+              <ul className="space-y-2.5 text-sm text-white/60">
+                <li>📍 Begur Road, Bangalore 560068</li>
+                <li>🏢 14 Towers · 33 Acres</li>
+                <li>🏠 2,300+ Families</li>
+                <li>🌿 25+ Amenities</li>
+                <li>🔒 24/7 Security</li>
               </ul>
             </div>
           </div>

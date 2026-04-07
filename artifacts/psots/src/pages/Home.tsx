@@ -1,16 +1,16 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowRight, Calendar, Store, Pin, Send, Bell, ShoppingBag, Shield, Users, Clock, ChevronRight } from "lucide-react";
+import { ArrowRight, Calendar, Store, Pin, Users, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useListNotices, useListEvents, useListListings } from "@workspace/api-client-react";
 
 const GALLERY = [
-  { src: "images/aerial-day.jpg", label: "Aerial View", span: "md:col-span-2 md:row-span-2" },
-  { src: "images/night-fireworks.jpg", label: "Celebrations", span: "" },
-  { src: "images/aerial-night.jpg", label: "Night Lights", span: "" },
-  { src: "images/pool-dusk.jpg", label: "Infinity Pool", span: "" },
-  { src: "images/main-gate.jpg", label: "Main Entrance", span: "" },
-  { src: "images/twilight-clubhouse.jpg", label: "Clubhouse", span: "" },
+  { src: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=900&q=80", label: "Aerial View", span: "md:col-span-2 md:row-span-2" },
+  { src: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&q=80", label: "Celebrations", span: "" },
+  { src: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80", label: "Night Lights", span: "" },
+  { src: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80", label: "Infinity Pool", span: "" },
+  { src: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80", label: "Main Entrance", span: "" },
+  { src: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80", label: "Clubhouse", span: "" },
 ];
 
 const TYPE_STYLES: Record<string, string> = {
@@ -35,7 +35,7 @@ export function Home() {
       <section className="relative min-h-[92vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src={`${import.meta.env.BASE_URL}images/hero-bg.jpg`}
+            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=85"
             alt="Prestige Song of the South"
             className="w-full h-full object-cover object-center"
           />
@@ -253,50 +253,39 @@ export function Home() {
         </div>
       </div>
 
-      {/* ─── Telegram CTA ─────────────────────────────────────────────── */}
+      {/* ─── Community CTA ────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pb-8">
         <div className="relative overflow-hidden rounded-3xl bg-foreground text-white">
           <div className="absolute inset-0 opacity-[0.07]">
-            <img src={`${import.meta.env.BASE_URL}images/aerial-night.jpg`} alt="" className="w-full h-full object-cover" />
+            <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&q=70" alt="" className="w-full h-full object-cover" />
           </div>
-          {/* Gold accent bar */}
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent" />
 
-          <div className="relative z-10 p-10 md:p-14">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-10">
-              <div className="w-16 h-16 rounded-2xl bg-[#0088cc]/20 border border-[#0088cc]/30 flex items-center justify-center shrink-0">
-                <Send className="w-7 h-7 text-[#0af]" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-px w-6 bg-accent/70" />
-                  <span className="text-accent/80 text-xs font-semibold uppercase tracking-[0.18em]">Telegram Bot</span>
-                </div>
-                <h2 className="font-display text-3xl md:text-4xl font-semibold mb-3">Stay connected, without opening the app.</h2>
-                <p className="text-white/55 text-base mb-8 max-w-lg">
-                  Post notices, list marketplace items, and manage your ads directly from Telegram. The bot handles the rest.
-                </p>
-                <div className="flex flex-wrap gap-2.5 mb-8">
-                  {[
-                    { icon: Bell, label: "/notice" },
-                    { icon: ShoppingBag, label: "/sell · /buy · /free" },
-                    { icon: Calendar, label: "/event" },
-                    { icon: Shield, label: "Auto moderation" },
-                  ].map(({ icon: Icon, label }) => (
-                    <div key={label} className="flex items-center gap-2 text-xs font-medium text-white/70 bg-white/8 border border-white/10 px-3.5 py-2 rounded-lg">
-                      <Icon className="w-3.5 h-3.5 text-accent" /> {label}
-                    </div>
-                  ))}
-                </div>
-                <a
-                  href="https://t.me/psots_telegram_bot"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-7 py-3.5 bg-[#0088cc] text-white rounded-xl font-semibold text-sm hover:bg-[#007ab8] transition-all shadow-lg hover:-translate-y-0.5"
-                >
-                  <Send className="w-4 h-4" /> Open @psots_telegram_bot
-                </a>
-              </div>
+          <div className="relative z-10 p-10 md:p-14 text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="h-px w-8 bg-accent/70" />
+              <span className="text-accent/80 text-xs font-semibold uppercase tracking-[0.18em]">Our Community</span>
+              <div className="h-px w-8 bg-accent/70" />
+            </div>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">
+              By the residents. For the residents.
+            </h2>
+            <p className="text-white/55 text-base max-w-lg mx-auto mb-8">
+              A self-managed portal bringing together all 2,300+ families of Prestige Song of the South — notices, events, and the marketplace in one place.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link
+                href="/notices"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-foreground rounded-xl font-semibold text-sm hover:bg-accent/90 transition-all shadow-lg hover:-translate-y-0.5"
+              >
+                View Notices <ChevronRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur text-white border border-white/20 rounded-xl font-semibold text-sm hover:bg-white/20 transition-all"
+              >
+                Browse Marketplace
+              </Link>
             </div>
           </div>
         </div>
