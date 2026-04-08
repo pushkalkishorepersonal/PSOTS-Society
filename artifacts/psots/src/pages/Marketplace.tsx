@@ -33,8 +33,9 @@ export function Marketplace() {
     type: type !== "all" ? (type as any) : undefined,
   });
 
-  const active = allListings?.filter(l => l.status === "active") || [];
-  const archived = allListings?.filter(l => l.status !== "active") || [];
+  const safeListings = Array.isArray(allListings) ? allListings : [];
+  const active = safeListings.filter(l => l.status === "active");
+  const archived = safeListings.filter(l => l.status !== "active");
 
   return (
     <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-14">

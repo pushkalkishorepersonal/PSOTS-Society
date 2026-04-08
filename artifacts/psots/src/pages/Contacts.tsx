@@ -56,10 +56,10 @@ export function Contacts() {
   const { data: contacts, isLoading } = useListContacts();
   const [search, setSearch] = useState("");
 
-  const filtered = contacts?.filter(c =>
+  const filtered = (Array.isArray(contacts) ? contacts : []).filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.role.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  );
 
   // Group by role
   const grouped = filtered.reduce((acc: Record<string, any[]>, c) => {

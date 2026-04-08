@@ -12,10 +12,11 @@ export function Events() {
   const [showPast, setShowPast] = useState(false);
 
   const today = startOfDay(new Date());
-  const upcoming = events?.filter(e => !isBefore(startOfDay(new Date(e.eventDate)), today))
-    .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()) || [];
-  const past = events?.filter(e => isBefore(startOfDay(new Date(e.eventDate)), today))
-    .sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()) || [];
+  const safeEvents = Array.isArray(events) ? events : [];
+  const upcoming = safeEvents.filter(e => !isBefore(startOfDay(new Date(e.eventDate)), today))
+    .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+  const past = safeEvents.filter(e => isBefore(startOfDay(new Date(e.eventDate)), today))
+    .sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
 
   return (
     <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-14">

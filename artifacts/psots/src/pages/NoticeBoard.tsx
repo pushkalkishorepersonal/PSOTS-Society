@@ -19,8 +19,9 @@ export function NoticeBoard() {
     category: activeCategory !== "All" ? activeCategory : undefined,
   });
 
-  const activeNotices = allNotices?.filter(n => !n.archivedAt) || [];
-  const archivedNotices = allNotices?.filter(n => !!n.archivedAt) || [];
+  const safeNotices = Array.isArray(allNotices) ? allNotices : [];
+  const activeNotices = safeNotices.filter(n => !n.archivedAt);
+  const archivedNotices = safeNotices.filter(n => !!n.archivedAt);
   const pinnedNotices = activeNotices.filter(n => n.isPinned);
   const regularNotices = activeNotices.filter(n => !n.isPinned);
 

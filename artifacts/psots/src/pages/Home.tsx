@@ -25,9 +25,9 @@ export function Home() {
   const { data: events } = useListEvents({ upcoming: true });
   const { data: listings } = useListListings({ status: "active" });
 
-  const pinnedNotices = notices?.filter(n => n.isPinned && !n.archivedAt).slice(0, 3) || [];
-  const upcomingEvents = events?.slice(0, 3) || [];
-  const recentListings = listings?.slice(0, 4) || [];
+  const pinnedNotices = (Array.isArray(notices) ? notices : []).filter(n => n.isPinned && !n.archivedAt).slice(0, 3);
+  const upcomingEvents = (Array.isArray(events) ? events : []).slice(0, 3);
+  const recentListings = (Array.isArray(listings) ? listings : []).slice(0, 4);
 
   return (
     <div className="pb-28">
