@@ -1107,8 +1107,8 @@
         } else if (flatData.status === 'occupied') {
           showFlatOccupied(flatNumber, flatData.ownerFirstName);
         } else {
-          // Flat not registered - redirect to simplified registration
-          window.location.href = `/society/register-simple.html?flat=${encodeURIComponent(flatNumber)}`;
+          // Flat not registered - redirect to main registration page
+          window.location.href = `/society/register.html?flat=${encodeURIComponent(flatNumber)}`;
           return;
         }
       } catch (err) {

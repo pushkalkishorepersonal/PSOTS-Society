@@ -367,9 +367,22 @@
       let base64, mimeType;
       if (file.type === 'application/pdf') {
         uploadBtn.textContent = 'Converting PDF...';
-        const converted = await convertPdfToImage(file);
-        base64 = converted.base64;
-        mimeType = converted.mimeType;
+        try {
+          const converted = await convertPdfToImage(file);
+          base64 = converted.base64;
+          mimeType = converted.mimeType;
+          console.log('PDF converted on frontend successfully');
+        } catch (pdfError) {
+          console.warn('Frontend PDF conversion failed, sending raw PDF to Worker:', pdfError);
+          // Fallback: Send raw PDF directly to Worker
+          base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          mimeType = file.type; // Keep as 'application/pdf'
+        }
       } else {
         base64 = await new Promise((resolve, reject) => {
           const reader = new FileReader();
