@@ -584,20 +584,36 @@
   async function convertToImage(file) {
     if (file.type === 'application/pdf') {
       try {
+        console.log('Converting PDF to image...');
         const arrayBuffer = await file.arrayBuffer();
+        console.log('ArrayBuffer loaded, size:', arrayBuffer.byteLength);
+
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        console.log('PDF loaded, pages:', pdf.numPages);
+
         const page = await pdf.getPage(1);
+        console.log('Page 1 loaded');
+
         const viewport = page.getViewport({ scale: 2.0 });
         const canvas = document.createElement('canvas');
         canvas.width = viewport.width;
         canvas.height = viewport.height;
+        console.log('Canvas created:', canvas.width, 'x', canvas.height);
+
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        console.log('Page rendered to canvas');
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        console.log('Canvas converted to JPEG, size:', dataUrl.length);
+
         return {
-          base64: canvas.toDataURL('image/jpeg', 0.85).split(',')[1],
+          base64: dataUrl.split(',')[1],
           mimeType: 'image/jpeg'
         };
       } catch (err) {
-        throw new Error('Could not process PDF. Please try JPG or PNG instead.');
+        console.error('PDF conversion error:', err);
+        console.error('Error details:', err.message, err.stack);
+        throw new Error(`PDF conversion failed: ${err.message}. Please try uploading a JPG or PNG instead, or contact support.`);
       }
     }
     return new Promise(resolve => {
@@ -620,8 +636,26 @@
         throw new Error('Invalid file type (PDF/JPG/PNG only)');
       }
 
-      const converted = await convertToImage(file);
-      documentData = converted;
+      // Convert PDF to image on frontend, or send directly if it fails
+      let documentToSend;
+      try {
+        documentToSend = await convertToImage(file);
+        console.log('Document converted successfully');
+      } catch (convertError) {
+        console.warn('Frontend PDF conversion failed, sending raw PDF to Worker:', convertError);
+        // Send raw PDF - Worker will handle conversion
+        const reader = new FileReader();
+        documentToSend = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve({
+            base64: reader.result.split(',')[1],
+            mimeType: file.type
+          });
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      documentData = documentToSend;
 
       document.getElementById('verifyAnimation').classList.add('active');
       animateVerification();
