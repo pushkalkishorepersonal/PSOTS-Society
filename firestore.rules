@@ -1,0 +1,241 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'pushkalkishore@gmail.com';
+    }
+    function isAdmin() {
+      return isSignedIn() && (isSuperAdmin() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+    function isOwnerOf(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    match /flats/{flatNumber} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (isSignedIn() &&
+        exists(/databases/$(database)/documents/identities/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/identities/$(request.auth.uid)).data.flatNumber == flatNumber);
+      allow delete: if isAdmin();
+
+      match /members/{memberId} {
+        allow read: if isSignedIn();
+        allow create: if isAdmin() || (isSignedIn() &&
+          exists(/databases/$(database)/documents/identities/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/identities/$(request.auth.uid)).data.flatNumber == flatNumber);
+        allow update: if isAdmin() || (isSignedIn() &&
+          exists(/databases/$(database)/documents/identities/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/identities/$(request.auth.uid)).data.memberId == memberId);
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /identities/{uid} {
+      allow read: if isOwnerOf(uid) || isAdmin();
+      allow create: if isOwnerOf(uid) && request.resource.data.uid == request.auth.uid;
+      allow update: if isOwnerOf(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /linkedAccounts/{uid} {
+      allow read, write: if isOwnerOf(uid) || isAdmin();
+    }
+
+    match /residents/{uid} {
+      allow get: if isOwnerOf(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwnerOf(uid) && request.resource.data.uid == request.auth.uid;
+      allow update: if isOwnerOf(uid) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /family/{memberId} {
+        allow read: if isOwnerOf(uid) || isAdmin();
+        allow create: if isOwnerOf(uid);
+        allow update: if isOwnerOf(uid) || isAdmin();
+        allow delete: if isOwnerOf(uid) || isAdmin();
+      }
+    }
+
+    match /admins/{adminId} {
+      allow read: if request.auth != null;
+      allow write: if isSuperAdmin() ||
+        (isSignedIn() &&
+         get(/databases/$(database)/documents/admins/$(request.auth.uid))
+           .data.permissions.manageAdmins == true);
+    }
+    match /rate_limits/{uid} {
+      allow read, write: if isOwnerOf(uid) || isAdmin();
+    }
+    match /audit_log/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+    match /appeals/{docId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.residentUid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.residentUid == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+    match /notifications/{uid} {
+      allow read, write: if isOwnerOf(uid) || isAdmin();
+    }
+    match /data_exports/{uid} {
+      allow read: if isOwnerOf(uid) || isAdmin();
+      allow create: if isOwnerOf(uid);
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+    match /marketplace_listings/{listingId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.sellerUid == request.auth.uid;
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.sellerUid == request.auth.uid);
+    }
+    match /lost_found/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.posterUid == request.auth.uid;
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.posterUid == request.auth.uid);
+    }
+    match /carpooling/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.posterUid == request.auth.uid;
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.posterUid == request.auth.uid);
+    }
+    match /consent/{uid} {
+      allow read: if isOwnerOf(uid) || isAdmin();
+      allow write: if isOwnerOf(uid);
+    }
+    match /feedback/{docId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    match /warnings/{groupId} {
+      match /members/{userId} {
+        allow read: if isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+    match /announcements/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /group_settings/{chatId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /violations/{chatId}/members/{userId} {
+      allow read: if isAdmin() || isOwnerOf(userId);
+      allow write: if isAdmin();
+    }
+
+    match /moderation_logs/{chatId}/logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /recommendations/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.createdByUid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /forwarded_analysis/{docId} {
+      allow read: if isAdmin();
+      allow create: if true;
+    }
+
+    match /invites/{token} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if true;
+    }
+
+    match /invite_audit/{token} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.invitedByUid == request.auth.uid);
+      allow create, update: if true; // Worker service account
+      allow delete: if false;
+    }
+
+    match /tenants/{tenantId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid) ||
+        (isSignedIn() && resource.data.tenantUid == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /tenant_family_requests/{requestId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid) ||
+        (isSignedIn() && resource.data.tenantUid == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /jobs/{jobId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.postedBy == request.auth.uid;
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.postedBy == request.auth.uid);
+    }
+
+    match /device_sessions/{deviceToken} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create, update: if true; // Worker service account
+      allow delete: if isAdmin();
+    }
+
+    // Chhath Puja collections
+    match /chhath_contributions/{contributionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /chhath_volunteers/{volunteerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.residentUid == request.auth.uid;
+      allow update: if isAdmin() || (isSignedIn() && resource.data.residentUid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /chhath_subscriptions/{subscriptionId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /chhath_announcements/{announcementId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /chhath_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if true; // Worker service account
+      allow update, delete: if false;
+    }
+  }
+}

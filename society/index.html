@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · PSOTS Society</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/polish.css">
+
+  <style>
+    /* Dashboard specific overrides */
+    .dashboard-wrapper {
+      padding-bottom: 80px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    /* Hero Section - Modern Redesign */
+    .hero-greeting {
+      background: linear-gradient(135deg, #1a4a3a 0%, #2d6b54 50%, #1a4a3a 100%);
+      border-radius: 24px;
+      padding: 48px 40px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(26, 74, 58, 0.2), 0 2px 8px rgba(0,0,0,0.1);
+      animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-greeting::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .hero-greeting::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -5%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(184,136,42,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-20px) translateX(10px); }
+    }
+
+    .hero-greeting-content {
+      position: relative;
+      z-index: 1;
+      color: #ffffff;
+      flex: 1;
+    }
+
+    .hero-greeting h1 {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.2;
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      letter-spacing: -0.5px;
+    }
+
+    .hero-greeting-meta {
+      font-size: 15px;
+      opacity: 0.95;
+      color: rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-greeting-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      padding: 4px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.15));
+      border: 3px solid rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 640px) {
+      .hero-greeting {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 32px 24px;
+      }
+      .hero-greeting h1 {
+        font-size: 28px;
+      }
+      .hero-avatar {
+        margin-top: 20px;
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+        align-self: center;
+      }
+    }
+
+    /* Quick actions row - Enhanced */
+    .quick-actions {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 20px 0;
+      margin-bottom: 32px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .quick-actions::-webkit-scrollbar { height: 6px; }
+    .quick-actions::-webkit-scrollbar-track { background: rgba(26,74,58,0.05); border-radius: 3px; }
+    .quick-actions::-webkit-scrollbar-thumb { background: rgba(26,74,58,0.2); border-radius: 3px; }
+    .quick-actions::-webkit-scrollbar-thumb:hover { background: rgba(26,74,58,0.3); }
+
+    .action-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid rgba(26,74,58,0.1);
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .action-chip:hover {
+      background: var(--jade);
+      color: white;
+      border-color: var(--jade);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(26,74,58,0.25);
+    }
+
+    .action-chip span:first-child {
+      font-size: 18px;
+    }
+
+    /* Stats grid - Modern Card Design */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid rgba(26,74,58,0.1);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--jade), var(--gold));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.15s; }
+    .stat-card:nth-child(3) { animation-delay: 0.2s; }
+    .stat-card:nth-child(4) { animation-delay: 0.25s; }
+
+    .stat-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(26,74,58,0.15);
+      border-color: var(--jade);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .stat-value {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--jade);
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    /* Feature showcase grid - Enhanced */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 28px;
+      margin-bottom: 48px;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+
+    .feature-tile {
+      background: white;
+      border: 1px solid rgba(26,74,58,0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .feature-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(26,74,58,0.03), transparent);
+      opacity: 0;
+      transition: opacity 0.5s;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .feature-tile:nth-child(1) { animation-delay: 0.12s; }
+    .feature-tile:nth-child(2) { animation-delay: 0.18s; }
+    .feature-tile:nth-child(3) { animation-delay: 0.24s; }
+
+    .feature-tile:hover {
+      transform: translateY(-10px) scale(1.01);
+      box-shadow: 0 16px 48px rgba(26,74,58,0.18);
+      border-color: var(--jade);
+    }
+
+    .feature-tile:hover::before {
+      opacity: 1;
+    }
+
+    .feature-video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, rgba(26,74,58,0.05) 0%, rgba(184,136,42,0.05) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .feature-video::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.03));
+      pointer-events: none;
+    }
+
+    .feature-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .feature-tile:hover .feature-video video {
+      transform: scale(1.05);
+    }
+
+    .feature-content {
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+    }
+
+    .feature-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .feature-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 10px;
+      line-height: 1.3;
+      letter-spacing: -0.3px;
+    }
+
+    .feature-desc {
+      font-size: 14.5px;
+      color: var(--ink-soft);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .feature-cta {
+      padding: 14px 24px;
+      background: var(--jade);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      font-family: var(--font-sans);
+      box-shadow: 0 4px 12px rgba(26,74,58,0.2);
+    }
+
+    .feature-cta:hover {
+      background: var(--jade-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(26,74,58,0.3);
+    }
+
+    .feature-cta::after {
+      content: '→';
+      transition: transform 0.3s;
+    }
+
+    .feature-cta:hover::after {
+      transform: translateX(4px);
+    }
+
+    /* Section header */
+    .dashboard-section-header {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--jade);
+      margin-bottom: 24px;
+      margin-top: 40px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+      position: relative;
+      letter-spacing: -0.3px;
+    }
+
+    .dashboard-section-header::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      height: 3px;
+      width: 60px;
+      background: linear-gradient(90deg, var(--jade), var(--gold));
+      border-radius: 2px;
+    }
+
+    /* Announcements */
+    .announcements-container {
+      margin-bottom: 48px;
+    }
+
+    .announcement-item {
+      background: white;
+      border: 1px solid rgba(26,74,58,0.12);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-left: 4px solid transparent;
+    }
+
+    .announcement-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      border-left-color: var(--jade);
+    }
+
+    .announcement-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .announcement-date {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .announcement-body {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.7;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 32px;
+      background: linear-gradient(135deg, rgba(26,74,58,0.04), rgba(184,136,42,0.04));
+      border-radius: 20px;
+      border: 2px dashed rgba(26,74,58,0.2);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+
+    .empty-state-text {
+      color: var(--jade);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-wrapper { padding-bottom: 100px; padding-left: 16px; padding-right: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .feature-content { padding: 18px; }
+      .feature-title { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="societyNav"></div>
+
+  <div class="main-content dashboard-wrapper">
+    <!-- Hero Greeting -->
+    <div class="hero-greeting">
+      <div class="hero-greeting-content">
+        <h1 id="greetingText">Welcome back! 👋</h1>
+        <p class="hero-greeting-meta" id="greetingMeta">Flat 15167 · Prestige Song of the South</p>
+      </div>
+      <div class="hero-avatar" id="greetingAvatar">🏘️</div>
+    </div>
+
+    <!-- ZONE 1: YOUR STUFF -->
+    <div style="margin: 40px 0; border-top: 2px solid var(--border); padding-top: 32px;">
+      <h2 class="dashboard-section-header">Your Stuff</h2>
+
+      <!-- Current Device Card -->
+      <div id="currentDeviceCard" style="background: linear-gradient(135deg, var(--jade) 0%, rgba(45,107,87,0.8) 100%); color: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(26,74,58,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div style="font-size: 28px; margin-bottom: 12px;">🔐</div>
+            <div style="font-size: 13px; opacity: 0.85; margin-bottom: 4px;">Current Device</div>
+            <div id="currentDeviceLabel" style="font-size: 16px; font-weight: 500;">Loading...</div>
+            <div id="currentDeviceLocation" style="font-size: 12px; opacity: 0.8; margin-top: 4px;">Location: Loading...</div>
+          </div>
+          <a href="/society/profile.html#devices" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; text-decoration: none; transition: all 0.2s ease;">
+            Manage Devices →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 2: FEATURES -->
+    <div style="margin: 40px 0; border-top: 2px solid var(--border); padding-top: 32px;">
+      <h2 class="dashboard-section-header">Features</h2>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <a href="/society/marketplace.html" class="action-chip">🛒 Marketplace</a>
+        <a href="/society/lostandfound.html" class="action-chip">🔍 Lost & Found</a>
+        <a href="/society/carpooling.html" class="action-chip">🚗 Carpooling</a>
+        <a href="/society/guide.html" class="action-chip">📖 Guide</a>
+        <a href="/society/recommendations.html" class="action-chip">⭐ Recommendations</a>
+        <a href="/society/jobs.html" class="action-chip">💼 Jobs</a>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📢</div>
+          <div class="stat-value" id="statAnnouncements">3</div>
+          <div class="stat-label">Announcements</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🛒</div>
+          <div class="stat-value" id="statListings">12</div>
+          <div class="stat-label">Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎉</div>
+          <div class="stat-value" id="statEvents">2</div>
+          <div class="stat-label">Events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔍</div>
+          <div class="stat-value" id="statLostandFound">4</div>
+          <div class="stat-label">Lost Items</div>
+        </div>
+      </div>
+
+      <!-- Featured Scenes with Remotion Videos -->
+      <h3 class="dashboard-section-header" style="margin-top: 32px;">Featured</h3>
+      <div class="features-grid">
+        <!-- Feature 1: Live & Available -->
+        <div class="feature-tile">
+          <div class="feature-video">
+            <video autoplay muted loop playsinline>
+              <source src="/society/videos/dashboard-scene1.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="feature-content">
+            <div class="feature-icon">🏢</div>
+            <h3 class="feature-title">Live & Available</h3>
+            <p class="feature-desc">Explore marketplace, lost & found, carpooling, and more community features.</p>
+            <a href="/society/marketplace.html" class="feature-cta">Explore Now →</a>
+          </div>
+        </div>
+
+        <!-- Feature 2: Construction Progress -->
+        <div class="feature-tile">
+          <div class="feature-video">
+            <video autoplay muted loop playsinline>
+              <source src="/society/videos/dashboard-scene2.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="feature-content">
+            <div class="feature-icon">🏗️</div>
+            <h3 class="feature-title">Construction Progress</h3>
+            <p class="feature-desc">New features being built based on resident feedback and community needs.</p>
+            <a href="/society/recommendations.html" class="feature-cta">See Recommendations →</a>
+          </div>
+        </div>
+
+        <!-- Feature 3: Community Vision -->
+        <div class="feature-tile">
+          <div class="feature-video">
+            <video autoplay muted loop playsinline>
+              <source src="/society/videos/dashboard-scene3.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="feature-content">
+            <div class="feature-icon">🏘️</div>
+            <h3 class="feature-title">Community Vision</h3>
+            <p class="feature-desc">Future features designed with residents in mind for a connected community.</p>
+            <a href="/society/guide.html" class="feature-cta">Learn More →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 3: COMMUNITY -->
+    <div style="margin: 40px 0; border-top: 2px solid var(--border); padding-top: 32px;">
+      <h2 class="dashboard-section-header">Community</h2>
+
+      <!-- Latest Announcements -->
+      <h3 class="dashboard-section-header" style="font-size: 18px; font-weight: 500; margin-bottom: 16px;">Latest Announcements</h3>
+      <div class="announcements-container">
+        <div id="announcementsList">
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p class="empty-state-text">Loading announcements...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+    <div style="max-width:800px;margin:0 auto;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        PSOTS Society · society.psots.in
+      </p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+        <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+        <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+        <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+        <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+        This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+      </p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { db } from '../../js/core/firebase.js';
+    import { setupHybridAuth, onChange, signOutUser } from '../js/core/hybrid-auth.js';
+    import { collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { renderSocietyNav } from '../../js/components/shared/SocietyNav.js';
+
+    // Setup hybrid auth (Firebase + Telegram session) and check immediately
+    const { user: authUser } = await setupHybridAuth();
+    if (!authUser) {
+      window.location.href = '/society/login.html';
+      throw new Error('Not authenticated');
+    }
+
+    // Render shared nav
+    await renderSocietyNav('societyNav', 'dashboard');
+
+    // Auth state check
+    onChange(async ({ user, resident }) => {
+      if (!user) {
+        await signOutUser();
+        return;
+      }
+
+      // Personalize greeting with time-aware message
+      const name = resident?.name?.split(' ')[0] || user.displayName?.split(' ')[0] || 'neighbour';
+      const hour = new Date().getHours();
+      let greeting, subtext;
+
+      if (hour >= 5 && hour < 12) {
+        greeting = `Good morning, ${name}! ☀️`;
+        subtext = 'Hope your day is off to a great start.';
+      } else if (hour >= 12 && hour < 17) {
+        greeting = `Good afternoon, ${name}! 🌤️`;
+        subtext = 'Hope your day is going well.';
+      } else if (hour >= 17 && hour < 21) {
+        greeting = `Good evening, ${name}! 🌆`;
+        subtext = 'Hope you had a wonderful day.';
+      } else {
+        greeting = `Good night, ${name}! 🌙`;
+        subtext = 'Rest well, see you tomorrow.';
+      }
+
+      document.getElementById('greetingText').textContent = greeting;
+      document.getElementById('greetingAvatar').textContent = resident?.flatNumber ? '🏘️' : '👤';
+
+      const metaLines = [subtext];
+      if (resident?.flatNumber) {
+        metaLines.push(`Flat ${resident.flatNumber} · Prestige Song of the South`);
+      }
+      document.getElementById('greetingMeta').textContent = metaLines.join('\n');
+
+      // Load announcements
+      try {
+        const q = query(
+          collection(db, 'announcements'),
+          orderBy('createdAt', 'desc'),
+          limit(5)
+        );
+        const snapshot = await getDocs(q);
+        const announcementsList = document.getElementById('announcementsList');
+
+        if (snapshot.empty) {
+          announcementsList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <p class="empty-state-text">No announcements yet. Check back soon!</p>
+            </div>
+          `;
+        } else {
+          announcementsList.innerHTML = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const date = data.createdAt?.toDate?.() || new Date();
+            const dateStr = date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+            return `
+              <div class="announcement-item">
+                <div class="announcement-title">${data.title || '(No title)'}</div>
+                <div class="announcement-date">${dateStr}</div>
+                <div class="announcement-body">${data.body || '(No content)'}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.error('Announcements error:', err);
+        document.getElementById('announcementsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <p class="empty-state-text">Could not load announcements. Please refresh.</p>
+          </div>
+        `;
+      }
+
+      // Load stats (placeholder - can integrate with real data)
+      try {
+        const announcementsSnap = await getDocs(query(collection(db, 'announcements'), limit(100)));
+        const listingsSnap = await getDocs(query(collection(db, 'marketplace_listings'), limit(100)));
+        document.getElementById('statAnnouncements').textContent = announcementsSnap.size;
+        document.getElementById('statListings').textContent = listingsSnap.size;
+      } catch (err) {
+        console.debug('Stats load error:', err);
+      }
+    });
+  </script>
+  <script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>
+
+    <!-- Current Device Display Initialization -->
+    <script type="module">
+      import { getDeviceLabel } from '../../js/core/device.js';
+
+      function getDeviceEmoji(deviceLabel) {
+        if (!deviceLabel) return '📱';
+        if (deviceLabel.includes('iPhone') || deviceLabel.includes('iPad')) return '📱';
+        if (deviceLabel.includes('Mac')) return '💻';
+        if (deviceLabel.includes('Windows') || deviceLabel.includes('Linux')) return '🖥️';
+        if (deviceLabel.includes('Android')) return '📱';
+        return '📱';
+      }
+
+      function loadCurrentDeviceInfo() {
+        const deviceLabelEl = document.getElementById('currentDeviceLabel');
+        const deviceLocationEl = document.getElementById('currentDeviceLocation');
+        
+        if (!deviceLabelEl || !deviceLocationEl) return;
+
+        const storedDeviceLabel = sessionStorage.getItem('currentDeviceLabel');
+        const storedDeviceLocation = sessionStorage.getItem('currentDeviceLocation');
+        
+        if (storedDeviceLabel) {
+          const emoji = getDeviceEmoji(storedDeviceLabel);
+          deviceLabelEl.textContent = `${emoji} ${storedDeviceLabel}`;
+        } else {
+          const currentLabel = getDeviceLabel();
+          const emoji = getDeviceEmoji(currentLabel);
+          deviceLabelEl.textContent = `${emoji} ${currentLabel}`;
+        }
+
+        if (storedDeviceLocation) {
+          deviceLocationEl.textContent = `Location: ${storedDeviceLocation}`;
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadCurrentDeviceInfo);
+      } else {
+        loadCurrentDeviceInfo();
+      }
+    </script>

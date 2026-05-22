@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Privacy Policy — PSOTS Society</title>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --jade: #1a4a3a; --gold: #b8882a; --cream: #f8f2e8; --cream-dark: #ede5d5;
+      --ink: #1a1208; --muted: #8a7a6a; --border: rgba(160,130,90,0.22);
+      --font-serif: 'Playfair Display', Georgia, serif; --font-sans: 'Nunito Sans', system-ui, sans-serif;
+    }
+    body { font-family: var(--font-sans); background: var(--cream); color: var(--ink); line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 12px; color: var(--jade); }
+    h2 { font-family: var(--font-serif); font-size: 1.4rem; margin-top: 32px; margin-bottom: 16px; color: var(--jade); }
+    h3 { font-size: 1rem; font-weight: 600; margin-top: 20px; margin-bottom: 10px; }
+    p { margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    table th, table td { border: 1px solid var(--border); padding: 12px; text-align: left; }
+    table th { background: var(--cream-dark); font-weight: 600; }
+    ul { margin-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 8px; }
+    .notice { background: #fef9ec; border-left: 4px solid var(--gold); padding: 16px; margin: 16px 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔒 Privacy Policy</h1>
+    <p style="color: var(--muted); margin-bottom: 24px;">Last updated: April 18, 2026</p>
+
+    <h2>Our Privacy Promise</h2>
+    <p><strong>Your data belongs to you.</strong> We've built PSOTS Society to respect your privacy:</p>
+    <ul>
+      <li>Admins see your first name and last initial — not your full identity</li>
+      <li>No ads. No data selling. No third-party tracking</li>
+      <li>You control what other residents see about you</li>
+      <li>You can download or delete your account anytime</li>
+    </ul>
+
+    <h2>What We Collect</h2>
+    <table>
+      <thead><tr><th>Data</th><th>Why</th><th>Who Sees</th><th>Duration</th></tr></thead>
+      <tbody>
+        <tr><td>Name</td><td>Profile & posts</td><td>You only (masked for admins)</td><td>Until deleted</td></tr>
+        <tr><td>Email</td><td>Login & notifications</td><td>You only</td><td>Until deleted</td></tr>
+        <tr><td>Phone</td><td>Two-factor auth</td><td>You only</td><td>Until deleted</td></tr>
+        <tr><td>Flat number</td><td>Community (optional)</td><td>Residents (you can hide)</td><td>Until deleted</td></tr>
+        <tr><td>Device info</td><td>Security & login</td><td>You only</td><td>90 days</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What Admins Can See</h2>
+    <p><strong style="color: var(--jade);">✓ Can see:</strong> First name + last initial, flat number, join date, login method, approval status</p>
+    <p><strong style="color: #c0392b;">✗ Cannot see:</strong> Full email, phone, photos, posts, Telegram username</p>
+
+    <h2>Your Rights</h2>
+    <ul>
+      <li><strong>See your data:</strong> Profile page</li>
+      <li><strong>Edit your data:</strong> Profile → Edit</li>
+      <li><strong>See access history:</strong> Profile → Privacy Settings</li>
+      <li><strong>Control visibility:</strong> Privacy Settings (show/hide flat, name, contact)</li>
+      <li><strong>Delete your account:</strong> Privacy Settings → Delete Account</li>
+    </ul>
+
+    <h2>Contact Relay</h2>
+    <p>When contacting residents through community features: your message is relayed via email, phone stays private, they see your flat number, limited to 5 contacts/day to prevent spam.</p>
+
+    <h2>Data Storage</h2>
+    <ul>
+      <li><strong>Location:</strong> India (Google Cloud, Bangalore)</li>
+      <li><strong>Provider:</strong> Firebase (Google only)</li>
+      <li><strong>Encryption:</strong> In transit (HTTPS) and at rest</li>
+    </ul>
+
+    <h2>Questions?</h2>
+    <p>Email: <strong>privacy@psots.in</strong> | Report: <strong>security@psots.in</strong></p>
+  </div>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSOTS — Lost & Found</title>
+  <meta name="description" content="Report lost or found items within Prestige Song of the South community."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --jade:        #1a4a3a;
+      --jade-light:  #2d6b54;
+      --jade-dark:   #102c22;
+      --jade-pale:   rgba(26,74,58,0.07);
+      --jade-glow:   rgba(26,74,58,0.14);
+      --gold:        #b8882a;
+      --gold-light:  #d4a84b;
+      --gold-pale:   #f0d898;
+      --gold-bg:     rgba(184,136,42,0.08);
+      --cream:       #f8f2e8;
+      --cream-dark:  #ede5d5;
+      --surface:     #fffcf7;
+      --ink:         #1a1208;
+      --ink-soft:    #3d2f1e;
+      --muted:       #8a7a6a;
+      --border:      rgba(160,130,90,0.20);
+      --white:       #ffffff;
+      --red:        #c0392b;
+      --terra:      #8b3a1a;
+      --green:      #16a34a;
+      --amber:      #d97706;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");}
+
+    /* NAV */
+    nav{position:fixed;top:34px;left:0;right:0;z-index:200;background:rgba(250,246,240,0.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 3.5rem;transition:box-shadow 0.3s}
+    nav.scrolled{box-shadow:0 2px 20px rgba(139,90,26,0.10)}
+    .nav-brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+    .nav-logo{width:44px;height:44px;display:flex;align-items:center;justify-content:center;}
+    .nav-brand-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);letter-spacing:0.3px}
+    .nav-brand-sub{font-size:9.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px}
+    .nav-links{display:flex;align-items:center;gap:2px}
+    .nav-link{padding:7px 15px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--muted);border:none;background:none;font-family:'Nunito Sans',sans-serif;letter-spacing:0.2px;transition:all 0.15s;text-decoration:none;display:inline-flex;align-items:center}
+    .nav-link:hover,.nav-link.active{color:var(--jade);background:rgba(26,74,58,0.07);font-weight:600}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-back{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:7px 15px;border-radius:8px;transition:all 0.15s}
+    .nav-back:hover{color:var(--jade);background:rgba(26,74,58,0.07)}
+    .nav-auth-pill{display:none;font-size:12.5px;font-weight:600;color:var(--jade);background:rgba(26,74,58,0.08);padding:6px 14px;border-radius:20px}
+    .nav-auth-pill.show{display:inline-flex;align-items:center;gap:6px}
+
+    /* PAGE LAYOUT */
+    .page-wrap{max-width:900px;margin:0 auto;padding:2.5rem 2rem 5rem}
+    .page-hero{margin-bottom:2rem}
+    .page-eyebrow{font-size:10.5px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;font-weight:600;margin-bottom:0.6rem;display:flex;align-items:center;gap:10px}
+    .page-eyebrow::before{content:'';width:24px;height:2px;background:var(--gold);border-radius:1px}
+    .page-title{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:400;color:var(--ink);line-height:1.1}
+    .page-sub{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.6}
+
+    /* TABS */
+    .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:2rem}
+    .tab-btn{padding:10px 22px;font-size:13.5px;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s}
+    .tab-btn.active{color:var(--jade);border-bottom-color:var(--jade);font-weight:700}
+
+    /* POST FORM */
+    .form-card{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:1.75rem;margin-bottom:2rem}
+    .form-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:500;color:var(--ink);margin-bottom:1.25rem}
+    .field{margin-bottom:1rem}
+    .field-label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;letter-spacing:0.2px}
+    .field-input{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--white);transition:border-color 0.15s;outline:none}
+    .field-input:focus{border-color:var(--jade)}
+    .field-hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+    .field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .btn-jade{display:inline-flex;align-items:center;gap:6px;background:var(--jade);color:var(--gold-pale);padding:10px 22px;border-radius:10px;font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all 0.2s}
+    .btn-jade:hover{background:var(--jade-light)}
+    .btn-jade:disabled{opacity:0.6;cursor:not-allowed}
+
+    /* INFO BOX */
+    .info-box{background:rgba(26,74,58,0.06);border:1px solid rgba(26,74,58,0.15);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--jade);margin-bottom:1rem;line-height:1.65}
+    .info-box.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
+
+    /* LISTINGS */
+    .listings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
+    .listing-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:1.4rem;transition:box-shadow 0.15s}
+    .listing-card:hover{box-shadow:0 14px 44px rgba(139,90,26,0.16),0 3px 10px rgba(0,0,0,0.05)}
+    .listing-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+    .listing-icon{font-size:1.8rem;line-height:1;flex-shrink:0}
+    .listing-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--ink);line-height:1.2;flex:1}
+    .listing-badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
+    .badge-lost{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+    .badge-found{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+    .badge-resolved{background:var(--cream-dark);color:var(--muted);border:1px solid var(--border)}
+    .listing-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+    .listing-meta{font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+    .listing-meta span{display:flex;align-items:center;gap:4px}
+    .listing-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+    .btn-sm-tg{display:inline-flex;align-items:center;gap:5px;background:#229ED9;color:white;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;text-decoration:none;transition:opacity 0.15s}
+    .btn-sm-tg:hover{opacity:0.88}
+    .btn-sm-resolve{display:inline-flex;align-items:center;gap:5px;background:none;color:var(--green);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--green);cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all 0.15s}
+    .btn-sm-resolve:hover{background:#f0fdf4}
+    .btn-sm-resolve:disabled{opacity:0.5;cursor:not-allowed}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:4rem 2rem;color:var(--muted)}
+    .empty-icon{font-size:3rem;margin-bottom:1rem}
+    .empty-text{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400}
+
+    /* LOADING */
+    .loader-ring{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--jade);border-radius:50%;animation:spin 0.8s linear infinite;margin:3rem auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* AUTH GATE */
+    .gate-wrap{text-align:center;padding:5rem 2rem;max-width:440px;margin:0 auto}
+    .gate-icon{font-size:3rem;margin-bottom:1.5rem}
+    .gate-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:400;color:var(--ink);margin-bottom:0.8rem}
+    .gate-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:2rem}
+
+    @media(max-width:640px){
+      nav{padding:0 1.2rem}
+      .nav-links{display:none}
+      .page-wrap{padding:1.5rem 1.2rem 4rem}
+      .page-title{font-size:1.8rem}
+      .listings-grid{grid-template-columns:1fr}
+      .field-row-2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div id="societyNav"></div>
+
+<div id="app">
+  <div class="loader-ring" style="margin-top:6rem"></div>
+</div>
+
+<div id="globalToast" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999"></div>
+
+<script type="module">
+import session from '/js/core/auth.js';
+import { db }  from '/js/core/firebase.js';
+import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
+import {
+  collection, query, where, orderBy, getDocs,
+  doc, setDoc, updateDoc, serverTimestamp, Timestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// Render shared nav
+// Load data immediately before nav
+await renderSocietyNav('societyNav', 'lostandfound');
+
+const app      = document.getElementById('app');
+const COLL     = 'lost_found';
+
+const CATEGORY_ICONS = {
+  Keys:'🔑', Pet:'🐾', Wallet:'👛', Electronics:'📱',
+  Documents:'📄', Vehicle:'🚗', Other:'📦'
+};
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('globalToast');
+  t.innerHTML = `<div style="background:${ok?'var(--jade)':'var(--terra)'};color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;font-family:'Nunito Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.15)">${msg}</div>`;
+  setTimeout(()=>t.innerHTML='',3000);
+}
+
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function renderGate() {
+  app.innerHTML = `
+    <div class="gate-wrap">
+      <div class="gate-icon">🔒</div>
+      <h2 class="gate-title">Sign in to view Lost & Found</h2>
+      <p class="gate-sub">Report or find items within the PSOTS community. Sign in to continue.</p>
+      <a href="/society/register.html" class="btn-jade">Sign In / Register</a>
+    </div>`;
+}
+
+function buildPage(user, resident) {
+  const isApproved = resident?.status === 'approved';
+  const tgUsername = resident?.telegramUsername || resident?.tgUsername || '';
+
+  app.innerHTML = `
+    <div class="page-wrap">
+      <div class="page-hero">
+        <div class="page-eyebrow">Community</div>
+        <h1 class="page-title">Lost & Found</h1>
+        <p class="page-sub">Lost something? Found something? Post it here. Listings auto-expire after 30 days.</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tabLost" data-tab="lost">🔍 Lost</button>
+        <button class="tab-btn" id="tabFound" data-tab="found">✅ Found</button>
+      </div>
+
+      ${isApproved ? `
+      <div class="form-card" id="postForm">
+        <div class="form-title">Post an Item</div>
+        <div class="field-row-2">
+          <div class="field">
+            <label class="field-label">Item Name *</label>
+            <input class="field-input" id="lfItemName" placeholder="e.g. Black Keys Bundle" maxlength="80"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Category *</label>
+            <select class="field-input" id="lfCategory">
+              <option value="">Select category</option>
+              ${Object.keys(CATEGORY_ICONS).map(c=>`<option value="${c}">${CATEGORY_ICONS[c]} ${c}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Description <small style="font-weight:400;opacity:0.7">(Optional, max 300 chars)</small></label>
+          <textarea class="field-input" id="lfDesc" rows="2" maxlength="300" placeholder="Brief description of the item…" style="resize:vertical"></textarea>
+        </div>
+        <div class="field-row-2">
+          <div class="field">
+            <label class="field-label">Location Last Seen / Found *</label>
+            <input class="field-input" id="lfLocation" placeholder="e.g. Near Tower 12 lobby"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Date *</label>
+            <input class="field-input" id="lfDate" type="date" value="${new Date().toISOString().split('T')[0]}"/>
+          </div>
+        </div>
+        ${tgUsername ? 
+          `<div class="info-box">📱 Contact via: <strong>@${tgUsername}</strong></div>` : 
+          (resident?.email ? 
+            `<div class="info-box">✉️ Residents will contact you via email. Add Telegram username on your profile for faster responses.</div>` : 
+            `<div class="info-box">💬 Add email or Telegram username to your profile to stay connected.</div>`
+          )
+        }
+        <div id="lfAlert" style="margin-bottom:8px"></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:13px;color:var(--muted);font-weight:600">Posting as:</span>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="lfType" value="lost" checked> Lost</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="lfType" value="found"> Found</label>
+          <button class="btn-jade" id="btnPostLF" style="margin-left:auto">Post Item</button>
+        </div>
+      </div>
+      ` : `<div class="info-box warn" style="margin-bottom:1.5rem">⏳ Your registration is pending approval. You can view listings but cannot post until verified.</div>`}
+
+      <div id="listingsContainer">
+        <div class="loader-ring"></div>
+      </div>
+    </div>`;
+
+  let _activeTab = 'lost';
+
+  async function loadListings(type) {
+    const container = document.getElementById('listingsContainer');
+    container.innerHTML = '<div class="loader-ring"></div>';
+    try {
+      const now = Timestamp.now();
+      const q = query(
+        collection(db, COLL),
+        where('type',   '==', type),
+        where('status', '==', 'active'),
+        where('expiresAt', '>', now),
+        orderBy('expiresAt', 'desc'),
+        orderBy('createdAt', 'desc')
+      );
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">${type==='lost'?'🔍':'📦'}</div><p class="empty-text">No ${type} items posted yet.</p></div>`;
+        return;
+      }
+      const cards = snap.docs.map(d => {
+        const p = { id: d.id, ...d.data() };
+        const icon = CATEGORY_ICONS[p.category] || '📦';
+        const isOwn = p.posterUid === user.uid;
+        return `
+          <div class="listing-card" data-id="${p.id}">
+            <div class="listing-top">
+              <div class="listing-icon">${icon}</div>
+              <div>
+                <span class="listing-badge badge-${p.type}">${p.type.toUpperCase()}</span>
+                <div class="listing-name">${escHtml(p.itemName)}</div>
+              </div>
+            </div>
+            ${p.description ? `<p class="listing-desc">${escHtml(p.description)}</p>` : ''}
+            <div class="listing-meta">
+              <span>📍 ${escHtml(p.location)}</span>
+              <span>📅 ${p.date}</span>
+              <span>🏠 Flat ${p.posterFlat || '—'}</span>
+              <span>⏳ Expires ${fmtDate(p.expiresAt)}</span>
+            </div>
+            <div class="listing-actions">
+              ${!isOwn ? `<button class="btn-contact" data-id="${p.id}" data-seller-uid="${escHtml(p.posterUid || '')}" data-seller-flat="${escHtml(p.posterFlat || '')}" data-title="${escHtml(p.itemName)}" data-post-type="lostandfound">💬 Contact Resident</button>` : ''}
+              ${isOwn ? `<button class="btn-sm-resolve" data-resolve="${p.id}">✅ Mark Resolved</button>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+      container.innerHTML = `<div class="listings-grid">${cards}</div>`;
+    } catch (e) {
+      container.innerHTML = `<div class="info-box warn">Failed to load listings. Please refresh.</div>`;
+      console.error(e);
+    }
+  }
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      _activeTab = btn.dataset.tab;
+      loadListings(_activeTab);
+    });
+  });
+
+  // Event delegation for resolve buttons
+  document.getElementById('listingsContainer').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-resolve]');
+    if (!btn) return;
+    const id = btn.dataset.resolve;
+    btn.disabled = true;
+    btn.textContent = 'Resolving…';
+    try {
+      await updateDoc(doc(db, COLL, id), { status: 'resolved', updatedAt: serverTimestamp() });
+      toast('Marked as resolved.');
+      loadListings(_activeTab);
+    } catch (err) {
+      toast('Failed to resolve. Try again.', false);
+      btn.disabled = false;
+      btn.textContent = '✅ Mark Resolved';
+    }
+  });
+
+  // Post form
+  if (isApproved) {
+    document.getElementById('btnPostLF')?.addEventListener('click', async () => {
+      const btn      = document.getElementById('btnPostLF');
+      const alert    = document.getElementById('lfAlert');
+      const itemName = document.getElementById('lfItemName').value.trim();
+      const category = document.getElementById('lfCategory').value;
+      const desc     = document.getElementById('lfDesc').value.trim();
+      const location = document.getElementById('lfLocation').value.trim();
+      const date     = document.getElementById('lfDate').value;
+      const type     = document.querySelector('input[name="lfType"]:checked')?.value || 'lost';
+
+      if (!itemName) { alert.innerHTML = '<div class="info-box warn">Item name is required.</div>'; return; }
+      if (!category) { alert.innerHTML = '<div class="info-box warn">Please select a category.</div>'; return; }
+      if (!location) { alert.innerHTML = '<div class="info-box warn">Location is required.</div>'; return; }
+      if (!date)     { alert.innerHTML = '<div class="info-box warn">Date is required.</div>'; return; }
+
+      alert.innerHTML = '';
+      btn.disabled = true;
+      btn.textContent = 'Posting…';
+
+      const now       = serverTimestamp();
+      const expiresAt = Timestamp.fromDate(new Date(Date.now() + 30*24*60*60*1000));
+      const postId    = `${user.uid}_${Date.now()}`;
+
+      try {
+        await setDoc(doc(db, COLL, postId), {
+          id:             postId,
+          type,
+          category,
+          itemName,
+          description:    desc,
+          location,
+          date,
+          posterUid:      user.uid,
+          posterFlat:     resident?.flatNumber || null,
+          posterTelegram: tgUsername || null,
+          status:         'active',
+          createdAt:      now,
+          expiresAt,
+        });
+        // Reset form
+        document.getElementById('lfItemName').value  = '';
+        document.getElementById('lfCategory').value  = '';
+        document.getElementById('lfDesc').value      = '';
+        document.getElementById('lfLocation').value  = '';
+        document.getElementById('lfDate').value      = new Date().toISOString().split('T')[0];
+        toast('Item posted successfully!');
+        // Switch to the tab matching what was posted
+        document.querySelector(`[data-tab="${type}"]`)?.click();
+      } catch (err) {
+        alert.innerHTML = '<div class="info-box warn">Failed to post. Please try again.</div>';
+        console.error(err);
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Post Item';
+      }
+    });
+  }
+
+  loadListings('lost');
+
+  // Contact modal
+  let contactTarget = null;
+  const contactOverlay = document.getElementById('lf-contact-overlay');
+  if (contactOverlay) {
+    contactOverlay.addEventListener('click', e => {
+      if (e.target === contactOverlay) closeContactModal();
+    });
+  }
+  const contactCloseBtn = document.getElementById('lf-contact-close');
+  if (contactCloseBtn) contactCloseBtn.onclick = closeContactModal;
+  const contactForm = document.getElementById('lfContactForm');
+  if (contactForm) contactForm.addEventListener('submit', handleContact);
+
+  // Contact handler
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-post-type="lostandfound"]');
+    if (btn) openContactModal(btn.dataset);
+  });
+
+  function openContactModal(data) {
+    if (!user) {
+      toast('Sign in to contact residents.', 'warn');
+      return;
+    }
+    contactTarget = data;
+    if (contactOverlay) {
+      contactOverlay.classList.add('open');
+      document.getElementById('lfContactMessage')?.focus();
+    }
+  }
+
+  function closeContactModal() {
+    if (contactOverlay) {
+      contactOverlay.classList.remove('open');
+      const form = document.getElementById('lfContactForm');
+      if (form) form.reset();
+    }
+  }
+
+  async function handleContact(e) {
+    e.preventDefault();
+    if (!contactTarget || !user) {
+      toast('Invalid request.', 'error');
+      return;
+    }
+    const message = document.getElementById('lfContactMessage').value.trim();
+    if (!message) {
+      toast('Message cannot be empty.', 'warn');
+      return;
+    }
+    if (message.length > 500) {
+      toast('Message must be 500 characters or less.', 'warn');
+      return;
+    }
+    const btn = document.getElementById('btnSendLFContact');
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid var(--jade);border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;"></span> Sending…';
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch('https://telegram.psots.in/contact/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        body: JSON.stringify({
+          targetUid: contactTarget.sellerUid,
+          postType: 'lostandfound',
+          postId: contactTarget.id,
+          message,
+        }),
+      });
+      const result = await res.json();
+      if (!result.ok) {
+        if (result.error === 'rate_limited') {
+          toast("You've reached today's contact limit (5/day). Try again tomorrow.", 'warn');
+        } else {
+          toast(result.error || 'Failed to send message.', 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+        return;
+      }
+      closeContactModal();
+      toast("Message sent! They'll reply via email.");
+    } catch (err) {
+      toast('Failed to send message. Please try again.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Send Message';
+    }
+  }
+}
+
+let _authFired = false;
+session.onChange(({ user, resident }) => {
+  _authFired = true;
+  if (!user) { renderGate(); return; }
+  buildPage(user, resident);
+});
+
+setTimeout(() => { if (!_authFired) renderGate(); }, 6000);
+</script>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav')?.classList.toggle('scrolled', window.scrollY > 10);
+});
+</script>
+
+<!-- ── CONTACT MODAL ── -->
+<div class="lf-modal-overlay" id="lf-contact-overlay" role="dialog" aria-modal="true" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.15);max-width:400px;width:90%;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:20px;">📧</div>
+        <span style="font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);">Contact Resident</span>
+      </div>
+      <button class="lf-modal-close" id="lf-contact-close" aria-label="Close" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <form id="lfContactForm" novalidate>
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;">Your Message *</label>
+          <textarea id="lfContactMessage" placeholder="Ask a question or share interest…" maxlength="500" required style="width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--white);resize:vertical;min-height:120px;"></textarea>
+          <p style="font-size:12px;color:var(--muted);margin-top:5px;">The resident will receive your email and can contact you directly.</p>
+        </div>
+        <button class="lf-submit-btn" id="btnSendLFContact" type="submit" style="width:100%;padding:10px 22px;background:var(--jade);color:var(--gold-pale);border-radius:10px;font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all 0.2s;">Send Message</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.lf-modal-overlay.open { display:flex !important; }
+</style>
+
+<footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+      PSOTS Society · society.psots.in
+    </p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+      <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+      <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+      <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+      <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+      This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+    </p>
+  </div>
+</footer>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance — PSOTS Chhath 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem;margin-bottom:1.5rem}
+  .sc{background:#fff;border-radius:14px;padding:1.1rem;border:1px solid rgba(200,100,0,.09);text-align:center;box-shadow:0 3px 14px rgba(26,8,0,.07)}
+  .sc-val{font-family:'DM Sans',sans-serif;font-size:1.3rem;font-weight:900;color:var(--or);line-height:1;margin-bottom:.2rem}
+  .sc-val.g{color:var(--green)}
+  .sc-lbl{font-size:.74rem;color:#6b3a18;font-weight:500}
+  .ebar{display:grid;grid-template-columns:130px 1fr 80px;align-items:center;gap:.8rem;margin-bottom:.75rem}
+  @media(max-width:460px){.ebar{grid-template-columns:90px 1fr 65px;gap:.5rem}}
+  .ebar-lbl{font-size:.78rem;color:var(--br);font-weight:500;text-align:right}
+  .ebar-track{height:10px;background:#f0d5b8;border-radius:50px;overflow:hidden}
+  .ebar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--or),var(--gold));transition:width 1.2s ease;width:0}
+  .ebar-amt{font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;color:var(--or)}
+  .yoy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.8rem;margin-bottom:.5rem}
+  .yc{background:#fff;border-radius:12px;padding:.9rem;border:1px solid rgba(200,100,0,.09);text-align:center}
+  .yc-yr{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#6b3a18;font-weight:500;margin-bottom:.25rem}
+  .yc-val{font-family:'DM Sans',sans-serif;font-size:1.05rem;font-weight:700;color:var(--ink)}
+  </style>
+</head>
+<body>
+<nav class="page-nav">
+  <a class="page-nav-back" href="../index.html"><span class="page-nav-back-icon">←</span> Home</a>
+  <div class="page-nav-title">💰 Finance</div>
+  <div></div>
+</nav>
+<div class="page-hero" style="background:linear-gradient(135deg,#1a0800,#3d1200)">
+  <span class="ph-icon">💰</span>
+  <div class="ph-title">Financial Snapshot</div>
+  <div class="ph-sub">Full transparency · पारदर्शिता · PSOTS Chhath 2025–2026</div>
+</div>
+<div class="page-content">
+  <div class="stat-grid">
+    <div class="sc"><div class="sc-val">141</div><div class="sc-lbl">Contributors 2025</div></div>
+    <div class="sc"><div class="sc-val">15</div><div class="sc-lbl">Vratis 2025</div></div>
+    <div class="sc"><div class="sc-val">₹2,35,553</div><div class="sc-lbl">Total Collected</div></div>
+    <div class="sc"><div class="sc-val">₹1,98,383</div><div class="sc-lbl">Total Expenses</div></div>
+    <div class="sc" style="background:linear-gradient(135deg,#fff5e8,#ffe8cc);border-color:rgba(232,92,0,.25)"><div class="sc-val g">₹1,04,670</div><div class="sc-lbl">Carried to 2026 ✅</div></div>
+    <div class="sc"><div class="sc-val">₹2,82,000</div><div class="sc-lbl">2026 Budget Plan</div></div>
+  </div>
+
+  <div class="card" id="expCard">
+    <div class="card-title">📊 2025 Expense Breakdown</div>
+    <div class="card-sub">Where every rupee went — total expenses ₹1,98,383</div>
+    <div class="ebar"><div class="ebar-lbl">Tent &amp; Decor</div><div class="ebar-track"><div class="ebar-fill" data-pct="32"></div></div><div class="ebar-amt">₹62,801</div></div>
+    <div class="ebar"><div class="ebar-lbl">Kharna Prasad</div><div class="ebar-track"><div class="ebar-fill" data-pct="30"></div></div><div class="ebar-amt">₹60,201</div></div>
+    <div class="ebar"><div class="ebar-lbl">Thekua Prasad</div><div class="ebar-track"><div class="ebar-fill" data-pct="27"></div></div><div class="ebar-amt">₹52,908</div></div>
+    <div class="ebar"><div class="ebar-lbl">Miscellaneous</div><div class="ebar-track"><div class="ebar-fill" data-pct="11"></div></div><div class="ebar-amt">₹22,473</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📈 Year on Year</div>
+    <div class="yoy-grid">
+      <div class="yc"><div class="yc-yr">2022</div><div class="yc-val">₹1,25,300</div></div>
+      <div class="yc"><div class="yc-yr">2023</div><div class="yc-val">₹1,83,630</div></div>
+      <div class="yc"><div class="yc-yr">2024</div><div class="yc-val">₹2,17,048</div></div>
+      <div class="yc"><div class="yc-yr">2025</div><div class="yc-val">₹1,98,383</div></div>
+      <div class="yc" style="background:linear-gradient(135deg,#fff5e8,#ffe8cc);border-color:rgba(232,92,0,.3)"><div class="yc-yr" style="color:var(--or)">2026 Budget</div><div class="yc-val" style="color:var(--or)">~₹2,82,000</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#fff5e8,#ffe8d0);border-color:rgba(232,92,0,.18)">
+    <div class="card-title">🏦 2026 Collection Progress</div>
+    <div class="card-sub">Live — updates as contributions are verified by the committee</div>
+    <div style="font-size:.82rem;color:var(--br);line-height:1.7">
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f0d5b8"><span>Carry forward from 2025</span><strong style="color:var(--green)">₹1,04,670</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f0d5b8"><span>Collected 2026 (so far)</span><strong id="live-collected" style="color:var(--or)">Loading…</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #f0d5b8"><span>2026 Budget</span><strong>₹2,82,000</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0"><span>Expenses 2026 (so far)</span><strong id="live-expenses">₹0</strong></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p style="font-size:.84rem;color:var(--br);line-height:1.7">🙏 <strong>Full transparency</strong> is a core value of our committee. Every rupee collected is accounted for. The 2025 committee spent ₹1,98,383 (65% of total funds), keeping a healthy surplus. Detailed expense logs available from the committee on request.</p>
+    <div style="margin-top:1rem"><a href="payment.html" style="text-decoration:none"><button class="btn-primary">💰 Make Your Contribution</button></a></div>
+  </div>
+</div>
+<script>
+const ob=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.querySelectorAll('.ebar-fill').forEach(b=>b.style.width=b.dataset.pct+'%')})},{threshold:.3});
+const ec=document.getElementById('expCard');if(ec)ob.observe(ec);
+const su=localStorage.getItem('psots_script_url')||'';
+async function loadLive(){if(!su||su.includes('YOUR_APPS')){document.getElementById('live-collected').textContent='Connect sheet to see live';return;}try{const r=await fetch(su+'?action=list'),d=await r.json();const total=(d.contributors||[]).reduce((s,c)=>s+(parseFloat(c.amount)||0),0);document.getElementById('live-collected').textContent='₹'+total.toLocaleString('en-IN');}catch(e){document.getElementById('live-collected').textContent='—';}}
+loadLive();
+</script>
+</body>
+</html>

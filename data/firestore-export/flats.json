@@ -1,0 +1,16 @@
+[
+  {
+    "id": "15167",
+    "flatNumber": "15167",
+    "tower": 15,
+    "floor": 16,
+    "unit": 7,
+    "ownerResidentId": "r_15167_1777491567127",
+    "hasTenants": false,
+    "maxFamilyMembers": 4,
+    "tenantCount": 0,
+    "familyCount": 0,
+    "createdAt": "2026-04-29T19:39:27.509Z",
+    "updatedAt": "2026-04-29T19:39:27.509Z"
+  }
+]

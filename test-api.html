@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Unified Login API</title>
+  <style>
+    body { font-family: monospace; padding: 40px; background: #000; color: #0f0; }
+    button { padding: 10px 20px; margin: 10px; cursor: pointer; font-size: 16px; }
+    pre { background: #111; padding: 20px; border: 1px solid #0f0; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Test Unified Login API</h1>
+  <button onclick="testAPI()">Test with Your Email</button>
+  <div id="result"></div>
+
+  <script type="module">
+    import { auth } from './js/core/firebase.js';
+    import { signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+    window.testAPI = async () => {
+      try {
+        document.getElementById('result').innerHTML = '<p>Signing in with Google...</p>';
+        
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        
+        document.getElementById('result').innerHTML += `<p>✅ Google Sign-In Success</p>
+          <pre>Email: ${result.user.email}\nUID: ${result.user.uid}</pre>`;
+        
+        const idToken = await result.user.getIdToken();
+        
+        document.getElementById('result').innerHTML += '<p>Calling /auth/unified-login...</p>';
+        
+        const apiRes = await fetch('https://telegram.psots.in/auth/unified-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            type: 'google',
+            identifier: result.user.email
+          })
+        });
+        
+        const apiData = await apiRes.json();
+        
+        document.getElementById('result').innerHTML += `
+          <p>API Response Status: ${apiRes.status}</p>
+          <pre>${JSON.stringify(apiData, null, 2)}</pre>
+        `;
+        
+        if (apiData.ok && apiData.resident) {
+          document.getElementById('result').innerHTML += `
+            <h2 style="color: #0f0;">✅ SUCCESS! You should be able to login.</h2>
+            <p>Redirecting to dashboard...</p>
+          `;
+          setTimeout(() => {
+            window.location.href = '/PSOTS/society/';
+          }, 2000);
+        } else {
+          document.getElementById('result').innerHTML += `
+            <h2 style="color: #f00;">❌ Issue Found</h2>
+            <p>Error: ${apiData.error || 'Unknown'}</p>
+            <p>Case: ${apiData.case || 'Unknown'}</p>
+          `;
+        }
+        
+      } catch (err) {
+        document.getElementById('result').innerHTML += `
+          <h2 style="color: #f00;">❌ Error</h2>
+          <pre>${err.message}\n${err.stack}</pre>
+        `;
+      }
+    };
+  </script>
+</body>
+</html>

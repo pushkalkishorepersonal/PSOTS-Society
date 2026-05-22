@@ -1,0 +1,277 @@
+/* ============================================================
+   PSOTS Layout v2.1 — Mobile-First Navigation & Page Wrapper
+   ============================================================ */
+
+/* ── DISCLAIMER BAR (Mobile-First) ───────────────────────– */
+.disclaimer-bar {
+  background: var(--jade);
+  color: rgba(255,255,255,0.75);
+  padding: 8px 1rem;
+  font-size: 12px;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-bar);
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+  animation: slideInLeft 0.4s var(--ease-smooth);
+}
+
+.disclaimer-bar strong {
+  color: var(--gold-pale);
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .disclaimer-bar {
+    padding: 7px 2rem;
+    font-size: 11.5px;
+  }
+}
+
+/* ── MAIN NAVIGATION (Mobile-First) ──────────────────────– */
+.main-nav {
+  position: fixed;
+  top: 34px;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  background: rgba(250,246,240,0.82);
+  backdrop-filter: saturate(1.6) blur(20px);
+  -webkit-backdrop-filter: saturate(1.6) blur(20px);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  transition: box-shadow var(--t-base), background var(--t-slow), border-color var(--t-base);
+}
+
+.main-nav.scrolled {
+  box-shadow: 0 4px 20px rgba(26,18,8,0.08), 0 1px 2px rgba(26,18,8,0.04);
+  background: rgba(250,246,240,0.94);
+  border-bottom-color: var(--border-strong);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  animation: slideInLeft 0.5s var(--ease-smooth);
+}
+
+.nav-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--grad-jade);
+  color: var(--gold-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(26,74,58,0.24), inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: transform var(--t-spring);
+}
+
+.nav-brand:hover .nav-logo {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.nav-brand-name {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.nav-brand-sub {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+.nav-back {
+  font-size: 13px;
+  color: var(--jade);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+
+.nav-back:hover {
+  color: var(--jade-light);
+}
+
+@media (min-width: 640px) {
+  .main-nav {
+    padding: 0 1.5rem;
+    height: 64px;
+  }
+  .nav-logo {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+  .nav-brand-name {
+    font-size: 16px;
+  }
+}
+
+/* ── PAGE WRAPPERS (Mobile-First) ───────────────────────– */
+.page-top {
+  padding-top: 90px;
+}
+
+.card-page {
+  padding-top: 90px;
+  padding-bottom: 3rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.card-page .card {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 0.8rem;
+}
+
+@media (min-width: 640px) {
+  .page-top {
+    padding-top: 98px;
+  }
+  .card-page {
+    padding-top: 110px;
+    padding-bottom: 4rem;
+  }
+  .card-page .card {
+    margin: 0 1rem;
+  }
+}
+
+/* ── ADMIN LAYOUT ────────────────────────────────────────– */
+.admin-topbar {
+  background: var(--grad-jade);
+  color: white;
+  padding: 0 1rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(26,74,58,0.18);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+}
+
+.admin-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  color: var(--gold-pale);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.admin-tab {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: rgba(255,255,255,0.6);
+  transition: var(--t-fast);
+  font-family: var(--font-sans);
+}
+
+.admin-tab:hover {
+  background: rgba(255,255,255,0.10);
+  color: white;
+}
+
+.admin-tab.active {
+  background: rgba(255,255,255,0.18);
+  color: white;
+  box-shadow: inset 0 -2px 0 var(--gold-pale);
+}
+
+.admin-user {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.55);
+}
+
+.admin-signout {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--t-fast);
+  min-height: 32px;
+}
+
+.admin-signout:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.admin-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.2rem 1rem;
+}
+
+.admin-page {
+  display: none;
+}
+
+.admin-page.active {
+  display: block;
+  animation: fadeUp 0.32s var(--ease-smooth);
+}
+
+@media (min-width: 768px) {
+  .admin-topbar {
+    padding: 0 1.5rem;
+  }
+  .admin-wrap {
+    padding: 1.5rem;
+  }
+}

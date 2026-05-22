@@ -1,0 +1,713 @@
+{
+  "exportedAt": "2026-05-12T00:49:14.825Z",
+  "totalRecords": 45,
+  "collections": [
+    {
+      "collection": "residents",
+      "count": 1,
+      "records": [
+        {
+          "id": "r_15167_1777491567127",
+          "name": "Pushkal Kishore",
+          "phone": "+919482088904",
+          "flatNumber": "15167",
+          "status": "approved",
+          "email": "pushkalkishore@gmail.com",
+          "residentType": "owner",
+          "approvedBy": "pushkalkishore@gmail.com",
+          "secondaryEmail": null,
+          "telegram": "PushkalKishore",
+          "secondaryPhone": null,
+          "lastLoginMethod": "Google",
+          "lastLoginDevice": "Desktop",
+          "lastLogin": "2026-05-11T23:18:03.398Z",
+          "loginCount": 19
+        }
+      ]
+    },
+    {
+      "collection": "credentials",
+      "count": 1,
+      "records": [
+        {
+          "id": "cred_google_pushkalkishore@gmail.com_1777491567127",
+          "type": "google",
+          "identifier": "pushkalkishore@gmail.com",
+          "residentId": "r_15167_1777491567127",
+          "credentialId": "cred_google_pushkalkishore@gmail.com_1777491567127",
+          "lastUsedAt": "2026-05-11T23:18:04.495Z"
+        }
+      ]
+    },
+    {
+      "collection": "flats",
+      "count": 1,
+      "records": [
+        {
+          "id": "15167",
+          "flatNumber": "15167",
+          "tower": 15,
+          "floor": 16,
+          "unit": 7,
+          "ownerResidentId": "r_15167_1777491567127",
+          "hasTenants": false,
+          "maxFamilyMembers": 4,
+          "tenantCount": 0,
+          "familyCount": 0,
+          "createdAt": "2026-04-29T19:39:27.509Z",
+          "updatedAt": "2026-04-29T19:39:27.509Z"
+        }
+      ]
+    },
+    {
+      "collection": "admins",
+      "count": 1,
+      "records": [
+        {
+          "id": "Tba5qgFFKLYgOZG9QPK3Vuz3LfI3",
+          "email": "pushkalkishore@gmail.com",
+          "name": "Pushkal Kishore",
+          "role": "superadmin",
+          "addedAt": "2026-04-14T08:49:29.000Z"
+        }
+      ]
+    },
+    {
+      "collection": "marketplace_listings",
+      "count": 1,
+      "records": [
+        {
+          "id": "BTiJtBfp1r1LgMOdrC1S",
+          "title": "TV for sale",
+          "price": 232,
+          "description": "asfd",
+          "category": "Electronics",
+          "telegramUsername": "pushkalkishore",
+          "sellerUid": "Tba5qgFFKLYgOZG9QPK3Vuz3LfI3",
+          "sellerName": "Pushkal Kishore",
+          "sellerEmail": "pushkalkishore@gmail.com",
+          "sellerTower": "Tower 15",
+          "reportCount": 0,
+          "reportedBy": [],
+          "createdAt": "2026-04-14T09:51:51.237Z"
+        }
+      ]
+    },
+    {
+      "collection": "lost_found",
+      "count": 1,
+      "records": [
+        {
+          "id": "eWHR4GR6d0fZhQ531D0nrWe2sVS2_1777739500618",
+          "type": "found",
+          "category": "Keys",
+          "itemName": "key found",
+          "description": "found the key near swimming pool",
+          "location": "Lulu entry near Swimming pool",
+          "date": "2026-05-02",
+          "posterUid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "posterFlat": "15167",
+          "posterTelegram": null,
+          "status": "active",
+          "expiresAt": "2026-06-01T16:31:40.618Z",
+          "createdAt": "2026-05-02T16:31:40.738Z"
+        }
+      ]
+    },
+    {
+      "collection": "carpooling",
+      "count": 1,
+      "records": [
+        {
+          "id": "Tba5qgFFKLYgOZG9QPK3Vuz3LfI3_1776704521154",
+          "type": "offering",
+          "from": "Tower 15, PSOTS",
+          "to": "Baghmane Solarium City Tech Park, Brookefield",
+          "date": "2026-04-20",
+          "time": "16:30",
+          "seats": 4,
+          "recurring": "weekdays",
+          "notes": null,
+          "posterUid": "Tba5qgFFKLYgOZG9QPK3Vuz3LfI3",
+          "posterFlat": "15167",
+          "posterTelegram": "PushkalKishore",
+          "status": "active",
+          "createdAt": "2026-04-20T17:02:03.802Z"
+        }
+      ]
+    },
+    {
+      "collection": "recommendations",
+      "count": 18,
+      "records": [
+        {
+          "id": "6363843654_home",
+          "name": "Mahipal",
+          "category": "home",
+          "subcategory": "",
+          "phone": "6363843654",
+          "description": ""
+        },
+        {
+          "id": "6366732953_home",
+          "name": "Prakash",
+          "category": "home",
+          "subcategory": "",
+          "phone": "6366732953",
+          "description": "Plumber"
+        },
+        {
+          "id": "8001216808_home",
+          "category": "home",
+          "subcategory": "Customer Service",
+          "name": "Jaguar Customer Care",
+          "phone": "8001216808",
+          "description": "",
+          "source": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:41:52.954Z",
+          "visibility": "public"
+        },
+        {
+          "id": "8296232266_home",
+          "category": "home",
+          "phone": "8296232266",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:27.757Z",
+          "visibility": "public"
+        },
+        {
+          "id": "8971256000_education",
+          "category": "education",
+          "phone": "8971256000",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:27.394Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9108521309_home",
+          "category": "home",
+          "phone": "9108521309",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:26.256Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9163623479_home",
+          "category": "home",
+          "phone": "9163623479",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:29.986Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9174110082_home",
+          "category": "home",
+          "phone": "9174110082",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:29.232Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9191087113_home",
+          "category": "home",
+          "subcategory": "plumber",
+          "name": "Banshidhar",
+          "phone": "9191087113",
+          "description": "",
+          "source": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:41:51.007Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9193489689_home",
+          "category": "home",
+          "phone": "9193489689",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:29.621Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9535137847_home",
+          "category": "home",
+          "phone": "9535137847",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:28.113Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9686088277_professional",
+          "category": "professional",
+          "phone": "9686088277",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:26.632Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9739655070_home",
+          "category": "home",
+          "subcategory": "electrician",
+          "name": "Shyam",
+          "phone": "9739655070",
+          "description": "",
+          "source": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:41:51.399Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9742089005_home",
+          "category": "home",
+          "phone": "9742089005",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:28.870Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9880788228_education",
+          "category": "education",
+          "subcategory": "mathematics",
+          "name": "Pankaja",
+          "phone": "9880788228",
+          "description": "Mathematics for classes v to xii within PSOTS, 10+ yrs Experience",
+          "source": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:41:51.794Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9886001124_home",
+          "category": "home",
+          "phone": "9886001124",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:25.693Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9945170788_home",
+          "category": "home",
+          "subcategory": "Painter",
+          "name": "Ravi",
+          "phone": "9945170788",
+          "description": "",
+          "source": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:41:52.552Z",
+          "visibility": "public"
+        },
+        {
+          "id": "9980625145_education",
+          "category": "education",
+          "phone": "9980625145",
+          "description": "",
+          "verified": true,
+          "status": "approved",
+          "rating": 0,
+          "reviews": 0,
+          "createdAt": "2026-04-17T15:27:28.495Z",
+          "visibility": "public"
+        }
+      ]
+    },
+    {
+      "collection": "announcements",
+      "count": 3,
+      "records": [
+        {
+          "id": "BXWc4WQaCcU4rfliRkWm",
+          "title": "Service Directory — 42 verified contacts",
+          "body": "We've compiled contacts for plumbers, electricians, painters, tutors, CAs and more — all from your neighbours' recommendations over 6 years. \n\nVisit Recommendations page to explore.                                            \n                                        ",
+          "postedBy": "pushkalkishore@gmail.com",
+          "createdAt": "2026-04-17T16:16:54.812Z",
+          "deleted": true
+        },
+        {
+          "id": "cz50WyVyyC9yeVfwdPfF",
+          "title": "Welcome to PSOTS Society Platform 🏘️     ",
+          "body": "Your community platform is now live. Find service contacts, post lost & found, list items on marketplace, and more. \n\nFeedback welcome — reach out to Flat 15167.   ",
+          "postedBy": "pushkalkishore@gmail.com",
+          "createdAt": "2026-04-17T16:15:43.038Z"
+        },
+        {
+          "id": "mMq9DZJjrFqven8vmez9",
+          "title": "Welcome to PSOTS MySociety",
+          "body": "The resident platform is now live. Login with your registered email.",
+          "createdAt": "2026-04-14T04:55:50.000Z",
+          "postedBy": "pushkalkishore@gmail.com"
+        }
+      ]
+    },
+    {
+      "collection": "device_sessions",
+      "count": 11,
+      "records": [
+        {
+          "id": "25a9df8d-d4cc-4650-bd7a-b0c7ef19bda8",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "25a9df8d-d4cc-4650-bd7a-b0c7ef19bda8",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "fxktli",
+          "firstSeen": 1777491576223,
+          "lastSeen": 1777491576223,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "2f21c191-fe5d-4e5e-9742-fb01628da295",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "2f21c191-fe5d-4e5e-9742-fb01628da295",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777659242523,
+          "lastSeen": 1777659242523,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "3ff24a9a-2c48-4dd8-a035-d9ff4741e48a",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "3ff24a9a-2c48-4dd8-a035-d9ff4741e48a",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777733963662,
+          "lastSeen": 1777733963662,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "42e0a07a-f3f3-491b-a42b-10eecef9fadc",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "42e0a07a-f3f3-491b-a42b-10eecef9fadc",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777784063014,
+          "lastSeen": 1777784063014,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "45d98f07-c1cf-4c35-880a-80f656575400",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "45d98f07-c1cf-4c35-880a-80f656575400",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "om7odx",
+          "firstSeen": 1778262460815,
+          "lastSeen": 1778262460815,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "49659e6b-3416-4ca9-b333-ce06e6675495",
+          "uid": "QUDFceVWN9XVthSpdPM3s91fZwt1",
+          "flatNumber": "10021",
+          "deviceToken": "49659e6b-3416-4ca9-b333-ce06e6675495",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777529446464,
+          "lastSeen": 1777529446464,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "67d1d747-d1a1-4716-93b1-41ae7f6ffc40",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "67d1d747-d1a1-4716-93b1-41ae7f6ffc40",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777660284044,
+          "lastSeen": 1777660284044,
+          "lastLoginMethod": "google",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "82a1876b-7c11-4538-a226-9b868396030b",
+          "lastUsedAt": "2026-04-30T23:06:33.816Z"
+        },
+        {
+          "id": "8850870b-0adf-4450-8a3b-adcf3082a11a",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "deviceToken": "8850870b-0adf-4450-8a3b-adcf3082a11a",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777529730041,
+          "lastSeen": 1777529730041,
+          "lastLoginMethod": "email",
+          "trusted": true,
+          "ipHint": "158.95.50.88"
+        },
+        {
+          "id": "a469d6f3-e52e-4398-b0f6-5a8306d9b860",
+          "lastUsedAt": "2026-04-30T21:20:26.694Z"
+        },
+        {
+          "id": "undefined",
+          "uid": "QUDFceVWN9XVthSpdPM3s91fZwt1",
+          "flatNumber": "10021",
+          "deviceToken": "49659e6b-3416-4ca9-b333-ce06e6675495",
+          "deviceLabel": "Mac · Chrome",
+          "fingerprint": "e50uzq",
+          "firstSeen": 1777529446464,
+          "lastSeen": 1777529446464,
+          "lastLoginMethod": "google",
+          "trusted": false,
+          "ipHint": "158.95.50.88",
+          "revokedAt": 1777529492327
+        }
+      ]
+    },
+    {
+      "collection": "invites",
+      "count": 0,
+      "records": []
+    },
+    {
+      "collection": "invite_audit",
+      "count": 0,
+      "records": []
+    },
+    {
+      "collection": "settings",
+      "count": 2,
+      "records": [
+        {
+          "id": "contact",
+          "adminWhatsapp": "919482088904",
+          "adminTelegram": "pushkalkishore",
+          "adminEmail": "pushkalkishore@gmail.com",
+          "adminName": "Pushkal Kishore"
+        },
+        {
+          "id": "platform",
+          "siteName": "MySociety",
+          "siteUrl": "https://society.psots.in",
+          "approvalTimeHours": "48",
+          "maintenanceMode": "false",
+          "contactEmail": "",
+          "announcementBannerEnabled": false,
+          "welcomeMessage": "",
+          "platformName": "PSOTS Society",
+          "lastUpdated": "2026-04-16T18:22:34.124Z",
+          "maintenanceModeEnabled": false
+        }
+      ]
+    },
+    {
+      "collection": "group_settings",
+      "count": 2,
+      "records": [
+        {
+          "id": "-1001328126394",
+          "chatId": "-1001328126394",
+          "botActive": true,
+          "thresholds": {
+            "warn": 1,
+            "mute": 3,
+            "muteDuration": 60,
+            "ban": 10
+          },
+          "gemini": {
+            "enabled": true,
+            "sensitivity": "medium",
+            "contextMessages": 15
+          },
+          "keywords": {
+            "predefined": {
+              "spam": true,
+              "abuse": true,
+              "links": false,
+              "ads": false,
+              "hate": true
+            },
+            "custom": []
+          },
+          "warningMessages": {
+            "dmThreshold": 3,
+            "notifyAdminFrom": 2,
+            "levels": []
+          }
+        },
+        {
+          "id": "-1001436625392",
+          "chatId": "-1001436625392",
+          "botActive": false,
+          "thresholds": {
+            "warn": 1,
+            "mute": 3,
+            "muteDuration": 60,
+            "ban": 10
+          },
+          "gemini": {
+            "enabled": true,
+            "sensitivity": "medium",
+            "contextMessages": 15
+          },
+          "keywords": {
+            "predefined": {
+              "spam": false,
+              "abuse": true,
+              "links": true,
+              "ads": true,
+              "hate": false
+            },
+            "custom": []
+          },
+          "warningMessages": {
+            "dmThreshold": 3,
+            "notifyAdminFrom": 2,
+            "levels": [
+              {
+                "atCount": 1,
+                "text": "⚠️ Hi {name}, your message was removed as it violated our community guidelines.\n\nThis is violation #1. Please review the community rules.\n\nView your record: {profile}",
+                "muteMinutes": 0,
+                "sendAs": "dm"
+              },
+              {
+                "atCount": 2,
+                "text": "⚠️ Hi {name}, this is your 2nd violation. Your message has been removed.\n\nReason: {reason}\n\nRepeated violations will result in being muted.\n\nView & appeal: {profile}",
+                "muteMinutes": 0,
+                "sendAs": "dm"
+              },
+              {
+                "atCount": 3,
+                "text": "🔇 Hi {name}, you have been muted for 60 minutes (violation #3).\n\nReason: {reason}\n\nYou may appeal at: {profile}",
+                "muteMinutes": 60,
+                "sendAs": "dm"
+              },
+              {
+                "atCount": 5,
+                "text": "🔇 Hi {name}, you have been muted for 24 hours (violation #{count}).\n\nThis is a serious violation. Admin has been notified.\n\nAppeal: {profile}",
+                "muteMinutes": 1440,
+                "sendAs": "group"
+              },
+              {
+                "atCount": 10,
+                "text": "⛔ Hi {name}, you have reached the maximum violation limit (#{count}).\n\nYou are indefinitely muted pending admin review.\n\nTo appeal: {profile}",
+                "muteMinutes": 99999,
+                "sendAs": "group"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "collection": "violations",
+      "count": 0,
+      "records": []
+    },
+    {
+      "collection": "feedback",
+      "count": 0,
+      "records": []
+    },
+    {
+      "collection": "jobs",
+      "count": 0,
+      "records": []
+    },
+    {
+      "collection": "tenants",
+      "count": 0,
+      "records": []
+    },
+    {
+      "collection": "identities",
+      "count": 1,
+      "records": [
+        {
+          "id": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "memberId": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "provider": "google",
+          "isPrimary": true,
+          "linkedAt": "2026-05-02T16:26:18.183Z"
+        }
+      ]
+    },
+    {
+      "collection": "linkedAccounts",
+      "count": 1,
+      "records": [
+        {
+          "id": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "flatNumber": "15167",
+          "memberId": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+          "provider": "google",
+          "linkedAt": "2026-05-02T16:26:18.264Z"
+        }
+      ]
+    }
+  ]
+}

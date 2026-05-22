@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSOTS — Prestige Song of the South · Bangalore</title>
+  <meta name="description" content="Community portal for residents of Prestige Song of the South, Bangalore. 2,100+ flats, 14 towers, 33 acres."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#1a1208;
+      --ink-soft:#3d2f1e;
+      --gold:#b8882a;
+      --gold-light:#d4a84b;
+      --gold-pale:#f0d898;
+      --cream:#faf6f0;
+      --cream-dark:#f0e8d8;
+      --white:#ffffff;
+      --muted:#8a7a6a;
+      --border:rgba(160,130,90,0.22);
+      --jade:#1a4a3a;
+      --jade-light:#2d6b54;
+      --terra:#8b3a1a;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;overflow-x:hidden}
+    .disclaimer-bar{background:var(--jade);color:rgba(255,255,255,0.7);padding:7px 2rem;font-size:11.5px;text-align:center;position:fixed;top:0;left:0;right:0;z-index:300;letter-spacing:0.2px;line-height:1.5;}
+    .disclaimer-bar strong{color:var(--gold-pale)}
+    nav{position:fixed;top:34px;left:0;right:0;z-index:200;background:rgba(250,246,240,0.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 3.5rem;transition:box-shadow 0.3s;}
+    nav.scrolled{box-shadow:0 4px 24px rgba(26,18,8,0.08)}
+    .nav-brand{display:flex;align-items:center;gap:13px;cursor:pointer;text-decoration:none}
+    .nav-logo{width:44px;height:44px;display:flex;align-items:center;justify-content:center;}
+    .nav-brand-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);letter-spacing:0.3px}
+    .nav-brand-sub{font-size:9.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px}
+    .nav-links{display:flex;align-items:center;gap:2px}
+    .nav-link{padding:7px 15px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'Nunito Sans',sans-serif;letter-spacing:0.2px;transition:all 0.15s;}
+    .nav-link:hover,.nav-link.active{color:var(--jade);background:rgba(26,74,58,0.07);font-weight:600}
+    .nav-chhath{display:flex;align-items:center;gap:7px;background:var(--jade);color:var(--gold-pale);padding:8px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.2px;transition:all 0.2s;}
+    .nav-chhath:hover{background:var(--jade-light);transform:translateY(-1px)}
+    .nav-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(26,18,8,0.1);min-width:160px;overflow:hidden;z-index:300}
+    .nav-dropdown.open{display:block}
+    .nav-dropdown a,.nav-dropdown button{display:block;width:100%;padding:11px 16px;font-size:13px;font-weight:500;color:var(--ink);text-decoration:none;background:none;border:none;cursor:pointer;text-align:left;font-family:'Nunito Sans',sans-serif;transition:background 0.15s;}
+    .nav-dropdown a:hover,.nav-dropdown button:hover{background:var(--cream)}
+    .nav-dropdown a{border-bottom:1px solid var(--border)}
+    .nav-dropdown .signout-btn{color:var(--terra)}
+    .page{display:none;padding-top:98px}
+    .page.active{display:block}
+    .hero{position:relative;height:calc(100vh - 98px);min-height:580px;overflow:hidden}
+    .hero-bg{position:absolute;inset:0;background-image:url('/IMG_20260322_050757_190.jpg');background-size:cover;background-position:center 35%;transform:scale(1.06);animation:heroZoom 14s cubic-bezier(0.25,0.46,0.45,0.94) forwards;}
+    @keyframes heroZoom{to{transform:scale(1)}}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(110deg,rgba(26,18,8,0.91) 0%,rgba(26,18,8,0.65) 45%,rgba(26,18,8,0.12) 100%);}
+    .hero-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 5.5rem;max-width:800px;}
+    .hero-tag{display:inline-flex;align-items:center;gap:10px;margin-bottom:2rem;opacity:0;animation:riseIn 0.7s 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;}
+    .hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+    .hero-tag span{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-weight:600}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(3rem,6vw,5.8rem);font-weight:400;color:white;line-height:1.04;letter-spacing:-0.5px;opacity:0;animation:riseIn 0.8s 0.5s cubic-bezier(0.34,1.26,0.64,1) forwards;}
+    .hero h1 em{font-style:italic;color:var(--gold-light)}
+    .hero-location{font-family:'Playfair Display',serif;font-size:clamp(1.2rem,2vw,1.7rem);font-weight:400;font-style:italic;color:rgba(255,255,255,0.65);margin:0.6rem 0 2rem;opacity:0;animation:riseIn 0.7s 0.65s forwards;}
+    .hero-desc{font-size:15px;color:rgba(255,255,255,0.56);line-height:1.85;max-width:440px;margin-bottom:3rem;opacity:0;animation:riseIn 0.7s 0.8s forwards;}
+    .hero-btns{display:flex;gap:13px;flex-wrap:wrap;opacity:0;animation:riseIn 0.7s 1s forwards;}
+    .btn-primary{background:var(--gold);color:var(--ink);padding:13px 28px;border-radius:11px;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;letter-spacing:0.3px;transition:all 0.2s;}
+    .btn-primary:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(184,136,42,0.35)}
+    .btn-outline{background:rgba(255,255,255,0.09);color:white;padding:13px 28px;border-radius:11px;font-size:14px;font-weight:500;border:1px solid rgba(255,255,255,0.28);cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all 0.2s;}
+    .btn-outline:hover{background:rgba(255,255,255,0.16)}
+    .hero-scroll{position:absolute;bottom:2.5rem;left:5.5rem;z-index:2;display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.3);font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:0;animation:riseIn 0.7s 1.3s forwards;}
+    .scroll-bar{width:48px;height:1px;background:rgba(255,255,255,0.2);position:relative;overflow:hidden;}
+    .scroll-bar::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--gold);animation:scrollSlide 2.5s 1.5s ease-in-out infinite;}
+    @keyframes scrollSlide{0%{left:-100%}50%{left:0%}100%{left:100%}}
+    @keyframes riseIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+    .stats-strip{position:relative;overflow:hidden;background:var(--jade);padding:0 5.5rem;display:flex;align-items:stretch;}
+    .stats-bg{position:absolute;inset:0;background-image:url('/IMG_20260322_045911_860.jpg');background-size:cover;background-position:center;opacity:0.08;}
+    .stat-item{position:relative;z-index:1;flex:1;padding:2.2rem 2rem;border-right:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:5px;}
+    .stat-item:last-child{border-right:none}
+    .stat-num{font-family:'Playfair Display',serif;font-size:2.3rem;font-weight:500;color:var(--gold-pale);line-height:1;}
+    .stat-lbl{font-size:11.5px;color:rgba(255,255,255,0.45);letter-spacing:1.8px;text-transform:uppercase;font-weight:500}
+    .about-section{display:grid;grid-template-columns:1fr 1fr}
+    .about-img{position:relative;overflow:hidden;min-height:540px}
+    .about-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.7s ease;display:block}
+    .about-img:hover img{transform:scale(1.04)}
+    .about-content{background:var(--white);padding:5.5rem;display:flex;flex-direction:column;justify-content:center;}
+    .section-tag{display:flex;align-items:center;gap:11px;margin-bottom:1.2rem}
+    .tag-line{width:28px;height:2px;background:var(--gold);border-radius:1px}
+    .tag-text{font-size:11px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;font-weight:600}
+    .about-content h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,2.8vw,2.8rem);font-weight:400;color:var(--ink);line-height:1.18;margin-bottom:1.5rem;}
+    .about-content h2 em{font-style:italic;color:var(--jade)}
+    .about-content p{font-size:14.5px;color:var(--muted);line-height:1.9;margin-bottom:1rem}
+    .badges{display:flex;flex-wrap:wrap;gap:9px;margin-top:1.5rem}
+    .badge{padding:6px 14px;border-radius:20px;background:var(--cream);border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--ink-soft);}
+    .gallery-section{padding:6rem 5.5rem;background:var(--cream)}
+    .gallery-header{margin-bottom:3rem}
+    .gallery-header h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:400;color:var(--ink);}
+    .gallery-header p{font-size:13.5px;color:var(--muted);margin-top:8px}
+    .gallery-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(3,228px);gap:10px;}
+    .g{border-radius:14px;overflow:hidden;position:relative;cursor:pointer}
+    .g img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease;display:block}
+    .g:hover img{transform:scale(1.07)}
+    .g .gl{position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(26,18,8,0.72));display:flex;align-items:flex-end;padding:1rem 1.1rem;color:rgba(255,255,255,0.9);font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;opacity:0;transition:opacity 0.35s;}
+    .g:hover .gl{opacity:1}
+    .g1{grid-column:1/6;grid-row:1/3}
+    .g2{grid-column:6/9;grid-row:1/2}
+    .g3{grid-column:9/13;grid-row:1/2}
+    .g4{grid-column:6/10;grid-row:2/3}
+    .g5{grid-column:10/13;grid-row:2/3}
+    .g6{grid-column:1/5;grid-row:3/4}
+    .g7{grid-column:5/9;grid-row:3/4}
+    .g8{grid-column:9/13;grid-row:3/4}
+    .chhath-section{display:grid;grid-template-columns:1fr 1fr;background:var(--cream-dark)}
+    .chhath-img{position:relative;min-height:520px;overflow:hidden}
+    .chhath-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .chhath-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,var(--cream-dark));}
+    .chhath-content{padding:5.5rem;display:flex;flex-direction:column;justify-content:center}
+    .chhath-numeral{font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:var(--jade);opacity:0.12;line-height:1;margin-bottom:-1rem;}
+    .chhath-content h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,2.5vw,2.6rem);font-weight:400;color:var(--ink);line-height:1.18;margin-bottom:1.2rem;}
+    .chhath-content h2 em{font-style:italic;color:var(--jade)}
+    .chhath-content p{font-size:14.5px;color:var(--muted);line-height:1.85;margin-bottom:0.9rem}
+    .chhath-stats{display:flex;gap:2.5rem;margin:1.5rem 0 2rem}
+    .cs-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:400;color:var(--jade);line-height:1}
+    .cs-lbl{font-size:11px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-top:4px}
+    .btn-jade{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--jade);color:var(--gold-pale);padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.2s;}
+    .btn-jade:hover{background:var(--jade-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,74,58,0.25)}
+    .inner-hero{position:relative;height:300px;overflow:hidden;display:flex;align-items:flex-end}
+    .inner-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+    .inner-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,18,8,0.94) 0%,rgba(26,18,8,0.2) 100%)}
+    .inner-title{position:relative;z-index:2;padding:3rem 4rem}
+    .inner-label{font-size:11px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;font-weight:600;margin-bottom:0.6rem;display:flex;align-items:center;gap:10px;}
+    .inner-label::before{content:'';width:24px;height:2px;background:var(--gold);border-radius:1px}
+    .inner-title h1{font-family:'Playfair Display',serif;font-size:3rem;font-weight:400;color:white;line-height:1.1}
+    .inner-body{padding:3.5rem 4rem}
+    .info-note{background:#fef9ec;border:1px solid #f0d88a;border-radius:13px;padding:15px 20px;margin-bottom:2.5rem;font-size:13.5px;color:#7a5a10;line-height:1.65;display:flex;gap:12px}
+    .off-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:2.5rem}
+    .off-card{padding:1.75rem;border-radius:16px;border:1px solid var(--border)}
+    .off-card.gn{background:#f0fdf4;border-color:#bbf7d0}
+    .off-card.bl{background:#eff6ff;border-color:#bfdbfe}
+    .off-card.am{background:#fef9ec;border-color:#fde68a}
+    .off-dept{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .off-contact{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+    .off-contact.cg{color:#16a34a}
+    .off-contact.cb{color:#1d6fa4}
+    .off-contact.ca{color:#92400e}
+    .off-card p{font-size:12.5px;color:var(--muted);line-height:1.65}
+    .emerg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:2.5rem}
+    .emerg-card{background:var(--white);border-radius:14px;padding:1.5rem;border:1px solid var(--border);text-align:center}
+    .emerg-icon{font-size:1.8rem;margin-bottom:8px}
+    .emerg-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+    .emerg-num{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:500;color:var(--ink)}
+    .badge-247{font-size:10px;font-weight:700;background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle}
+    .guide-intro{background:var(--white);border-radius:14px;padding:1.75rem 2rem;border:1px solid var(--border);margin-bottom:1.5rem}
+    .guide-intro p{font-size:14px;color:var(--muted);line-height:1.75}
+    .acc-item{background:var(--white);border-radius:13px;border:1px solid var(--border);margin-bottom:9px;overflow:hidden}
+    .acc-head{padding:1.3rem 1.75rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:14.5px;font-weight:600;color:var(--ink);transition:background 0.15s;}
+    .acc-head:hover{background:var(--cream)}
+    .acc-chevron{color:var(--muted);transition:transform 0.25s;display:inline-block;font-size:12px}
+    .acc-head.open .acc-chevron{transform:rotate(180deg)}
+    .acc-body{display:none;padding:0 1.75rem 1.75rem;border-top:1px solid var(--border)}
+    .acc-body.open{display:block}
+    .rules-list{list-style:none;margin-top:0.75rem}
+    .rules-list li{padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px;color:var(--ink-soft);display:flex;gap:11px;align-items:flex-start;line-height:1.65}
+    .rules-list li:last-child{border-bottom:none}
+    .rules-list li::before{content:'›';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:1px}
+    .penalty-table{width:100%;border-collapse:collapse;margin-top:1.5rem}
+    .penalty-table th{text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 14px;border-bottom:2px solid var(--border)}
+    .penalty-table th:last-child{text-align:right}
+    .penalty-table td{padding:12px 14px;font-size:13.5px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+    .penalty-table tr:last-child td{border-bottom:none}
+    .penalty-table tr:hover td{background:var(--cream)}
+    .penalty-amt{font-weight:600;text-align:right;color:var(--ink)}
+    .docs-card{background:var(--cream-dark);border-radius:14px;padding:1.75rem;display:flex;gap:18px;margin-top:2rem;border:1px solid var(--border)}
+    .docs-icon{width:46px;height:46px;background:var(--white);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+    .docs-info h4{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+    .docs-info p{font-size:13px;color:var(--muted);line-height:1.65}
+    .docs-info a{color:#1d6fa4;font-weight:500}
+    footer{background:var(--jade);color:white;padding:5rem 5.5rem 3rem}
+    .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:4rem;padding-bottom:3rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem}
+    .footer-mono{width:44px;height:44px;border-radius:11px;background:rgba(255,255,255,0.08);color:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:1.2rem}
+    .footer-brand h3{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;color:white;margin-bottom:4px}
+    .footer-brand .tagline{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}
+    .footer-brand p{font-size:13px;color:rgba(255,255,255,0.42);line-height:1.8;max-width:280px}
+    .footer-col h4{font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);font-weight:600;margin-bottom:1.2rem}
+    .footer-col ul{list-style:none}
+    .footer-col li{margin-bottom:10px}
+    .footer-col a{font-size:13.5px;color:rgba(255,255,255,0.5);text-decoration:none;cursor:pointer;transition:color 0.15s}
+    .footer-col a:hover{color:var(--gold-pale)}
+    .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:1.2rem}
+    .footer-copy{font-size:12px;color:rgba(255,255,255,0.22)}
+    .footer-tags{display:flex;gap:16px}
+    .footer-tag{font-size:12px;color:rgba(255,255,255,0.2)}
+    .footer-disclaimer{font-size:11px;color:rgba(255,255,255,0.18);line-height:1.65;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,0.08)}
+    .disc-mobile{display:none}
+    .nav-hamburger{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink);padding:6px 10px;border-radius:8px;line-height:1;transition:background 0.15s;}
+    .nav-hamburger:hover{background:rgba(26,74,58,0.07)}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .reveal-delay-1{transition-delay:0.1s}
+    .reveal-delay-2{transition-delay:0.2s}
+    .reveal-delay-3{transition-delay:0.3s}
+    @media(max-width:1100px){
+      .about-section,.chhath-section{grid-template-columns:1fr}
+      .about-img,.chhath-img{min-height:350px}
+      .off-grid{grid-template-columns:1fr}
+      .emerg-grid{grid-template-columns:1fr 1fr}
+      .footer-top{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:768px){
+      nav{padding:0 1.5rem}
+      .nav-links{display:none;position:absolute;top:64px;left:0;right:0;background:rgba(250,246,240,0.98);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);flex-direction:column;align-items:stretch;padding:8px;gap:2px;box-shadow:0 8px 24px rgba(26,18,8,0.1);}
+      .nav-links.open{display:flex}
+      .nav-links .nav-link{display:block;width:100%;text-align:left;padding:11px 16px;}
+      .nav-hamburger{display:flex;align-items:center;justify-content:center}
+      .disc-mobile{display:inline}
+      .disc-desktop{display:none}
+      .nav-chhath span{display:none}
+      .hero-content,.hero-scroll{padding-left:1.5rem;padding-right:1.5rem}
+      .stats-strip{padding:0 1.5rem;flex-wrap:wrap}
+      .stat-item{min-width:50%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.07)}
+      .gallery-section{padding:3rem 1.5rem}
+      .about-content,.chhath-content{padding:3rem 1.5rem}
+      .inner-title,.inner-body{padding:2rem 1.5rem}
+      .gallery-grid{display:flex;flex-direction:column}
+      .g{height:220px}
+      .footer-top{grid-template-columns:1fr;gap:2rem}
+      footer{padding:3rem 1.5rem 2rem}
+    }
+  </style>
+</head>
+<body>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer-bar">
+  <span class="disc-mobile">🏘️ Resident Initiative</span><span class="disc-desktop">🏘️ <strong>Resident Initiative</strong> — Independently built by PSOTS residents for community convenience. Not affiliated with or endorsed by the RWA.</span>
+</div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-brand" onclick="showPage('home')">
+    <div class="nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS" style="width:40px;height:40px;object-fit:contain;"/></div>
+    <div>
+      <div class="nav-brand-name">PSOTS</div>
+      <div class="nav-brand-sub">Prestige Song of the South</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
+    <button class="nav-link" id="nav-events" onclick="showPage('events')">Events</button>
+    <button class="nav-link" id="nav-contacts" onclick="showPage('contacts')">Contacts</button>
+
+  </div>
+  <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+  <div id="nav-auth" style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <a href="https://society.psots.in"
+       style="display:flex;align-items:center;gap:7px;background:var(--jade);
+              color:var(--gold-pale);padding:8px 18px;border-radius:9px;
+              font-size:13px;font-weight:600;text-decoration:none;
+              letter-spacing:0.2px;transition:all 0.2s;">
+      🏘️ <span>PSOTS Society</span>
+    </a>
+  </div>
+  <a href="https://chhath.psots.in" class="nav-chhath" target="_blank">🌅 <span>Chhath 2026</span></a>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <div class="hero-tag-dot"></div>
+        <span>South Bangalore · BBMP OC Certified</span>
+      </div>
+      <h1>Your home.<br><em>Our community.</em></h1>
+      <div class="hero-location">Prestige Song of the South, Bangalore</div>
+      <p class="hero-desc">A resident-built community portal — emergency contacts, community guidelines, and everything our 2,100+ families need, in one place.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('contacts')">Emergency Contacts</button>
+        <a href="https://society.psots.in/society/login" class="btn-outline" style="text-decoration:none;display:inline-flex;align-items:center">Join PSOTS Society →</a>
+      </div>
+    </div>
+    <div class="hero-scroll"><div class="scroll-bar"></div><span>Explore</span></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stats-bg"></div>
+    <div class="stat-item"><div class="stat-num">2,100+</div><div class="stat-lbl">Flats</div></div>
+    <div class="stat-item"><div class="stat-num">14</div><div class="stat-lbl">Towers</div></div>
+    <div class="stat-item"><div class="stat-num">33</div><div class="stat-lbl">Acres</div></div>
+    <div class="stat-item"><div class="stat-num">25+</div><div class="stat-lbl">Amenities</div></div>
+    <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-lbl">Security</div></div>
+    <div class="stat-item"><div class="stat-num">BBMP</div><div class="stat-lbl">OC Certified</div></div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="about-section">
+    <div class="about-img reveal">
+      <img src="/IMG_20260322_045943_963.jpg" alt="Aerial view of PSOTS" loading="lazy"/>
+    </div>
+    <div class="about-content">
+      <div class="section-tag reveal"><div class="tag-line"></div><span class="tag-text">About Our Society</span></div>
+      <h2 class="reveal reveal-delay-1">A landmark community in the <em>heart of South Bangalore</em></h2>
+      <p class="reveal reveal-delay-2">Prestige Song of the South is one of Bangalore's most celebrated residential townships — spread across 33 acres in Yelenahalli, Begur Sub-division, with 2,100+ homes across 14 towers.</p>
+      <p class="reveal reveal-delay-2">Developed by Urbanize Developers (India) Pvt. Ltd. under the Prestige Group brand, the society holds Final Occupancy Certificates from BBMP for both Phase 1 (2019) and Phase 2 (2022).</p>
+      <p class="reveal reveal-delay-2">At the heart of the community is <strong>The Opera Club House</strong> — a world-class amenity block with swimming pools, spa, gym, home theatre, library, and banquet facilities.</p>
+      <div class="badges reveal reveal-delay-3">
+        <span class="badge">🏛️ BBMP OC Certified</span>
+        <span class="badge">🎭 The Opera Club House</span>
+        <span class="badge">📍 Yelenahalli, Bangalore</span>
+        <span class="badge">🏗️ Prestige Group</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="gallery-section">
+    <div class="gallery-header reveal">
+      <div class="section-tag"><div class="tag-line"></div><span class="tag-text">Life at PSOTS</span></div>
+      <h2>Moments captured by our residents</h2>
+      <p>Every photograph was taken by a PSOTS resident — no stock photography.</p>
+    </div>
+    <div class="gallery-grid reveal">
+      <div class="g g1"><img src="/IMG_20260322_050111_024.jpg" alt="Sunset aerial" loading="lazy"/><div class="gl">Sunset from the towers</div></div>
+      <div class="g g2"><img src="/IMG_20260322_050118_616.jpg" alt="The Opera Club House" loading="lazy"/><div class="gl">The Opera Club House</div></div>
+      <div class="g g3"><img src="/IMG_20260322_050634_376.jpg" alt="Pool at dusk" loading="lazy"/><div class="gl">Swimming Pool</div></div>
+      <div class="g g4"><img src="/IMG_20260322_045953_610.jpg" alt="Aerial pool night" loading="lazy"/><div class="gl">Diwali Night · Aerial</div></div>
+      <div class="g g5"><img src="/IMG_20260322_050741_123.jpg" alt="Gardens" loading="lazy"/><div class="gl">Landscaped Gardens</div></div>
+      <div class="g g6"><img src="/IMG_20260322_050712_507.jpg" alt="Moonlit towers" loading="lazy"/><div class="gl">Moonlit Towers</div></div>
+      <div class="g g7"><img src="/IMG_20260322_050124_112.jpg" alt="Evening walkway" loading="lazy"/><div class="gl">Evening Walkway</div></div>
+      <div class="g g8"><img src="/IMG_20260322_050222_915.jpg" alt="PSOTS towers" loading="lazy"/><div class="gl">14 Towers · 33 Acres</div></div>
+    </div>
+  </div>
+
+  <!-- CHHATH -->
+  <div class="chhath-section">
+    <div class="chhath-img">
+      <img src="/IMG_20260322_050657_348.jpg" alt="Chhath Puja at PSOTS" loading="lazy"/>
+    </div>
+    <div class="chhath-content">
+      <div class="chhath-numeral reveal">V</div>
+      <div class="section-tag reveal" style="margin-top:0.5rem"><div class="tag-line"></div><span class="tag-text">Chhath Puja 2026</span></div>
+      <h2 class="reveal reveal-delay-1">Panch Varsh Mahotsav —<br><em>Five years of faith</em></h2>
+      <p class="reveal reveal-delay-2">What began with 58 families at a ghat has grown into PSOTS's grandest annual celebration. This year marks our 5th Chhath Puja — a milestone we're honouring with a larger ghat, prasad for all 2,100+ flats, and a community cultural programme.</p>
+      <div class="chhath-stats reveal reveal-delay-2">
+        <div><div class="cs-num">400+</div><div class="cs-lbl">At Arghya</div></div>
+        <div><div class="cs-num">15+</div><div class="cs-lbl">Vrati Families</div></div>
+        <div><div class="cs-num">5th</div><div class="cs-lbl">Year · 2026</div></div>
+      </div>
+      <a href="https://chhath.psots.in" class="btn-jade reveal reveal-delay-3" target="_blank">🌅 Visit chhath.psots.in</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-mono"><img src="/assets/psots-logo.png" alt="PSOTS" style="width:48px;height:48px;object-fit:contain;"/></div>
+        <h3>Prestige Song of the South</h3>
+        <div class="tagline">Community Portal · psots.in</div>
+        <p>A resident-built portal for the 2,100+ families across 14 towers in Yelenahalli, Bangalore. No ads, no spam.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Portal</h4>
+        <ul>
+          <li><a onclick="showPage('home')">Home</a></li>
+          <li><a onclick="showPage('events')">Events</a></li>
+          <li><a onclick="showPage('contacts')">Contacts</a></li>
+          <li><a href="/society/about.html">About</a></li>
+          <li><a href="/society/faq.html">FAQ</a></li>
+          <li><a href="/society/privacy.html">Privacy Policy</a></li>
+          <li><a href="/society/terms.html">Terms of Use</a></li>
+          <li><a href="https://society.psots.in/guide">Community Guide</a></li>
+          <li><a href="https://chhath.psots.in" target="_blank">🌅 Chhath Puja 2026</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="/cdn-cgi/l/email-protection#0e6b6d4e7e7d617a7d206760"><span class="__cf_email__" data-cfemail="1f7a7c5f6f6c706b6c317671">[email&#160;protected]</span></a></li>
+          <li><a href="/cdn-cgi/l/email-protection#75131c1b141b16103505061a01065b1c1b"><span class="__cf_email__" data-cfemail="7016191e111e13153000031f04035e191e">[email&#160;protected]</span></a></li>
+          <li><a href="tel:+916366561152">+91 63665 61152</a></li>
+          <li><a href="tel:+918041404804">+91 804140 4804</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 PSOTS Community Portal · psots.in</span>
+      <div class="footer-tags"><span class="footer-tag">Self-managed</span><span class="footer-tag">No ads</span><span class="footer-tag">No spam</span></div>
+    </div>
+    <p class="footer-disclaimer">⚠️ This portal is an independent resident initiative and is not affiliated with, endorsed by, or representative of the Prestige Song of the South Apartment Owners' Association (RWA). For official society communications, use MyGate or contact the management office directly.</p>
+  </footer>
+</div>
+
+<!-- EVENTS PAGE -->
+<div id="page-events" class="page">
+  <div class="inner-hero">
+    <div class="inner-bg" style="background-image:url('/IMG_20260322_050657_348.jpg')"></div>
+    <div class="inner-overlay"></div>
+    <div class="inner-title">
+      <div class="inner-label">Community</div>
+      <h1>Events</h1>
+    </div>
+  </div>
+  <div class="inner-body">
+    <div style="background:var(--white);border-radius:18px;border:1px solid var(--border);overflow:hidden;max-width:580px;margin-bottom:3rem;">
+      <div style="background:var(--cream-dark);padding:1.25rem 1.75rem;display:flex;align-items:center;gap:18px;">
+        <div style="text-align:center;min-width:56px;">
+          <div style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;">NOV</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:400;color:var(--ink);line-height:1;">3</div>
+        </div>
+        <div><div style="font-size:13px;color:var(--muted);">Monday, 2026 · Sandhya Arghya 5:45 PM onwards</div></div>
+      </div>
+      <div style="padding:1.75rem;">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:400;color:var(--ink);margin-bottom:10px;">Chhath Puja 2026 — Panch Varsh Mahotsav</h3>
+        <p style="font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:16px;">Our grandest Chhath Puja — the 5th year. Sandhya Arghya Nov 3 at 5:45 PM, Usha Arghya Nov 4 at 6:15 AM at the Society Ghat. Prasad for all 2,100+ flats. Full details, contributions, and finance transparency at chhath.psots.in.</p>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">📍 Society Ghat — Amphitheatre &nbsp;·&nbsp; 🌅 400+ devotees expected</div>
+        <a href="https://chhath.psots.in" target="_blank" class="btn-jade">🌅 Visit chhath.psots.in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTS PAGE -->
+<div id="page-contacts" class="page">
+  <div class="inner-hero">
+    <div class="inner-bg" style="background-image:url('/IMG_20260322_050118_616.jpg')"></div>
+    <div class="inner-overlay"></div>
+    <div class="inner-title">
+      <div class="inner-label">Directory</div>
+      <h1>Emergency Contacts</h1>
+    </div>
+  </div>
+  <div class="inner-body">
+    <div class="info-note">ℹ️ <div><strong>Note on @psots.in emails:</strong> Emails sent to <a href="/cdn-cgi/l/email-protection#b6d3d5f6c6c5d9c2c598dfd8"><span class="__cf_email__" data-cfemail="3550567545465a41461b5c5b">[email&#160;protected]</span></a> and <a href="/cdn-cgi/l/email-protection#6c0a05020d020f092c1c1f03181f420502"><span class="__cf_email__" data-cfemail="ea8c83848b84898faa9a99859e99c48384">[email&#160;protected]</span></a> are received directly by the RWA Executive Committee and Finance Committee members — official channels managed by elected society representatives.</div></div>
+    <div style="margin-bottom:1.2rem;font-size:10.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);">── Official Channels</div>
+    <div class="off-grid">
+      <div class="off-card gn">
+        <div class="off-dept">Property Management Helpdesk</div>
+        <div class="off-contact cg">📞 +91 63665 61152</div>
+        <p>+91 804140 4804<br><a href="/cdn-cgi/l/email-protection#6f1c001b1c41070a031f0b0a1c042f1f1d0a1c1b06080a0c00011c1b1d1a0c1b0600011c410c00410601"><span class="__cf_email__" data-cfemail="384b574c4b16505d54485c5d4b5378484a5d4b4c515f5d5b57564b4c4a4d5b4c5157564b165b57165156">[email&#160;protected]</span></a><br><br>⚠️ Raise tickets first via MyGate app</p>
+      </div>
+      <div class="off-card bl">
+        <div class="off-dept">Executive Committee</div>
+        <div class="off-contact cb">✉️ <a href="/cdn-cgi/l/email-protection#ef8a8caf9f9c809b9cc18681"><span class="__cf_email__" data-cfemail="f39690b383809c8780dd9a9d">[email&#160;protected]</span></a></div>
+        <p>Governance, escalations, event approvals. Emails received by EC members directly.</p>
+      </div>
+      <div class="off-card am">
+        <div class="off-dept">Finance / Accounting</div>
+        <div class="off-contact ca">✉️ <a href="/cdn-cgi/l/email-protection#85e3ecebe4ebe6e0c5f5f6eaf1f6abeceb"><span class="__cf_email__" data-cfemail="f096999e919e9395b080839f8483de999e">[email&#160;protected]</span></a></div>
+        <p>CAM dues, maintenance charges, payment queries. Emails received by Finance Committee members.</p>
+      </div>
+    </div>
+    <div style="margin-bottom:1.2rem;font-size:10.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);">── National Emergency Numbers</div>
+    <div class="emerg-grid">
+      <div class="emerg-card"><div class="emerg-icon">🚒</div><div class="emerg-name">Fire</div><div class="emerg-num">101 <span class="badge-247">24/7</span></div></div>
+      <div class="emerg-card"><div class="emerg-icon">🚑</div><div class="emerg-name">Ambulance</div><div class="emerg-num">108 <span class="badge-247">24/7</span></div></div>
+      <div class="emerg-card"><div class="emerg-icon">👮</div><div class="emerg-name">Police</div><div class="emerg-num">100 <span class="badge-247">24/7</span></div></div>
+      <div class="emerg-card"><div class="emerg-icon">🆘</div><div class="emerg-name">National Emergency</div><div class="emerg-num">112 <span class="badge-247">24/7</span></div></div>
+    </div>
+  </div>
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  function closeMobileMenu() {
+    const links = document.querySelector('.nav-links');
+    const btn = document.getElementById('navHamburger');
+    if (links) links.classList.remove('open');
+    if (btn) btn.textContent = '☰';
+  }
+
+  function toggleMobileMenu() {
+    const links = document.querySelector('.nav-links');
+    const btn = document.getElementById('navHamburger');
+    const isOpen = links.classList.contains('open');
+    links.classList.toggle('open');
+    btn.textContent = isOpen ? '☰' : '✕';
+  }
+
+  function showPage(id) {
+    closeMobileMenu();
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    const navBtn = document.getElementById('nav-' + id);
+    if (navBtn) navBtn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleAcc(head) {
+    const body = head.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    head.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('mainNav');
+    nav.classList.toggle('scrolled', window.scrollY > 10);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#nav-user')) {
+      const dd = document.getElementById('nav-dropdown');
+      if (dd) dd.classList.remove('open');
+    }
+    if (!e.target.closest('nav')) closeMobileMenu();
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FAQ — PSOTS Society</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --jade:        #1a4a3a;
+      --jade-light:  #2d6b54;
+      --gold:       #b8882a;
+      --gold-light: #d4a84b;
+      --gold-pale:  #f0d898;
+      --cream:       #f8f2e8;
+      --cream-dark:  #ede5d5;
+      --surface:     #fffcf7;
+      --ink:        #1a1208;
+      --ink-soft:   #3d2f1e;
+      --muted:      #8a7a6a;
+      --border:      rgba(160,130,90,0.20);
+      --white:      #ffffff;
+      --red:        #c0392b;
+    }
+    body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");}
+    .container{max-width:800px;margin:20px auto 60px;padding:0 24px}
+    h1{font-family:'Playfair Display',serif;font-size:2.5rem;margin-bottom:40px;color:var(--jade)}
+    .faq-item{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
+    .faq-question{padding:20px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--jade);transition:background 0.2s}
+    .faq-question:hover{background:var(--cream-dark)}
+    .faq-question::after{content:'+';font-size:20px;font-weight:400}
+    .faq-item.open .faq-question::after{content:'−'}
+    .faq-answer{padding:0 24px;max-height:0;overflow:hidden;transition:all 0.3s ease-out;color:var(--ink-soft);font-size:15px}
+    .faq-item.open .faq-answer{padding:0 24px 24px;max-height:500px}
+  </style>
+</head>
+<body>
+
+<div id="societyNav"></div>
+<div style="max-width:800px;margin:0 auto;padding:116px 24px 0;">
+  <a href="/society/" style="color:var(--jade);text-decoration:none;font-size:14px;">← Back to Dashboard</a>
+</div>
+
+<div class="container">
+  <h1>Frequently Asked Questions</h1>
+
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Who pays for running this platform?</div>
+      <div class="faq-answer">
+        <p>Currently self-funded by Pushkal Kishore personally. Running costs are kept minimal through free and low-cost infrastructure. This platform does not charge residents anything. In future, small optional revenue may be explored through classified listing fees or voluntary community contributions — any such changes will be announced transparently before implementation.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is this the official PSOTSAOA or RWA website?</div>
+      <div class="faq-answer">
+        <p>No. This is an independent resident initiative. PSOTSAOA (the registered Apartment Owners Association) has its own communication channels. This platform operates separately and is not controlled by or affiliated with the Association. Discussions with the Association about this platform are planned and will be shared with residents once completed.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">The domain psots.in — who owns it?</div>
+      <div class="faq-answer">
+        <p>psots.in was registered by Pushkal Kishore in 2021. The Association currently uses it for their official email communications with Pushkal's agreement. Billing ownership and domain control remain with Pushkal Kishore, as acknowledged in writing by the Association Secretary. The resident portal runs on society.psots.in — a separate subdomain.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">How do you verify that I am a genuine resident?</div>
+      <div class="faq-answer">
+        <p>When you register, you provide your flat number, name, phone and email. A platform admin cross-checks this with MyGate — which has verified resident records for all flats. Your registration is only approved after this manual verification.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is my data safe?</div>
+      <div class="faq-answer">
+        <p>Yes. Your data is stored securely on Google Firebase, hosted in the asia-south1 region (Bangalore). Only your name, flat number, phone and email are collected. Your data is never sold, shared or published. Only platform admins can access your profile for verification purposes. You can request deletion of your data at any time.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What about Prestige Estates or PPMS — are they involved?</div>
+      <div class="faq-answer">
+        <p>No. This platform is not affiliated with Prestige Estates or PPMS. It operates as an independent resident community initiative, similar in nature to a resident WhatsApp group — just more structured and searchable. Prestige and PPMS have not been formally informed yet. This will be done at an appropriate stage.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Will this replace our Telegram groups?</div>
+      <div class="faq-answer">
+        <p>No — and it is not designed to. Telegram groups remain active for real-time conversations. This platform complements them by providing structured information that does not get buried in chat.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">What happens if the platform shuts down?</div>
+      <div class="faq-answer">
+        <p>Your data can be exported and deleted on request. The platform will give residents advance notice before any shutdown. Since this is self-funded, continuity depends on the community's engagement and support over time.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Can I contribute to building this?</div>
+      <div class="faq-answer">
+        <p>Yes. If you are a PSOTS resident with technical, design, content or moderation skills — reach out to @pushkalkishore on Telegram. This is a community project and contributions are welcome.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Who moderates content?</div>
+      <div class="faq-answer">
+        <p>Trusted resident volunteers appointed as platform admins. Content that is harmful, misleading or disruptive to community harmony is removed. The Telegram bot helps flag potentially problematic content for admin review.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleFaq(el) {
+  const item = el.parentElement;
+  item.classList.toggle('open');
+}
+</script>
+
+<script type="module">
+import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
+await renderSocietyNav('societyNav', '');
+</script>
+
+<footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+      PSOTS Society · society.psots.in
+    </p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+      <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+      <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+      <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+      <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+      This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+    </p>
+  </div>
+</footer>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

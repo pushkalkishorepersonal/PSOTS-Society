@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join as Family Member · PSOTS Society</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --jade:       #1a4a3a;
+      --jade-light: #2d6b54;
+      --jade-dark:  #102c22;
+      --jade-pale:  rgba(26,74,58,0.07);
+      --jade-glow:  rgba(26,74,58,0.14);
+      --gold:       #b8882a;
+      --gold-light: #d4a84b;
+      --gold-pale:  #f0d898;
+      --cream:      #f8f2e8;
+      --cream-dark: #ede5d5;
+      --surface:    #fffcf7;
+      --ink:        #1a1208;
+      --ink-soft:   #3d2f1e;
+      --muted:      #8a7a6a;
+      --border:     rgba(160,130,90,0.20);
+      --red:        #c0392b;
+      --terra:      #8b3a1a;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans:  'Nunito Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      height: 58px;
+      background: rgba(255,252,247,0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--ink);
+    }
+
+    .nav-logo img { width: 34px; height: 34px; object-fit: contain; }
+
+    .nav-brand-name {
+      font-family: var(--font-serif);
+      font-size: 15px; font-weight: 600;
+      color: var(--jade); line-height: 1.2;
+    }
+    .nav-brand-sub { font-size: 9.5px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+      background: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(26,74,58,0.055) 0%, transparent 70%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      padding: 40px 40px 36px;
+      border-radius: 22px;
+      box-shadow: 0 8px 40px rgba(139,90,26,0.12), 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid rgba(160,130,90,0.18);
+      animation: cardEnter 0.48s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(22px) scale(0.97); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .step { display: none; }
+    .step.active {
+      display: block;
+      animation: stepIn 0.28s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    h1, h2 {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .step.active h1::before,
+    .step.active h2::before {
+      content: '';
+      display: block;
+      width: 28px; height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      margin-bottom: 12px;
+      border-radius: 2px;
+    }
+
+    p { font-size: 14.5px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 6px; color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      font-size: 15px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--ink);
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--jade);
+      box-shadow: 0 0 0 3px var(--jade-glow);
+    }
+    input:hover:not(:focus) { border-color: rgba(160,130,90,0.40); }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      background: var(--jade);
+      color: var(--surface);
+      border: none;
+      border-radius: 11px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.14s, box-shadow 0.18s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 2px 10px rgba(26,74,58,0.22);
+      letter-spacing: 0.01em;
+    }
+    button:hover:not(:disabled) {
+      background: var(--jade-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(26,74,58,0.28);
+    }
+    button:active:not(:disabled) { transform: translateY(1px) scale(0.984); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--jade);
+      border: 1.5px solid var(--jade);
+      box-shadow: none;
+      margin-top: 12px;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--jade-pale);
+      box-shadow: 0 2px 10px rgba(26,74,58,0.12);
+    }
+
+    .btn-outline {
+      background: var(--surface);
+      color: var(--ink-soft);
+      border: 1.5px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .btn-outline:hover:not(:disabled) {
+      border-color: rgba(184,136,42,0.50);
+      background: #fffdf4;
+      box-shadow: 0 3px 12px rgba(184,136,42,0.14);
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      margin-bottom: 18px;
+      display: none;
+      border-left: 3px solid;
+    }
+    .message.error   { background: #fff5f5; color: #c53030; border-left-color: #c0392b; display: block; }
+    .message.success { background: #f0fff4; color: #2f855a; border-left-color: var(--jade); display: block; }
+    .message.warn    { background: #fef9ec; color: var(--terra); border-left-color: var(--gold); display: block; }
+
+    .loader {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.30);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .consent-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-top: 18px; margin-bottom: 6px;
+    }
+    .consent-row input[type="checkbox"] {
+      width: 17px; height: 17px; margin-top: 3px;
+      border-radius: 4px; flex-shrink: 0; cursor: pointer;
+      accent-color: var(--jade);
+    }
+    .consent-row label {
+      text-transform: none; letter-spacing: normal;
+      font-size: 12.5px; color: var(--muted);
+      cursor: pointer; font-weight: 500;
+    }
+    .consent-row a { color: var(--jade); font-weight: 700; text-decoration: none; }
+    .consent-row a:hover { text-decoration: underline; }
+
+    .invitation-card {
+      background: linear-gradient(135deg, var(--jade-pale), rgba(26,74,58,0.04));
+      border: 1px solid rgba(26,74,58,0.12);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .invitation-card h3 {
+      font-size: 14px; font-weight: 700; color: var(--jade);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .invitation-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; font-size: 14px;
+    }
+
+    .invitation-row strong { color: var(--ink); }
+
+    .divider-or {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin: 18px 0;
+    }
+    .divider-or::before, .divider-or::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border));
+    }
+    .divider-or::after { background: linear-gradient(90deg, var(--border), transparent); }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 24px; border-radius: 18px; }
+      h1, h2 { font-size: 23px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="/society/">
+      <div class="nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS"/></div>
+      <div>
+        <div class="nav-brand-name">PSOTS Society</div>
+        <div class="nav-brand-sub">Prestige Song of the South</div>
+      </div>
+    </a>
+  </nav>
+
+  <div class="main-container">
+    <div class="card">
+      <div id="global-message" class="message"></div>
+
+      <!-- Step 1: Loading / Validating -->
+      <div id="step-loading" class="step active">
+        <h1>Checking Invitation</h1>
+        <p>Please wait while we verify your invitation...</p>
+        <div style="text-align: center; padding: 20px;">
+          <div class="loader" style="margin: 0 auto; width: 24px; height: 24px;"></div>
+        </div>
+      </div>
+
+      <!-- Step 2: Invitation Details -->
+      <div id="step-error" class="step">
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+          <h2 style="color:var(--jade);margin-bottom:12px;">Invalid Invitation</h2>
+          <p id="error-message" style="color:var(--muted);margin-bottom:24px;">This invitation link is invalid or has expired.</p>
+          <a href="/society/" class="btn btn-primary">Go to Home</a>
+        </div>
+      </div>
+
+      <div id="step-invitation" class="step">
+        <h1>You're Invited!</h1>
+        <p>Join PSOTS Society as a family member</p>
+
+        <div class="invitation-card">
+          <h3>Invitation Details</h3>
+          <div class="invitation-row">
+            <span>Inviter:</span>
+            <strong id="inv-inviter">—</strong>
+          </div>
+          <div class="invitation-row">
+            <span>Flat:</span>
+            <strong id="inv-flat">—</strong>
+          </div>
+          <div class="invitation-row">
+            <span>Relation:</span>
+            <strong id="inv-relation">—</strong>
+          </div>
+          <div class="invitation-row" style="color: #8a7a6a; font-size: 13px; margin-top: 12px;">
+            ⏱️ Valid for <span id="inv-timer">10:00</span>
+          </div>
+        </div>
+
+        <p style="font-size: 13.5px; color: var(--ink-soft);">Choose how you'll create your account:</p>
+
+        <button class="btn-outline" id="btn-join-google" onclick="joinWithGoogle()">
+          Continue with Google
+        </button>
+        <button class="btn-outline" id="btn-join-email" onclick="selectJoinMethod('email')">
+          Use Email OTP
+        </button>
+
+        <div id="join-method-email" style="display:none; margin-top:16px;">
+          <div class="form-group">
+            <label>First Name</label>
+            <input id="join-name" placeholder="Your full name" type="text"/>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input id="join-email" placeholder="email@example.com" type="email"/>
+          </div>
+          <button id="btn-send-join-otp" onclick="sendJoinOTP()">Send OTP →</button>
+          <div id="join-email-otp-section" style="display:none; margin-top:12px;">
+            <div class="form-group">
+              <label>6-Digit Code</label>
+              <input id="join-otp" placeholder="Enter code" maxlength="6" inputmode="numeric"/>
+            </div>
+            <button onclick="joinWithEmailOTP()">Verify & Join →</button>
+          </div>
+        </div>
+
+        <div class="consent-row" style="margin-top: 24px;">
+          <input type="checkbox" id="join-agree"/>
+          <label for="join-agree">
+            I agree to the <a href="/society/terms.html" target="_blank">Terms of Use</a>
+            and <a href="/society/privacy.html" target="_blank">Privacy Policy</a>
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div id="step-success" class="step">
+        <h1>Welcome! 🎉</h1>
+        <p>Your account has been created successfully</p>
+
+        <div class="invitation-card">
+          <div style="text-align: center; font-size: 32px; margin-bottom: 12px;">✓</div>
+          <h3 style="text-align: center;">Account Created</h3>
+          <div class="invitation-row">
+            <span>Name:</span>
+            <strong id="success-name">—</strong>
+          </div>
+          <div class="invitation-row">
+            <span>Flat:</span>
+            <strong id="success-flat">—</strong>
+          </div>
+        </div>
+
+        <button onclick="goToDashboard()">Go to Dashboard →</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from '../../js/core/firebase.js';
+    import residentService from '../../js/services/resident.service.js';
+    import {
+      signInWithPopup, GoogleAuthProvider, signInWithCustomToken,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+    const workerUrl = 'https://telegram.psots.in';
+    let inviteToken = null;
+    let inviteData = null;
+    let expiresAt = null;
+    let timerInterval = null;
+
+    function showStep(stepId) {
+      const steps = document.querySelectorAll('.step');
+      steps.forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(stepId);
+      if (!target) return;
+      target.classList.add('active');
+      hideMessage();
+    }
+
+    function showMessage(msg, type = 'error') {
+      const el = document.getElementById('global-message');
+      el.textContent = msg;
+      el.className = `message ${type}`;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function hideMessage() {
+      document.getElementById('global-message').style.display = 'none';
+    }
+
+    function setLoader(btnId, loading) {
+      const btn = typeof btnId === 'string' ? document.getElementById(btnId) : btnId;
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="loader"></span>';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
+      }
+    }
+
+    function startExpiryTimer() {
+      const timerEl = document.getElementById('inv-timer');
+      function updateTimer() {
+        const remaining = expiresAt - Date.now();
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          showMessage('Invitation has expired. Please request a new one.');
+          showStep('step-loading');
+          return;
+        }
+        const secs = Math.floor(remaining / 1000);
+        const mins = Math.floor(secs / 60);
+        const displaySecs = secs % 60;
+        timerEl.textContent = `${mins}:${displaySecs.toString().padStart(2, '0')}`;
+      }
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    async function validateInvitation() {
+      const params = new URLSearchParams(window.location.search);
+      inviteToken = params.get('token');
+
+      if (!inviteToken) {
+        showMessage('No invitation token provided');
+        showStep('step-error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${workerUrl}/invite/validate?token=${encodeURIComponent(inviteToken)}`);
+        const data = await res.json();
+
+        if (!data.ok) {
+          let msg = 'Invalid or expired invitation';
+          if (data.error === 'expired') msg = 'This invitation has expired';
+          if (data.error === 'already_used') msg = 'This invitation has already been used';
+          showMessage(msg);
+          showStep('step-error');
+          return;
+        }
+
+        inviteData = data;
+        expiresAt = data.expiresAt;
+
+        document.getElementById('inv-inviter').textContent = data.inviterName;
+        document.getElementById('inv-flat').textContent = data.flatNumber;
+        document.getElementById('inv-relation').textContent = data.relation;
+
+        showStep('step-invitation');
+        startExpiryTimer();
+      } catch (err) {
+        console.error('Validation error:', err);
+        showMessage('Error: ' + err.message + ' — URL: ' + workerUrl);
+        showStep('step-error');
+      }
+    }
+
+    window.selectJoinMethod = function(method) {
+      document.getElementById('join-method-email').style.display = method === 'email' ? 'block' : 'none';
+      hideMessage();
+    };
+
+    window.sendJoinOTP = async function() {
+      const name = document.getElementById('join-name').value.trim();
+      const email = document.getElementById('join-email').value.trim();
+
+      if (!name) return showMessage('Please enter your name');
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showMessage('Please enter a valid email');
+
+      const btn = document.getElementById('btn-send-join-otp');
+      setLoader(btn, true);
+
+      try {
+        const res = await fetch(`${workerUrl}/auth/send-email-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+
+        document.getElementById('join-email-otp-section').style.display = 'block';
+        showMessage('OTP sent to your email', 'success');
+      } catch (err) {
+        showMessage('Failed to send OTP: ' + err.message);
+      } finally {
+        setLoader(btn, false);
+      }
+    };
+
+    window.joinWithGoogle = async function() {
+      if (!document.getElementById('join-agree').checked) {
+        return showMessage('Please accept the terms and privacy policy');
+      }
+
+      const btn = document.getElementById('btn-join-google');
+      setLoader(btn, true);
+
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        const idToken = await user.getIdToken();
+        await completeInvite(user.uid, user.displayName || 'Family Member', idToken, 'google');
+      } catch (err) {
+        showMessage('Registration failed: ' + err.message);
+      } finally {
+        setLoader(btn, false);
+      }
+    };
+
+    window.joinWithEmailOTP = async function() {
+      const name = document.getElementById('join-name').value.trim();
+      const email = document.getElementById('join-email').value.trim();
+      const otp = document.getElementById('join-otp').value.trim();
+
+      if (!otp || otp.length !== 6) return showMessage('Please enter a valid 6-digit code');
+      if (!document.getElementById('join-agree').checked) {
+        return showMessage('Please accept the terms and privacy policy');
+      }
+
+      const btn = document.querySelector('#join-email-otp-section button:last-child');
+      setLoader(btn, true);
+
+      try {
+        const res = await fetch(`${workerUrl}/auth/verify-email-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, registration: true })
+        });
+
+        const data = await res.json();
+        if (!data.ok || !data.token) throw new Error('OTP verification failed');
+
+        const token = data.token;
+        await signInWithCustomToken(auth, token);
+        const user = auth.currentUser;
+
+        const idToken = await user.getIdToken();
+        await completeInvite(user.uid, name, idToken, 'email_otp');
+      } catch (err) {
+        showMessage('Registration failed: ' + err.message);
+      } finally {
+        setLoader(btn, false);
+      }
+    };
+
+    async function completeInvite(uid, name, idToken, loginMethod) {
+      try {
+        const res = await fetch(`${workerUrl}/invite/accept`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ token: inviteToken, uid, name, loginMethod })
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error('Failed to complete invitation');
+
+        document.getElementById('success-name').textContent = name;
+        document.getElementById('success-flat').textContent = inviteData.flatNumber;
+        clearInterval(timerInterval);
+        showStep('step-success');
+      } catch (err) {
+        showMessage('Error completing registration: ' + err.message);
+      }
+    }
+
+    window.goToDashboard = function() {
+      window.location.href = '/society/';
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          await validateInvitation();
+        } catch(e) {
+          console.error('Fatal error:', e);
+          const el = document.getElementById('step-loading');
+          if (el) {
+            el.innerHTML = '<div style="padding:40px;text-align:center;"><p style="color:red;">Error: ' + e.message + '</p><a href="/society/">Go Home</a></div>';
+          }
+        }
+      });
+    } else {
+      (async () => {
+        try {
+          await validateInvitation();
+        } catch(e) {
+          console.error('Fatal error:', e);
+          const el = document.getElementById('step-loading');
+          if (el) {
+            el.innerHTML = '<div style="padding:40px;text-align:center;"><p style="color:red;">Error: ' + e.message + '</p><a href="/society/">Go Home</a></div>';
+          }
+        }
+      })();
+    }
+  </script>
+</body>
+</html>

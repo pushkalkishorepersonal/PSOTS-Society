@@ -1,0 +1,56 @@
+// DIAGNOSTIC SCRIPT - Run this on carpooling page console
+// This will show us EXACTLY what resident data the page is seeing
+
+(async () => {
+  console.log('='.repeat(60));
+  console.log('DIAGNOSTIC: Checking resident data flow');
+  console.log('='.repeat(60));
+  
+  // 1. Check direct Firestore
+  console.log('\n1️⃣ Checking Firestore directly...');
+  const { auth, db } = await import('/js/core/firebase.js');
+  const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  
+  const user = auth.currentUser;
+  console.log('Current user:', user?.email, user?.uid);
+  
+  if (user) {
+    const q = query(collection(db, 'residents'), where('email', '==', user.email));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      const firestoreData = snap.docs[0].data();
+      console.log('Firestore status:', firestoreData.status);
+      console.log('Firestore data:', firestoreData);
+    }
+  }
+  
+  // 2. Check what auth.js session has
+  console.log('\n2️⃣ Checking auth.js session...');
+  const session = await import('/js/core/auth.js').then(m => m.default);
+  console.log('session.user:', session.user?.email);
+  console.log('session.resident:', session.resident);
+  console.log('session.resident.status:', session.resident?.status);
+  
+  // 3. Check cache
+  console.log('\n3️⃣ Checking cache...');
+  const cache = await import('/js/core/cache.js').then(m => m.default);
+  if (user) {
+    const cachedResident = cache.get(cache.keys.resident(user.uid));
+    console.log('Cached resident:', cachedResident);
+    console.log('Cached status:', cachedResident?.status);
+  }
+  
+  // 4. Check residentService
+  console.log('\n4️⃣ Checking residentService...');
+  const residentService = await import('/js/services/resident.service.js').then(m => m.default);
+  if (user) {
+    const serviceResident = await residentService.get(user.uid);
+    console.log('Service resident:', serviceResident);
+    console.log('Service status:', serviceResident?.status);
+  }
+  
+  console.log('\n' + '='.repeat(60));
+  console.log('If all statuses show "approved" but page shows pending,');
+  console.log('then the issue is in the page rendering logic.');
+  console.log('='.repeat(60));
+})();

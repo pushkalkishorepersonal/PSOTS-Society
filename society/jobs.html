@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSOTS — Jobs Board</title>
+  <meta name="description" content="Jobs and opportunities in PSOTS Society — hiring, looking for roles, community drives."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --jade:        #1a4a3a;
+      --jade-light:  #2d6b54;
+      --jade-pale:   rgba(26,74,58,0.07);
+      --jade-glow:   rgba(26,74,58,0.14);
+      --gold:        #b8882a;
+      --gold-light:  #d4a84b;
+      --gold-pale:   #f0d898;
+      --gold-bg:     rgba(184,136,42,0.08);
+      --cream:       #f8f2e8;
+      --cream-dark:  #ede5d5;
+      --surface:     #fffcf7;
+      --ink:         #1a1208;
+      --ink-soft:    #3d2f1e;
+      --muted:       #8a7a6a;
+      --border:      rgba(160,130,90,0.20);
+      --white:       #ffffff;
+      --red:         #c0392b;
+      --shadow-card: 0 6px 28px rgba(139,90,26,0.10), 0 1px 4px rgba(0,0,0,0.04);
+      --font-serif:  'Playfair Display', Georgia, serif;
+      --font-sans:   'Nunito Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    }
+
+    .disclaimer-bar {
+      background: var(--jade);
+      color: rgba(255,255,255,0.7);
+      padding: 7px 2rem;
+      font-size: 11.5px;
+      text-align: center;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 300;
+      letter-spacing: 0.2px;
+    }
+    .disclaimer-bar strong { color: var(--gold-pale); }
+
+    .jobs-nav {
+      display: none;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .nav-logo { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+    .nav-brand-name {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .nav-brand-sub {
+      font-size: 9.5px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .nav-item {
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-item:hover { color: var(--jade); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      margin-top: 0;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      font-weight: 400;
+      margin-bottom: 12px;
+      margin-top: 2rem;
+      color: var(--jade);
+    }
+
+    .page-intro {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 700px;
+      line-height: 1.6;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      background: var(--white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--jade);
+      box-shadow: 0 0 0 3px var(--jade-pale);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 28px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 14px 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--jade);
+      border-bottom-color: var(--jade);
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--ink);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .add-btn {
+      padding: 11px 18px;
+      background: var(--jade);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.14s;
+    }
+
+    .add-btn:hover {
+      background: var(--jade-light);
+      transform: translateY(-1px);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: rgba(160,130,90,0.40);
+      box-shadow: 0 10px 36px rgba(139,90,26,0.14), 0 2px 6px rgba(0,0,0,0.05);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      flex: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: var(--gold-bg);
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    .badge.expiring {
+      background: rgba(192,57,43,0.10);
+      color: var(--red);
+    }
+
+    .card-meta {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .meta-label {
+      color: var(--muted);
+      font-weight: 600;
+      min-width: 70px;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+    }
+
+    .meta-value {
+      color: var(--ink-soft);
+      flex: 1;
+    }
+
+    .meta-flat {
+      display: inline-block;
+      background: var(--jade-pale);
+      color: var(--jade);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .card-description {
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--cream);
+      border-radius: 8px;
+      border-left: 3px solid var(--gold);
+    }
+
+    .drive-link {
+      color: var(--jade);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: inline-block;
+      transition: color 0.2s;
+    }
+
+    .drive-link:hover {
+      color: var(--jade-light);
+      text-decoration: underline;
+    }
+
+    .card-footer {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .whatsapp-btn {
+      flex: 1;
+      padding: 10px 16px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .whatsapp-btn:hover {
+      background: #20BA58;
+    }
+
+    .delete-btn {
+      padding: 10px 12px;
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid var(--red);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .delete-btn:hover {
+      background: rgba(192,57,43,0.08);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--jade);
+      box-shadow: 0 0 0 3px var(--jade-pale);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: var(--font-sans);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 12px;
+      background: var(--jade);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--jade-light);
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--jade);
+      color: var(--jade);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state-text {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .empty-state-hint {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .filter-note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .jobs-nav {
+        padding: 0 1rem;
+      }
+      .container {
+        padding: 0 1rem;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .search-bar {
+        flex-direction: column;
+      }
+      .search-bar input {
+        min-width: auto;
+      }
+      .modal-content {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="societyNav"></div>
+  <div class="disclaimer-bar">
+    <strong>📋 Jobs Board</strong> — Share opportunities with neighbors. No resumes — WhatsApp only.
+  </div>
+
+  <div class="jobs-nav">
+    <a class="nav-brand" href="/society/">
+      <div class="nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS" style="width:100%;"/></div>
+      <div>
+        <div class="nav-brand-name">PSOTS Society</div>
+        <div class="nav-brand-sub">Jobs Board</div>
+      </div>
+    </a>
+    <div class="nav-right">
+      <a href="/society/" class="nav-item">← Back</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>💼 Jobs Board</h1>
+    <p class="page-intro">Share job openings, find opportunities, and discover talent within PSOTS Society. Connect directly via WhatsApp — no resumes, just conversations.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by company, skill, or role..."/>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('hiring')">💼 Hiring & Referring</button>
+      <button class="tab-btn" onclick="switchTab('looking')">🙋 Looking for Opportunity</button>
+      <button class="tab-btn" onclick="switchTab('drives')">📢 Community Drives</button>
+    </div>
+
+    <!-- Tab 1: Hiring & Referring -->
+    <div id="hiring" class="tab-content active">
+      <div class="tab-header">
+        <div></div>
+        <button class="add-btn" id="addHiringBtn" onclick="openModal('hiring')">+ Post Opening</button>
+      </div>
+      <div id="hiringCards" class="cards-grid"></div>
+    </div>
+
+    <!-- Tab 2: Looking for Opportunity -->
+    <div id="looking" class="tab-content">
+      <div class="tab-header">
+        <div></div>
+        <button class="add-btn" id="addLookingBtn" onclick="openModal('looking')">+ I'm Looking</button>
+      </div>
+      <div id="lookingCards" class="cards-grid"></div>
+    </div>
+
+    <!-- Tab 3: Community Drives -->
+    <div id="drives" class="tab-content">
+      <div class="tab-header">
+        <div></div>
+        <button class="add-btn" id="addDriveBtn" onclick="openModal('drives')">+ Add Drive Link</button>
+      </div>
+      <div id="drivesCards" class="cards-grid"></div>
+    </div>
+  </div>
+
+  <!-- Modals for adding posts -->
+  <div id="hiringModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Post Job Opening</div>
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input type="text" id="hiringCompany" placeholder="e.g., Flipkart"/>
+      </div>
+      <div class="form-group">
+        <label>Role / Position *</label>
+        <input type="text" id="hiringRole" placeholder="e.g., Senior Software Engineer"/>
+      </div>
+      <div class="form-group">
+        <label>Experience Required *</label>
+        <input type="text" id="hiringExperience" placeholder="e.g., 5+ years"/>
+      </div>
+      <div class="form-group">
+        <label>Additional Details</label>
+        <textarea id="hiringDescription" placeholder="e.g., Tech stack, location, benefits, interview process..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Number *</label>
+        <input type="tel" id="hiringPhone" placeholder="+91XXXXXXXXXX"/>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="submitHiring()">Post Opening</button>
+        <button class="btn-secondary" onclick="closeModal('hiring')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lookingModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Post Your Profile</div>
+      <div class="form-group">
+        <label>Skills / Expertise *</label>
+        <input type="text" id="lookingSkills" placeholder="e.g., Python, Java, Product Management"/>
+      </div>
+      <div class="form-group">
+        <label>Experience Level *</label>
+        <input type="text" id="lookingExperience" placeholder="e.g., 5+ years as Senior Developer"/>
+      </div>
+      <div class="form-group">
+        <label>Target Companies / Roles</label>
+        <input type="text" id="lookingTarget" placeholder="e.g., Google, Amazon, startups..."/>
+      </div>
+      <div class="form-group">
+        <label>Additional Details</label>
+        <textarea id="lookingDescription" placeholder="Your preferences, availability, relocation, etc..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Number *</label>
+        <input type="tel" id="lookingPhone" placeholder="+91XXXXXXXXXX"/>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="submitLooking()">Post Profile</button>
+        <button class="btn-secondary" onclick="closeModal('looking')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="drivesModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Add Walk-in Drive</div>
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input type="text" id="driveCompany" placeholder="e.g., Amazon, TCS"/>
+      </div>
+      <div class="form-group">
+        <label>Role / Position *</label>
+        <input type="text" id="driveRole" placeholder="e.g., Software Developer, Analyst"/>
+      </div>
+      <div class="form-group">
+        <label>Date & Time</label>
+        <input type="text" id="driveDate" placeholder="e.g., April 20, 2026 — 9:00 AM"/>
+      </div>
+      <div class="form-group">
+        <label>Drive Link / Registration URL *</label>
+        <input type="url" id="driveLink" placeholder="https://..."/>
+      </div>
+      <div class="form-group">
+        <label>Additional Details</label>
+        <textarea id="driveDescription" placeholder="Eligibility, location, prerequisites, etc..."></textarea>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="submitDrive()">Add Drive</button>
+        <button class="btn-secondary" onclick="closeModal('drives')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db } from '../../js/core/firebase.js';
+    import { setupHybridAuth, getUser, getResident } from '../js/core/hybrid-auth.js';
+    import { doc, getDoc, collection, addDoc, getDocs, query, where, serverTimestamp, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { renderSocietyNav } from '../../js/components/shared/SocietyNav.js';
+
+    // Setup hybrid auth (Firebase + Telegram session) and check immediately
+    const { user: authUser } = await setupHybridAuth();
+    if (!authUser) {
+      window.location.href = '/society/login.html?redirect=/society/jobs.html';
+      throw new Error('Not authenticated');
+    }
+
+    await renderSocietyNav('societyNav', 'jobs');
+
+    let currentUser = authUser;
+    let currentFlat = null;
+    let allJobs = [];
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function getDaysRemaining(expiresAt) {
+      const days = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+      return days > 0 ? days : 0;
+    }
+
+    function renderJobs() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const hiringCards = document.getElementById('hiringCards');
+      const lookingCards = document.getElementById('lookingCards');
+      const drivesCards = document.getElementById('drivesCards');
+
+      hiringCards.innerHTML = '';
+      lookingCards.innerHTML = '';
+      drivesCards.innerHTML = '';
+
+      const hiring = allJobs.filter(j => j.type === 'hiring' && j.status === 'active');
+      const looking = allJobs.filter(j => j.type === 'looking' && j.status === 'active');
+      const drives = allJobs.filter(j => j.type === 'drive' && j.status === 'active');
+
+      function matchesSearch(job) {
+        return !searchTerm ||
+          job.company?.toLowerCase().includes(searchTerm) ||
+          job.role?.toLowerCase().includes(searchTerm) ||
+          job.skills?.toLowerCase().includes(searchTerm) ||
+          job.description?.toLowerCase().includes(searchTerm);
+      }
+
+      function renderCard(job, isOwner) {
+        const days = getDaysRemaining(job.expiresAt);
+        const isExpiring = days < 7 && days > 0;
+        const isExpired = days <= 0;
+
+        if (job.type === 'drive') {
+          return `
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">${escapeHTML(job.company)}</div>
+              </div>
+              <div class="card-meta">
+                <div class="meta-row">
+                  <span class="meta-label">Role</span>
+                  <span class="meta-value">${escapeHTML(job.role)}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Date</span>
+                  <span class="meta-value">${escapeHTML(job.driveDate || '—')}</span>
+                </div>
+              </div>
+              <div class="card-footer">
+                <a href="${escapeHTML(job.driveLink)}" target="_blank" class="drive-link">📌 Register / Learn More →</a>
+                ${isOwner ? `<button class="delete-btn" onclick="deleteJob('${job.id}')">Delete</button>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        if (job.type === 'hiring') {
+          return `
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">${escapeHTML(job.company)}</div>
+                ${isExpiring ? `<span class="badge expiring">Expires in ${days} days</span>` : ''}
+              </div>
+              <div class="card-meta">
+                <div class="meta-row">
+                  <span class="meta-label">Role</span>
+                  <span class="meta-value">${escapeHTML(job.role)}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Experience</span>
+                  <span class="meta-value">${escapeHTML(job.experience)}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Posted by</span>
+                  <span class="meta-flat">Flat ${escapeHTML(job.flatNumber)}</span>
+                </div>
+              </div>
+              ${job.description ? `<div class="card-description">${escapeHTML(job.description)}</div>` : ''}
+              <div class="card-footer">
+                <a href="https://wa.me/${job.contactPhone}" target="_blank" class="whatsapp-btn">💬 WhatsApp</a>
+                ${isOwner ? `<button class="delete-btn" onclick="deleteJob('${job.id}')">Delete</button>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        if (job.type === 'looking') {
+          return `
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">${escapeHTML(job.skills)}</div>
+                ${isExpiring ? `<span class="badge expiring">Expires in ${days} days</span>` : ''}
+              </div>
+              <div class="card-meta">
+                <div class="meta-row">
+                  <span class="meta-label">Experience</span>
+                  <span class="meta-value">${escapeHTML(job.experience)}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Target</span>
+                  <span class="meta-value">${escapeHTML(job.targetCompanies || '—')}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Posted by</span>
+                  <span class="meta-flat">Flat ${escapeHTML(job.flatNumber)}</span>
+                </div>
+              </div>
+              ${job.description ? `<div class="card-description">${escapeHTML(job.description)}</div>` : ''}
+              <div class="card-footer">
+                <a href="https://wa.me/${job.contactPhone}" target="_blank" class="whatsapp-btn">💬 WhatsApp</a>
+                ${isOwner ? `<button class="delete-btn" onclick="deleteJob('${job.id}')">Delete</button>` : ''}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      hiring.filter(matchesSearch).forEach(job => {
+        const isOwner = currentUser && job.postedBy === currentUser.uid;
+        hiringCards.innerHTML += renderCard(job, isOwner);
+      });
+
+      looking.filter(matchesSearch).forEach(job => {
+        const isOwner = currentUser && job.postedBy === currentUser.uid;
+        lookingCards.innerHTML += renderCard(job, isOwner);
+      });
+
+      drives.filter(matchesSearch).forEach(job => {
+        const isOwner = currentUser && job.postedBy === currentUser.uid;
+        drivesCards.innerHTML += renderCard(job, isOwner);
+      });
+
+      if (hiring.filter(matchesSearch).length === 0) {
+        hiringCards.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><div class="empty-state-text">No openings yet</div><div class="empty-state-hint">Be the first to post!</div></div>`;
+      }
+      if (looking.filter(matchesSearch).length === 0) {
+        lookingCards.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">🔍</div><div class="empty-state-text">No profiles yet</div><div class="empty-state-hint">Share your skills</div></div>`;
+      }
+      if (drives.filter(matchesSearch).length === 0) {
+        drivesCards.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📢</div><div class="empty-state-text">No drives scheduled</div><div class="empty-state-hint">Check back soon!</div></div>`;
+      }
+    }
+
+    async function loadJobs() {
+      try {
+        const jobsRef = collection(db, 'jobs');
+        const q = query(jobsRef, orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        allJobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderJobs();
+      } catch (err) {
+        console.error('Error loading jobs:', err);
+      }
+    }
+
+    // Load resident data and jobs
+    try {
+      const resident = getResident();
+      if (resident) {
+        currentFlat = resident.flatNumber;
+        if (resident.status !== 'active') {
+          document.getElementById('addHiringBtn').disabled = true;
+          document.getElementById('addLookingBtn').disabled = true;
+          document.getElementById('addDriveBtn').disabled = true;
+        }
+      }
+      await loadJobs();
+    } catch (err) {
+      console.error('Error loading resident data:', err);
+    }
+
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    };
+
+    window.openModal = function(type) {
+      if (!currentUser) return alert('Please log in');
+      if (!currentFlat) return alert('Could not find your flat number');
+      document.getElementById(type + 'Modal').classList.add('show');
+    };
+
+    window.closeModal = function(type) {
+      document.getElementById(type + 'Modal').classList.remove('show');
+      document.getElementById(type + 'Modal').querySelectorAll('input, textarea').forEach(el => el.value = '');
+    };
+
+    window.submitHiring = async function() {
+      const company = document.getElementById('hiringCompany').value.trim();
+      const role = document.getElementById('hiringRole').value.trim();
+      const experience = document.getElementById('hiringExperience').value.trim();
+      const description = document.getElementById('hiringDescription').value.trim();
+      const phone = document.getElementById('hiringPhone').value.trim();
+
+      if (!company || !role || !experience || !phone) return alert('Fill all required fields');
+
+      try {
+        await addDoc(collection(db, 'jobs'), {
+          type: 'hiring',
+          company, role, experience, description,
+          contactPhone: phone,
+          flatNumber: currentFlat,
+          postedBy: currentUser.uid,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          expiresAt: Date.now() + 90 * 24 * 60 * 60 * 1000
+        });
+        closeModal('hiring');
+        await loadJobs();
+      } catch (err) {
+        alert('Error posting: ' + err.message);
+      }
+    };
+
+    window.submitLooking = async function() {
+      const skills = document.getElementById('lookingSkills').value.trim();
+      const experience = document.getElementById('lookingExperience').value.trim();
+      const targetCompanies = document.getElementById('lookingTarget').value.trim();
+      const description = document.getElementById('lookingDescription').value.trim();
+      const phone = document.getElementById('lookingPhone').value.trim();
+
+      if (!skills || !experience || !phone) return alert('Fill all required fields');
+
+      try {
+        await addDoc(collection(db, 'jobs'), {
+          type: 'looking',
+          skills, experience, targetCompanies, description,
+          contactPhone: phone,
+          flatNumber: currentFlat,
+          postedBy: currentUser.uid,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          expiresAt: Date.now() + 90 * 24 * 60 * 60 * 1000
+        });
+        closeModal('looking');
+        await loadJobs();
+      } catch (err) {
+        alert('Error posting: ' + err.message);
+      }
+    };
+
+    window.submitDrive = async function() {
+      const company = document.getElementById('driveCompany').value.trim();
+      const role = document.getElementById('driveRole').value.trim();
+      const driveDate = document.getElementById('driveDate').value.trim();
+      const driveLink = document.getElementById('driveLink').value.trim();
+      const description = document.getElementById('driveDescription').value.trim();
+
+      if (!company || !role || !driveLink) return alert('Fill all required fields');
+
+      try {
+        await addDoc(collection(db, 'jobs'), {
+          type: 'drive',
+          company, role, driveDate, driveLink, description,
+          flatNumber: currentFlat,
+          postedBy: currentUser.uid,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          expiresAt: Date.now() + 90 * 24 * 60 * 60 * 1000
+        });
+        closeModal('drives');
+        await loadJobs();
+      } catch (err) {
+        alert('Error posting: ' + err.message);
+      }
+    };
+
+    window.deleteJob = async function(jobId) {
+      if (!confirm('Delete this post?')) return;
+      try {
+        await deleteDoc(doc(db, 'jobs', jobId));
+        await loadJobs();
+      } catch (err) {
+        alert('Error deleting: ' + err.message);
+      }
+    };
+
+    document.getElementById('searchInput').addEventListener('input', renderJobs);
+  </script>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

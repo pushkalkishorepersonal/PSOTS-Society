@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png" />
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSOTS — Carpooling</title>
+  <meta name="description"
+    content="Share rides with fellow PSOTS residents. Offer or find a carpool within the community." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --jade: #1a4a3a;
+      --jade-light: #2d6b54;
+      --jade-dark: #102c22;
+      --jade-pale: rgba(26, 74, 58, 0.07);
+      --jade-glow: rgba(26, 74, 58, 0.14);
+      --gold: #b8882a;
+      --gold-light: #d4a84b;
+      --gold-pale: #f0d898;
+      --gold-bg: rgba(184, 136, 42, 0.08);
+      --cream: #f8f2e8;
+      --cream-dark: #ede5d5;
+      --surface: #fffcf7;
+      --ink: #1a1208;
+      --ink-soft: #3d2f1e;
+      --muted: #8a7a6a;
+      --border: rgba(160, 130, 90, 0.20);
+      --white: #ffffff;
+      --red: #c0392b;
+      --terra: #8b3a1a;
+      --green: #16a34a;
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 34px;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: rgba(250, 246, 240, 0.96);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 3.5rem;
+      transition: box-shadow 0.3s
+    }
+
+    nav.scrolled {
+      box-shadow: 0 2px 20px rgba(139, 90, 26, 0.10)
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      text-decoration: none
+    }
+
+    .nav-logo {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: 0.3px
+    }
+
+    .nav-brand-sub {
+      font-size: 9.5px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 1px
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px
+    }
+
+    .nav-link {
+      padding: 7px 15px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--muted);
+      border: none;
+      background: none;
+      font-family: 'Nunito Sans', sans-serif;
+      letter-spacing: 0.2px;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--jade);
+      background: rgba(26, 74, 58, 0.07);
+      font-weight: 600
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .nav-back {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 7px 15px;
+      border-radius: 8px;
+      transition: all 0.15s
+    }
+
+    .nav-back:hover {
+      color: var(--jade);
+      background: rgba(26, 74, 58, 0.07)
+    }
+
+    .nav-auth-pill {
+      display: none;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--jade);
+      background: rgba(26, 74, 58, 0.08);
+      padding: 6px 14px;
+      border-radius: 20px
+    }
+
+    .nav-auth-pill.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    /* PAGE LAYOUT */
+    .page-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 5rem
+    }
+
+    .page-eyebrow {
+      font-size: 10.5px;
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .page-eyebrow::before {
+      content: '';
+      width: 24px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 1px
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.1
+    }
+
+    .page-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px;
+      margin-bottom: 2rem;
+      line-height: 1.6
+    }
+
+    /* TABS */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem
+    }
+
+    .tab-btn {
+      padding: 10px 22px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-family: 'Nunito Sans', sans-serif;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s
+    }
+
+    .tab-btn.active {
+      color: var(--jade);
+      border-bottom-color: var(--jade);
+      font-weight: 700
+    }
+
+    /* POST FORM */
+    .form-card {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 1.75rem;
+      margin-bottom: 2rem
+    }
+
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 1.25rem
+    }
+
+    .field {
+      margin-bottom: 1rem
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 5px;
+      letter-spacing: 0.2px
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-family: 'Nunito Sans', sans-serif;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color 0.15s;
+      outline: none
+    }
+
+    .field-input:focus {
+      border-color: var(--jade)
+    }
+
+    .field-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem
+    }
+
+    .field-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13.5px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      padding: 8px 16px;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      transition: all 0.15s
+    }
+
+    .radio-label:has(input:checked) {
+      border-color: var(--jade);
+      background: rgba(26, 74, 58, 0.06);
+      color: var(--jade);
+      font-weight: 600
+    }
+
+    .radio-label input {
+      accent-color: var(--jade)
+    }
+
+    .btn-jade {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--jade);
+      color: var(--gold-pale);
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito Sans', sans-serif;
+      transition: all 0.2s
+    }
+
+    .btn-jade:hover {
+      background: var(--jade-light)
+    }
+
+    .btn-jade:disabled {
+      opacity: 0.6;
+      cursor: not-allowed
+    }
+
+    /* INFO BOX */
+    .info-box {
+      background: rgba(26, 74, 58, 0.06);
+      border: 1px solid rgba(26, 74, 58, 0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--jade);
+      margin-bottom: 1rem;
+      line-height: 1.65
+    }
+
+    .info-box.warn {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e
+    }
+
+    /* LISTINGS */
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem
+    }
+
+    .ride-card {
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 1.4rem;
+      transition: box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .ride-card:hover {
+      box-shadow: 0 14px 44px rgba(139, 90, 26, 0.16), 0 3px 10px rgba(0, 0, 0, 0.05)
+    }
+
+    .ride-type-badge {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      align-self: flex-start
+    }
+
+    .badge-offering {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0
+    }
+
+    .badge-looking {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe
+    }
+
+    .badge-full {
+      background: var(--cream-dark);
+      color: var(--muted);
+      border: 1px solid var(--border)
+    }
+
+    .badge-cancelled {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca
+    }
+
+    .ride-route {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--ink);
+      flex-wrap: wrap
+    }
+
+    .route-arrow {
+      color: var(--gold);
+      font-size: 1rem;
+      flex-shrink: 0
+    }
+
+    .ride-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .ride-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px
+    }
+
+    .ride-notes {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6
+    }
+
+    .ride-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto
+    }
+
+    .btn-sm-tg {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #229ED9;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito Sans', sans-serif;
+      text-decoration: none;
+      transition: opacity 0.15s
+    }
+
+    .btn-sm-tg:hover {
+      opacity: 0.88
+    }
+
+    .btn-sm-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Nunito Sans', sans-serif;
+      transition: all 0.15s
+    }
+
+    .btn-sm-full {
+      color: var(--amber, #d97706);
+      border: 1.5px solid var(--amber, #d97706)
+    }
+
+    .btn-sm-full:hover {
+      background: #fffbeb
+    }
+
+    .btn-sm-cancel {
+      color: var(--terra);
+      border: 1.5px solid rgba(139, 58, 26, 0.3)
+    }
+
+    .btn-sm-cancel:hover {
+      background: rgba(139, 58, 26, 0.06)
+    }
+
+    .btn-sm-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted)
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem
+    }
+
+    .empty-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 400
+    }
+
+    /* LOADING */
+    .loader-ring {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--jade);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 3rem auto
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* AUTH GATE */
+    .gate-wrap {
+      text-align: center;
+      padding: 5rem 2rem;
+      max-width: 440px;
+      margin: 0 auto
+    }
+
+    .gate-icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem
+    }
+
+    .gate-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.8rem
+    }
+
+    .gate-sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 2rem
+    }
+
+    @media(max-width:640px) {
+      nav {
+        padding: 0 1.2rem
+      }
+
+      .nav-links {
+        display: none
+      }
+
+      .page-wrap {
+        padding: 1.5rem 1.2rem 4rem
+      }
+
+      .page-title {
+        font-size: 1.8rem
+      }
+
+      .listings-grid {
+        grid-template-columns: 1fr
+      }
+
+      .field-row-2,
+      .field-row-3 {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="societyNav"></div>
+
+  <div id="app">
+    <div class="loader-ring" style="margin-top:6rem"></div>
+  </div>
+
+  <div id="globalToast" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999"></div>
+
+  <script type="module">
+    import session from '/js/core/auth.js';
+    import { db } from '/js/core/firebase.js';
+    import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
+    import {
+      collection, query, where, orderBy, getDocs,
+      doc, setDoc, updateDoc, serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    // Render shared nav
+    // Load data immediately before nav
+    await renderSocietyNav('societyNav', 'carpooling');
+
+    const app = document.getElementById('app');
+    const COLL = 'carpooling';
+
+    const RECURRING_LABELS = {
+      'one-time': '🗓️ One-time',
+      daily: '🔁 Daily',
+      weekdays: '📅 Weekdays',
+      weekends: '📆 Weekends',
+    };
+
+    function escHtml(str) {
+      return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function toast(msg, ok = true) {
+      const t = document.getElementById('globalToast');
+      t.innerHTML = `<div style="background:${ok ? 'var(--jade)' : 'var(--terra)'};color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;font-family:'Nunito Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.15)">${msg}</div>`;
+      setTimeout(() => t.innerHTML = '', 3000);
+    }
+
+    function renderGate() {
+      app.innerHTML = `
+    <div class="gate-wrap">
+      <div class="gate-icon">🔒</div>
+      <h2 class="gate-title">Sign in to view Carpooling</h2>
+      <p class="gate-sub">Offer or find rides within the PSOTS community. Sign in to continue.</p>
+      <a href="/society/register.html" class="btn-jade">Sign In / Register</a>
+    </div>`;
+    }
+
+    function buildPage(user, resident) {
+      const isApproved = resident?.status === 'approved';
+      const tgUsername = resident?.telegramUsername || resident?.tgUsername || '';
+
+      app.innerHTML = `
+    <div class="page-wrap">
+      <div class="page-eyebrow">Community</div>
+      <h1 class="page-title">Carpooling</h1>
+      <p class="page-sub">Share rides with your neighbours. Offer a seat or find one — together we reduce traffic and emissions.</p>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tabOffering" data-tab="offering">🚗 Offering Ride</button>
+        <button class="tab-btn" id="tabLooking" data-tab="looking">🙋 Looking for Ride</button>
+      </div>
+
+      ${isApproved ? `
+      <div class="form-card" id="postForm">
+        <div class="form-title">Post a Ride</div>
+        <div class="field" style="margin-bottom:1.2rem">
+          <label class="field-label">I am…</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="cpType" value="offering" checked> 🚗 Offering a Ride</label>
+            <label class="radio-label"><input type="radio" name="cpType" value="looking"> 🙋 Looking for a Ride</label>
+          </div>
+        </div>
+        <div class="field-row-2">
+          <div class="field">
+            <label class="field-label">From *</label>
+            <input class="field-input" id="cpFrom" placeholder="e.g. PSOTS Main Gate"/>
+          </div>
+          <div class="field">
+            <label class="field-label">To *</label>
+            <input class="field-input" id="cpTo" placeholder="e.g. Koramangala 4th Block"/>
+          </div>
+        </div>
+        <div class="field-row-3">
+          <div class="field">
+            <label class="field-label">Date *</label>
+            <input class="field-input" id="cpDate" type="date" value="${new Date().toISOString().split('T')[0]}"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Time *</label>
+            <input class="field-input" id="cpTime" type="time"/>
+          </div>
+          <div class="field" id="cpSeatsField">
+            <label class="field-label">Seats Available *</label>
+            <select class="field-input" id="cpSeats">
+              ${[1, 2, 3, 4, 5, 6].map(n => `<option value="${n}">${n}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Recurring</label>
+          <select class="field-input" id="cpRecurring">
+            <option value="one-time">One-time</option>
+            <option value="daily">Daily</option>
+            <option value="weekdays">Weekdays (Mon–Fri)</option>
+            <option value="weekends">Weekends (Sat–Sun)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Notes <small style="font-weight:400;opacity:0.7">(Optional)</small></label>
+          <input class="field-input" id="cpNotes" placeholder="e.g. I'll be at gate by 8:55 AM" maxlength="200"/>
+        </div>
+        ${tgUsername ? `<div class="info-box">✈️ Contact via: <strong>@${tgUsername}</strong> (your Telegram)</div>` : (resident?.email ? `<div class="info-box">✉️ Contact via email — add Telegram username to your profile for faster responses.</div>` : `<div class="info-box warn">⚠️ Add Telegram username or verify your email so residents can contact you.</div>`)}
+        <div id="cpAlert" style="margin-bottom:8px"></div>
+        <button class="btn-jade" id="btnPostCp">Post Ride</button>
+      </div>
+      ` : `<div class="info-box warn" style="margin-bottom:1.5rem">⏳ Your registration is pending approval. You can view rides but cannot post until verified.</div>`}
+
+      <div id="listingsContainer">
+        <div class="loader-ring"></div>
+      </div>
+    </div>`;
+
+      let _activeTab = 'offering';
+
+      async function loadListings(type) {
+        const container = document.getElementById('listingsContainer');
+        container.innerHTML = '<div class="loader-ring"></div>';
+        try {
+          const q = query(
+            collection(db, COLL),
+            where('type', '==', type),
+            where('status', 'in', ['active', 'full']),
+            orderBy('createdAt', 'desc')
+          );
+          const snap = await getDocs(q);
+          if (snap.empty) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-icon">${type === 'offering' ? '🚗' : '🙋'}</div><p class="empty-text">No ${type === 'offering' ? 'ride offers' : 'ride requests'} posted yet.</p></div>`;
+            return;
+          }
+          const cards = snap.docs.map(d => {
+            const p = { id: d.id, ...d.data() };
+            const isOwn = p.posterUid === user.uid;
+            const recurringLabel = RECURRING_LABELS[p.recurring] || p.recurring;
+            const badgeClass = p.status === 'full' ? 'badge-full' : p.status === 'cancelled' ? 'badge-cancelled' : `badge-${p.type}`;
+            const badgeText = p.status === 'full' ? 'FULL' : p.status === 'cancelled' ? 'CANCELLED' : p.type === 'offering' ? 'OFFERING' : 'LOOKING';
+            return `
+          <div class="ride-card" data-id="${p.id}">
+            <span class="ride-type-badge ${badgeClass}">${badgeText}</span>
+            <div class="ride-route">
+              <span>${escHtml(p.from)}</span>
+              <span class="route-arrow">→</span>
+              <span>${escHtml(p.to)}</span>
+            </div>
+            <div class="ride-meta">
+              <span>📅 ${p.date}</span>
+              <span>🕐 ${p.time}</span>
+              ${p.type === 'offering' ? `<span>💺 ${p.seats} seat${p.seats > 1 ? 's' : ''}</span>` : ''}
+              <span>${recurringLabel}</span>
+              <span>🏠 Flat ${p.posterFlat || '—'}</span>
+            </div>
+            ${p.notes ? `<p class="ride-notes">${escHtml(p.notes)}</p>` : ''}
+            <div class="ride-actions">
+              ${!isOwn ? `<button class="btn-contact" data-id="${p.id}" data-seller-uid="${escHtml(p.posterUid || '')}" data-seller-flat="${escHtml(p.posterFlat || '')}" data-title="${escHtml(p.from + ' → ' + p.to)}" data-post-type="carpooling">💬 Contact Resident</button>` : ''}
+              ${isOwn && p.status === 'active' && p.type === 'offering' ? `<button class="btn-sm-action btn-sm-full" data-action="full" data-id="${p.id}">🚫 Mark as Full</button>` : ''}
+              ${isOwn && p.status !== 'cancelled' ? `<button class="btn-sm-action btn-sm-cancel" data-action="cancel" data-id="${p.id}">✕ Cancel</button>` : ''}
+            </div>
+          </div>`;
+          }).join('');
+          container.innerHTML = `<div class="listings-grid">${cards}</div>`;
+        } catch (e) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon">🚗</div><p class="empty-text">No ${type === 'offering' ? 'ride offers' : 'ride requests'} posted yet.</p></div>`;
+          console.error(e);
+        }
+      }
+
+      // Tab switching
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          _activeTab = btn.dataset.tab;
+          loadListings(_activeTab);
+        });
+      });
+
+      // Event delegation for action buttons
+      document.getElementById('listingsContainer').addEventListener('click', async e => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const { action, id } = btn.dataset;
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = '…';
+        try {
+          const newStatus = action === 'full' ? 'full' : 'cancelled';
+          await updateDoc(doc(db, COLL, id), { status: newStatus, updatedAt: serverTimestamp() });
+          toast(action === 'full' ? 'Marked as full.' : 'Ride cancelled.');
+          loadListings(_activeTab);
+        } catch (err) {
+          toast('Action failed. Try again.', false);
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+
+      // Show/hide seats field based on type
+      if (isApproved) {
+        document.querySelectorAll('input[name="cpType"]').forEach(r => {
+          r.addEventListener('change', () => {
+            const seatsField = document.getElementById('cpSeatsField');
+            if (seatsField) seatsField.style.display = r.value === 'looking' ? 'none' : '';
+          });
+        });
+
+        document.getElementById('btnPostCp')?.addEventListener('click', async () => {
+          const btn = document.getElementById('btnPostCp');
+          const alertEl = document.getElementById('cpAlert');
+          const type = document.querySelector('input[name="cpType"]:checked')?.value || 'offering';
+          const from = document.getElementById('cpFrom').value.trim();
+          const to = document.getElementById('cpTo').value.trim();
+          const date = document.getElementById('cpDate').value;
+          const time = document.getElementById('cpTime').value;
+          const seats = type === 'offering' ? parseInt(document.getElementById('cpSeats').value) : null;
+          const recurring = document.getElementById('cpRecurring').value;
+          const notes = document.getElementById('cpNotes').value.trim();
+
+          if (!from) { alertEl.innerHTML = '<div class="info-box warn">From location is required.</div>'; return; }
+          if (!to) { alertEl.innerHTML = '<div class="info-box warn">To location is required.</div>'; return; }
+          if (!date) { alertEl.innerHTML = '<div class="info-box warn">Date is required.</div>'; return; }
+          if (!time) { alertEl.innerHTML = '<div class="info-box warn">Time is required.</div>'; return; }
+
+          alertEl.innerHTML = '';
+          btn.disabled = true;
+          btn.textContent = 'Posting…';
+
+          const postId = `${user.uid}_${Date.now()}`;
+          try {
+            await setDoc(doc(db, COLL, postId), {
+              id: postId,
+              type,
+              from,
+              to,
+              date,
+              time,
+              seats: seats ?? null,
+              recurring,
+              notes: notes || null,
+              posterUid: user.uid,
+              posterFlat: resident?.flatNumber || null,
+              posterTelegram: tgUsername || null,
+              status: 'active',
+              createdAt: serverTimestamp(),
+            });
+            // Reset form
+            document.getElementById('cpFrom').value = '';
+            document.getElementById('cpTo').value = '';
+            document.getElementById('cpDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cpTime').value = '';
+            document.getElementById('cpNotes').value = '';
+            document.getElementById('cpRecurring').value = 'one-time';
+            toast('Ride posted successfully!');
+            // Switch to matching tab
+            document.querySelector(`[data-tab="${type}"]`)?.click();
+          } catch (err) {
+            alertEl.innerHTML = '<div class="info-box warn">Failed to post. Please try again.</div>';
+            console.error(err);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Post Ride';
+          }
+        });
+      }
+
+      loadListings('offering');
+
+      // Contact modal
+      let contactTarget = null;
+      const contactOverlay = document.getElementById('cp-contact-overlay');
+      if (contactOverlay) {
+        contactOverlay.addEventListener('click', e => {
+          if (e.target === contactOverlay) closeContactModal();
+        });
+      }
+      const contactCloseBtn = document.getElementById('cp-contact-close');
+      if (contactCloseBtn) contactCloseBtn.onclick = closeContactModal;
+      const contactForm = document.getElementById('cpContactForm');
+      if (contactForm) contactForm.addEventListener('submit', handleContact);
+
+      // Contact handler
+      document.addEventListener('click', e => {
+        const btn = e.target.closest('[data-post-type="carpooling"]');
+        if (btn) openContactModal(btn.dataset);
+      });
+
+      function openContactModal(data) {
+        if (!user) {
+          toast('Sign in to contact residents.', 'warn');
+          return;
+        }
+        contactTarget = data;
+        if (contactOverlay) {
+          contactOverlay.classList.add('open');
+          document.getElementById('cpContactMessage')?.focus();
+        }
+      }
+
+      function closeContactModal() {
+        if (contactOverlay) {
+          contactOverlay.classList.remove('open');
+          const form = document.getElementById('cpContactForm');
+          if (form) form.reset();
+        }
+      }
+
+      async function handleContact(e) {
+        e.preventDefault();
+        if (!contactTarget || !user) {
+          toast('Invalid request.', 'error');
+          return;
+        }
+        const message = document.getElementById('cpContactMessage').value.trim();
+        if (!message) {
+          toast('Message cannot be empty.', 'warn');
+          return;
+        }
+        if (message.length > 500) {
+          toast('Message must be 500 characters or less.', 'warn');
+          return;
+        }
+        const btn = document.getElementById('btnSendCPContact');
+        btn.disabled = true;
+        btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid var(--jade);border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;"></span> Sending…';
+        try {
+          const idToken = await user.getIdToken();
+          const res = await fetch('https://telegram.psots.in/contact/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+            body: JSON.stringify({
+              targetUid: contactTarget.sellerUid,
+              postType: 'carpooling',
+              postId: contactTarget.id,
+              message,
+            }),
+          });
+          const result = await res.json();
+          if (!result.ok) {
+            if (result.error === 'rate_limited') {
+              toast("You've reached today's contact limit (5/day). Try again tomorrow.", 'warn');
+            } else {
+              toast(result.error || 'Failed to send message.', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = 'Send Message';
+            return;
+          }
+          closeContactModal();
+          toast("Message sent! They'll reply via email.");
+        } catch (err) {
+          toast('Failed to send message. Please try again.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+        }
+      }
+    }
+
+    let _authFired = false;
+    session.onChange(({ user, resident }) => {
+      _authFired = true;
+      if (!user) { renderGate(); return; }
+      buildPage(user, resident);
+    });
+
+    setTimeout(() => { if (!_authFired) renderGate(); }, 6000);
+  </script>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('mainNav')?.classList.toggle('scrolled', window.scrollY > 10);
+    });
+  </script>
+
+  <!-- ── CONTACT MODAL ── -->
+  <div class="cp-modal-overlay" id="cp-contact-overlay" role="dialog" aria-modal="true"
+    style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:300;align-items:center;justify-content:center;">
+    <div
+      style="background:var(--white);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.15);max-width:400px;width:90%;max-height:80vh;overflow-y:auto;">
+      <div
+        style="display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:20px;">📧</div>
+          <span style="font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);">Contact
+            Resident</span>
+        </div>
+        <button class="cp-modal-close" id="cp-contact-close" aria-label="Close"
+          style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+      <div style="padding:20px;">
+        <form id="cpContactForm" novalidate>
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;">Your
+              Message *</label>
+            <textarea id="cpContactMessage" placeholder="Ask a question about the ride…" maxlength="500" required
+              style="width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--white);resize:vertical;min-height:120px;"></textarea>
+            <p style="font-size:12px;color:var(--muted);margin-top:5px;">The resident will receive your email and can
+              contact you directly.</p>
+          </div>
+          <button class="cp-submit-btn" id="btnSendCPContact" type="submit"
+            style="width:100%;padding:10px 22px;background:var(--jade);color:var(--gold-pale);border-radius:10px;font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all 0.2s;">Send
+            Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .cp-modal-overlay.open {
+      display: flex !important;
+    }
+  </style>
+
+  <footer
+    style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+    <div style="max-width:800px;margin:0 auto;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        PSOTS Society · society.psots.in
+      </p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+        <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+        <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+        <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+        <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+        This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+      </p>
+    </div>
+  </footer>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+
+</html>

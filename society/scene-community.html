@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coming Soon - PSOTS Society</title>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <style>
+    .status-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .scene-hero {
+      background: linear-gradient(135deg, #1a4a3a 0%, #2d6b57 50%, #0d2b1f 100%);
+      color: white;
+      padding: 60px 40px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .scene-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .video-container {
+      margin: 40px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(26,74,58,0.25);
+    }
+    .video-container video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .feature-card {
+      background: #f8f2e8;
+      padding: 24px;
+      border-radius: 14px;
+      border: 2px dashed rgba(102,126,234,0.3);
+      position: relative;
+      text-align: center;
+    }
+    .coming-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(102,126,234,0.15);
+      color: #667eea;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .feature-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: #1a4a3a;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      color: #8a7a6a;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .timeline {
+      color: #667eea;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #1a4a3a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="societyNav"></div>
+
+  <div class="container" style="max-width: 1000px;">
+    <a href="/society/" class="back-link">← Back to Dashboard</a>
+    <span class="status-badge">🔮 UPCOMING</span>
+
+    <div class="scene-hero">
+      <h1>🔮 Future Vision</h1>
+      <p>Exciting features we're dreaming up for PSOTS</p>
+    </div>
+
+    <div class="video-container">
+      <video autoplay muted loop playsinline controls>
+        <source src="/videos/dashboard-scene3.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 28px; color: #1a4a3a; margin-bottom: 24px;">What's Next</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="coming-badge">Q3 2026</div>
+        <div class="feature-icon">🏃</div>
+        <div class="feature-title">Fitness & Wellness</div>
+        <div class="feature-desc">Find gym buddies, yoga classes, and wellness activities in your community</div>
+        <div class="timeline">Expected: July - September 2026</div>
+      </div>
+      <div class="feature-card">
+        <div class="coming-badge">Q4 2026</div>
+        <div class="feature-icon">🎓</div>
+        <div class="feature-title">Learning Hub</div>
+        <div class="feature-desc">Share skills and knowledge through workshops and tutoring</div>
+        <div class="timeline">Expected: October - December 2026</div>
+      </div>
+      <div class="feature-card">
+        <div class="coming-badge">Q1 2027</div>
+        <div class="feature-icon">🌱</div>
+        <div class="feature-title">Green Initiatives</div>
+        <div class="feature-desc">Track community sustainability goals and green activities</div>
+        <div class="timeline">Expected: January - March 2027</div>
+      </div>
+      <div class="feature-card">
+        <div class="coming-badge">Q2 2027</div>
+        <div class="feature-icon">🐕</div>
+        <div class="feature-title">Pet Community</div>
+        <div class="feature-desc">Connect pet lovers, share tips, and find pet services</div>
+        <div class="timeline">Expected: April - June 2027</div>
+      </div>
+      <div class="feature-card">
+        <div class="coming-badge">Q3 2027</div>
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Arts & Culture</div>
+        <div class="feature-desc">Showcase and celebrate artistic talents in the community</div>
+        <div class="timeline">Expected: July - September 2027</div>
+      </div>
+      <div class="feature-card">
+        <div class="coming-badge">Q4 2027</div>
+        <div class="feature-icon">🤝</div>
+        <div class="feature-title">Volunteer Hub</div>
+        <div class="feature-desc">Coordinate community service and volunteer opportunities</div>
+        <div class="timeline">Expected: October - December 2027</div>
+      </div>
+    </div>
+
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 28px; color: #1a4a3a; margin-bottom: 24px;">Long-term Vision</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+      <div style="background: #f8f2e8; padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
+        <div style="font-size: 24px; margin-bottom: 8px;">🏘️</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 16px; color: #1a4a3a; font-weight: 600; margin-bottom: 4px;">Smart Community</div>
+        <p style="color: #8a7a6a; font-size: 12px; margin: 0;">Integration with smart home and IoT devices</p>
+      </div>
+      <div style="background: #f8f2e8; padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
+        <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 16px; color: #1a4a3a; font-weight: 600; margin-bottom: 4px;">Analytics Dashboard</div>
+        <p style="color: #8a7a6a; font-size: 12px; margin: 0;">Community insights and engagement metrics</p>
+      </div>
+      <div style="background: #f8f2e8; padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
+        <div style="font-size: 24px; margin-bottom: 8px;">🌐</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 16px; color: #1a4a3a; font-weight: 600; margin-bottom: 4px;">Multi-community Network</div>
+        <p style="color: #8a7a6a; font-size: 12px; margin: 0;">Connect with other societies and communities</p>
+      </div>
+    </div>
+
+    <div style="background: rgba(102,126,234,0.08); border-left: 4px solid #667eea; padding: 24px; border-radius: 8px; margin-bottom: 40px;">
+      <h3 style="color: #667eea; margin-bottom: 8px;">💡 Your Input Matters</h3>
+      <p style="color: #8a7a6a;">Have an idea for a feature? We want to hear it! These timelines are based on resident feedback. Share your suggestions with our admin team, and you might see your idea come to life.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import SocietyNav from '../../js/components/SocietyNav.js';
+    const nav = document.getElementById('societyNav');
+    nav.innerHTML = new SocietyNav().render();
+  </script>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

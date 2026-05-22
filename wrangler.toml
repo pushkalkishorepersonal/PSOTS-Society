@@ -1,0 +1,59 @@
+name = "psots-telegram-bot-v2"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Custom domain routing
+routes = [
+  { pattern = "telegram.psots.in/*", zone_name = "psots.in" }
+]
+
+# Note: Environment variables are injected dynamically by GitHub Actions workflow
+# See .github/workflows/deploy.yml for secret configuration
+
+# KV namespace bindings
+[[kv_namespaces]]
+binding = "VIOLATIONS"
+id = "3c89be83b87e4cf0b8f91b18bf2dc0e4"
+
+[[kv_namespaces]]
+binding = "AUDIT_LOG"
+id = "6a727dbadb5c4bb3b1062c319758a0a1"
+
+[[kv_namespaces]]
+binding = "SESSIONS_KV"
+id = "e81c8c14b12d4e728d31e690e266bf83"
+
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "b4763da482214aa996e44745286611e2"
+
+[[kv_namespaces]]
+binding = "RATE_LIMITS_KV"
+id = "91f5d4a1d7444ea1a7ea3204558e3c52"
+preview_id = "5f3c150671c64b7eba4c4c49b24668ac"
+
+# Workers AI binding
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true
+
+# Scheduled tasks - 8 PM IST (14:30 UTC)
+[triggers]
+crons = ["30 14 * * *"]
+# ═══════════════════════════════════════════════════════════════════════════════
+# D1 DATABASE BINDINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# PSOTS Society Main Database (residents, flats, credentials, etc.)
+[[d1_databases]]
+binding = "PSOTS_DB"
+database_name = "psots-society-db"
+database_id = "d9a7cf00-94a2-4204-9166-142d801a8953"
+
+# Chhath Puja 2026 Database
+[[d1_databases]]
+binding = "CHHATH_DB"
+database_name = "psots-chhath-db"
+database_id = "91480b26-adc6-4df8-9d9f-2d99fa4a68b4"

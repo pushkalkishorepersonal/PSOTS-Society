@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subscribe — PSOTS Chhath 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+  .pref-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.3rem}
+  .pref-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem .95rem;background:var(--warm);border-radius:10px;border:1px solid #f0d5b8}
+  .pi-text{font-size:.85rem;font-weight:500;color:var(--ink)}
+  .pi-sub{font-size:.76rem;color:#6b3a18}
+  .toggle{position:relative;width:42px;height:24px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0}
+  .ts{position:absolute;inset:0;background:#e0d0c0;border-radius:50px;cursor:pointer;transition:.3s}
+  .ts::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  .toggle input:checked+.ts{background:var(--wa)}
+  .toggle input:checked+.ts::before{transform:translateX(18px)}
+  </style>
+</head>
+<body>
+<nav class="page-nav">
+  <a class="page-nav-back" href="../index.html"><span class="page-nav-back-icon">←</span> Home</a>
+  <div class="page-nav-title">📲 Subscribe</div>
+  <div></div>
+</nav>
+<div class="page-hero" style="background:linear-gradient(135deg,#075e54,#128c7e)">
+  <span class="ph-icon">📲</span>
+  <div class="ph-title">WhatsApp Updates</div>
+  <div class="ph-sub">Stay updated · No spam · Only important updates from the committee</div>
+</div>
+<div class="page-content">
+  <div class="card">
+    <div class="card-title">Subscribe for Updates</div>
+    <div class="card-sub">Enter your details below and tap Subscribe. This opens WhatsApp with a pre-filled message — just hit Send. The committee will add you to the broadcast list.</div>
+    <div class="fg">
+      <div class="ff"><label>Your Name</label><input type="text" id="s-name" placeholder="Full name"/></div>
+      <div class="ff"><label>Flat Number</label><input type="text" id="s-flat" placeholder="e.g. B-204"/></div>
+    </div>
+    <div class="ff" style="margin-bottom:1.2rem"><label>WhatsApp Number</label><input type="tel" id="s-mobile" placeholder="10-digit WhatsApp number" maxlength="10" inputmode="numeric"/></div>
+    <div class="card-sub">Choose what you'd like to receive:</div>
+    <div class="pref-list">
+      <div class="pref-item"><div><div class="pi-text">🗓 Event Reminders</div><div class="pi-sub">Schedule, Arghya timings, venue</div></div><label class="toggle"><input type="checkbox" id="p1" checked/><span class="ts"></span></label></div>
+      <div class="pref-item"><div><div class="pi-text">💰 Payment Confirmation</div><div class="pi-sub">When your contribution is verified</div></div><label class="toggle"><input type="checkbox" id="p2" checked/><span class="ts"></span></label></div>
+      <div class="pref-item"><div><div class="pi-text">📢 Announcements</div><div class="pi-sub">General updates from committee</div></div><label class="toggle"><input type="checkbox" id="p3" checked/><span class="ts"></span></label></div>
+      <div class="pref-item"><div><div class="pi-text">🙏 Prasad Updates</div><div class="pi-sub">Kharna & Thekua distribution details</div></div><label class="toggle"><input type="checkbox" id="p4" checked/><span class="ts"></span></label></div>
+    </div>
+    <button class="btn-wa btn-block" onclick="doSubscribe()">📲 Subscribe on WhatsApp</button>
+    <p style="font-size:.76rem;color:#6b3a18;margin-top:.7rem;text-align:center">Tapping above opens WhatsApp with your details pre-filled. Just hit Send.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Already Subscribed?</div>
+    <div class="card-sub">To unsubscribe from the broadcast list, send a WhatsApp message to the committee.</div>
+    <button class="btn-secondary" onclick="doUnsubscribe()">🔕 Unsubscribe</button>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+const C={waOrg:'919482088904'};
+// Prefill from cookies / profile
+window.addEventListener('DOMContentLoaded',()=>{
+  const u=localStorage.getItem('psots_user');
+  if(u){const user=JSON.parse(u);const p=localStorage.getItem('psots_profile_'+user.id);if(p){const pr=JSON.parse(p);if(pr.name)document.getElementById('s-name').value=pr.name;if(pr.flat)document.getElementById('s-flat').value=pr.flat;if(pr.mobile)document.getElementById('s-mobile').value=pr.mobile;}}
+});
+function doSubscribe(){
+  const name=document.getElementById('s-name').value.trim();
+  const flat=document.getElementById('s-flat').value.trim();
+  const mobile=document.getElementById('s-mobile').value.trim();
+  if(!name||!flat||!mobile){alert('Please fill in all three fields.');return;}
+  if(!/^\d{10}$/.test(mobile)){alert('Please enter a valid 10-digit WhatsApp number.');return;}
+  const prefs=[];
+  if(document.getElementById('p1').checked)prefs.push('Event Reminders');
+  if(document.getElementById('p2').checked)prefs.push('Payment Confirmations');
+  if(document.getElementById('p3').checked)prefs.push('Announcements');
+  if(document.getElementById('p4').checked)prefs.push('Prasad Updates');
+  const msg=encodeURIComponent(`🪔 *PSOTS Chhath 2026 — Subscribe for Updates*\n\n👤 ${name}\n🏠 Flat: ${flat}\n📱 ${mobile}\n\n✅ Preferences:\n${prefs.map(p=>'• '+p).join('\n')}\n\nPlease add me to the broadcast list. 🙏`);
+  window.open(`https://wa.me/${C.waOrg}?text=${msg}`,'_blank');
+  localStorage.setItem('psots_wa_subscribed','true');
+  document.getElementById('toast').textContent='📲 WhatsApp opened — tap Send to subscribe!';
+  document.getElementById('toast').className='show success';
+  setTimeout(()=>document.getElementById('toast').className='',3000);
+}
+function doUnsubscribe(){
+  const name=document.getElementById('s-name').value.trim()||'Resident';
+  const flat=document.getElementById('s-flat').value.trim()||'—';
+  const msg=encodeURIComponent(`🔕 Please remove me from the PSOTS Chhath 2026 broadcast list.\n\n👤 ${name}\n🏠 Flat: ${flat}`);
+  window.open(`https://wa.me/${C.waOrg}?text=${msg}`,'_blank');
+}
+</script>
+</body>
+</html>

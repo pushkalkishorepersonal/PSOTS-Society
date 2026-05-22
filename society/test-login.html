@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Login Status</title>
+  <style>
+    body { font-family: monospace; padding: 40px; background: #1a1a1a; color: #0f0; }
+    .result { background: #000; padding: 20px; margin: 20px 0; border: 1px solid #0f0; }
+    button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Login Diagnostics</h1>
+  
+  <button onclick="testAuth()">1. Test Firebase Auth</button>
+  <button onclick="testWorkerAPI()">2. Test Worker API</button>
+  <button onclick="testFullFlow()">3. Test Full Login</button>
+  
+  <div id="results"></div>
+
+  <script type="module">
+    import { auth } from '../js/core/firebase.js';
+    import { signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    
+    const log = (title, data) => {
+      const div = document.createElement('div');
+      div.className = 'result';
+      div.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+      document.getElementById('results').appendChild(div);
+    };
+
+    window.testAuth = async () => {
+      log('Firebase Auth State', {
+        currentUser: auth.currentUser ? {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email,
+          displayName: auth.currentUser.displayName
+        } : null
+      });
+    };
+
+    window.testWorkerAPI = async () => {
+      if (!auth.currentUser) {
+        log('Worker API Test', { error: 'Not logged in. Click "Test Full Login" first.' });
+        return;
+      }
+
+      const idToken = await auth.currentUser.getIdToken();
+      const res = await fetch('https://telegram.psots.in/auth/unified-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          type: 'google',
+          identifier: auth.currentUser.email
+        })
+      });
+
+      const data = await res.json();
+      log('Worker API Response', {
+        status: res.status,
+        ok: res.ok,
+        data
+      });
+    };
+
+    window.testFullFlow = async () => {
+      try {
+        log('Starting Google Sign-In...', {});
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        
+        log('Google Sign-In Success', {
+          uid: result.user.uid,
+          email: result.user.email
+        });
+
+        const idToken = await result.user.getIdToken();
+        const workerRes = await fetch('https://telegram.psots.in/auth/unified-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            type: 'google',
+            identifier: result.user.email
+          })
+        });
+
+        const workerData = await workerRes.json();
+        log('Worker API Result', {
+          status: workerRes.status,
+          response: workerData
+        });
+
+        if (workerData.ok && workerData.resident) {
+          log('✅ SUCCESS', { message: 'You are registered and approved!', resident: workerData.resident });
+        } else if (workerData.error === 'not_registered') {
+          log('❌ NOT REGISTERED', { message: 'You need to register first' });
+        } else if (workerData.error === 'not_approved') {
+          log('⏳ PENDING APPROVAL', { message: 'Waiting for admin approval', status: workerData.status });
+        } else {
+          log('❓ UNKNOWN STATE', workerData);
+        }
+
+      } catch (err) {
+        log('ERROR', { message: err.message, stack: err.stack });
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Construction - PSOTS Society</title>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <style>
+    .status-badge {
+      display: inline-block;
+      background: #c49535;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .scene-hero {
+      background: linear-gradient(135deg, #8b3a1a 0%, #c49535 50%, #8b3a1a 100%);
+      color: white;
+      padding: 60px 40px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .scene-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .video-container {
+      margin: 40px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(139,90,26,0.25);
+    }
+    .video-container video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .feature-card {
+      background: #f8f2e8;
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(160,130,90,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .construction-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(196,149,53,0.2);
+      color: #8b3a1a;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: #8b3a1a;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      color: #8a7a6a;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(139,90,26,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b3a1a, #c49535);
+      border-radius: 3px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #8b3a1a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="societyNav"></div>
+
+  <div class="container" style="max-width: 1000px;">
+    <a href="/society/" class="back-link">← Back to Dashboard</a>
+    <span class="status-badge">🏗️ UNDER CONSTRUCTION</span>
+
+    <div class="scene-hero">
+      <h1>🏗️ Pages Being Built</h1>
+      <p>Here's a preview of what we're working on for you</p>
+    </div>
+
+    <div class="video-container">
+      <video autoplay muted loop playsinline controls>
+        <source src="/videos/dashboard-scene2.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 28px; color: #8b3a1a; margin-bottom: 24px;">Coming Soon</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="construction-badge">30% Done</div>
+        <div class="feature-icon">⭐</div>
+        <div class="feature-title">Recommendations</div>
+        <div class="feature-desc">Find trusted service providers, plumbers, electricians, and vendors</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 30%;"></div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="construction-badge">50% Done</div>
+        <div class="feature-icon">💬</div>
+        <div class="feature-title">Community Chat</div>
+        <div class="feature-desc">Moderated group chats for residents to discuss and connect</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 50%;"></div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="construction-badge">60% Done</div>
+        <div class="feature-icon">🎉</div>
+        <div class="feature-title">Events</div>
+        <div class="feature-desc">Community events, celebrations, and gatherings calendar</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 60%;"></div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="construction-badge">40% Done</div>
+        <div class="feature-icon">📰</div>
+        <div class="feature-title">Community Blog</div>
+        <div class="feature-desc">Stories, insights, and articles from residents and admins</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 40%;"></div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="construction-badge">70% Done</div>
+        <div class="feature-icon">🔔</div>
+        <div class="feature-title">Smart Notifications</div>
+        <div class="feature-desc">Personalized alerts for listings, messages, and announcements</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 70%;"></div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="construction-badge">45% Done</div>
+        <div class="feature-icon">🏆</div>
+        <div class="feature-title">Resident Profiles</div>
+        <div class="feature-desc">Showcase your skills, interests, and services to the community</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 45%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: rgba(139,90,26,0.08); border-left: 4px solid #8b3a1a; padding: 24px; border-radius: 8px; margin-bottom: 40px;">
+      <h3 style="color: #8b3a1a; margin-bottom: 8px;">🔨 We're Building</h3>
+      <p style="color: #8a7a6a;">These features are actively being developed based on feedback from our residents. Each progress bar shows how close we are to launch. Check back regularly for updates!</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import SocietyNav from '../../js/components/SocietyNav.js';
+    const nav = document.getElementById('societyNav');
+    nav.innerHTML = new SocietyNav().render();
+  </script>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

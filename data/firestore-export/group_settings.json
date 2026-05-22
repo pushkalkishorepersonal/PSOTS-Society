@@ -1,0 +1,95 @@
+[
+  {
+    "id": "-1001328126394",
+    "chatId": "-1001328126394",
+    "botActive": true,
+    "thresholds": {
+      "warn": 1,
+      "mute": 3,
+      "muteDuration": 60,
+      "ban": 10
+    },
+    "gemini": {
+      "enabled": true,
+      "sensitivity": "medium",
+      "contextMessages": 15
+    },
+    "keywords": {
+      "predefined": {
+        "spam": true,
+        "abuse": true,
+        "links": false,
+        "ads": false,
+        "hate": true
+      },
+      "custom": []
+    },
+    "warningMessages": {
+      "dmThreshold": 3,
+      "notifyAdminFrom": 2,
+      "levels": []
+    }
+  },
+  {
+    "id": "-1001436625392",
+    "chatId": "-1001436625392",
+    "botActive": false,
+    "thresholds": {
+      "warn": 1,
+      "mute": 3,
+      "muteDuration": 60,
+      "ban": 10
+    },
+    "gemini": {
+      "enabled": true,
+      "sensitivity": "medium",
+      "contextMessages": 15
+    },
+    "keywords": {
+      "predefined": {
+        "spam": false,
+        "abuse": true,
+        "links": true,
+        "ads": true,
+        "hate": false
+      },
+      "custom": []
+    },
+    "warningMessages": {
+      "dmThreshold": 3,
+      "notifyAdminFrom": 2,
+      "levels": [
+        {
+          "atCount": 1,
+          "text": "⚠️ Hi {name}, your message was removed as it violated our community guidelines.\n\nThis is violation #1. Please review the community rules.\n\nView your record: {profile}",
+          "muteMinutes": 0,
+          "sendAs": "dm"
+        },
+        {
+          "atCount": 2,
+          "text": "⚠️ Hi {name}, this is your 2nd violation. Your message has been removed.\n\nReason: {reason}\n\nRepeated violations will result in being muted.\n\nView & appeal: {profile}",
+          "muteMinutes": 0,
+          "sendAs": "dm"
+        },
+        {
+          "atCount": 3,
+          "text": "🔇 Hi {name}, you have been muted for 60 minutes (violation #3).\n\nReason: {reason}\n\nYou may appeal at: {profile}",
+          "muteMinutes": 60,
+          "sendAs": "dm"
+        },
+        {
+          "atCount": 5,
+          "text": "🔇 Hi {name}, you have been muted for 24 hours (violation #{count}).\n\nThis is a serious violation. Admin has been notified.\n\nAppeal: {profile}",
+          "muteMinutes": 1440,
+          "sendAs": "group"
+        },
+        {
+          "atCount": 10,
+          "text": "⛔ Hi {name}, you have reached the maximum violation limit (#{count}).\n\nYou are indefinitely muted pending admin review.\n\nTo appeal: {profile}",
+          "muteMinutes": 99999,
+          "sendAs": "group"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "name": "PSOTS Society",
+  "short_name": "PSOTS",
+  "description": "Community portal for residents of Prestige Song of the South, Bangalore.",
+  "start_url": "/society/",
+  "scope": "/society/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf6f0",
+  "theme_color": "#1a4a3a",
+  "categories": ["lifestyle", "social", "utilities"],
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/assets/psots-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/psots-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Marketplace",
+      "short_name": "Market",
+      "url": "/society/marketplace.html",
+      "icons": [{ "src": "/assets/psots-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Recommendations",
+      "short_name": "Recs",
+      "url": "/society/recommendations.html",
+      "icons": [{ "src": "/assets/psots-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Lost & Found",
+      "short_name": "L&F",
+      "url": "/society/lostandfound.html",
+      "icons": [{ "src": "/assets/psots-icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

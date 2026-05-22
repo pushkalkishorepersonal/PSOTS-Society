@@ -1,0 +1,10 @@
+/society              /society/index.html        200
+/society/login        /society/login.html         200
+/society/register     /society/register-simple.html      200
+/society/dashboard    /society/index.html         200
+/society/marketplace  /society/marketplace.html   200
+/society/guide        /society/guide.html         200
+/society/lostandfound /society/lostandfound.html  200
+/society/carpooling   /society/carpooling.html    200
+/society/profile      /society/profile.html       200
+/society/admin        /society/admin.html         200

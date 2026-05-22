@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live & Available - PSOTS Society</title>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <style>
+    .status-badge {
+      display: inline-block;
+      background: #2f855a;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .scene-hero {
+      background: linear-gradient(135deg, #1a5a4a 0%, #2d7a6a 50%, #1a5a4a 100%);
+      color: white;
+      padding: 60px 40px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .scene-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .video-container {
+      margin: 40px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(26,74,58,0.25);
+    }
+    .video-container video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .feature-card {
+      background: #f8f2e8;
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(160,130,90,0.2);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(26,74,58,0.12);
+    }
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: #1a4a3a;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      color: #8a7a6a;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #1a4a3a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="societyNav"></div>
+
+  <div class="container" style="max-width: 1000px;">
+    <a href="/society/" class="back-link">← Back to Dashboard</a>
+    <span class="status-badge">✅ LIVE & AVAILABLE</span>
+
+    <div class="scene-hero">
+      <h1>🏢 Live Features</h1>
+      <p>Explore what's available right now on PSOTS Society</p>
+    </div>
+
+    <div class="video-container">
+      <video autoplay muted loop playsinline controls>
+        <source src="/videos/dashboard-scene1.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 28px; color: #1a4a3a; margin-bottom: 24px;">Available Right Now</h2>
+    <div class="features-grid">
+      <a href="/society/marketplace.html" class="feature-card">
+        <div class="feature-icon">🛒</div>
+        <div class="feature-title">Marketplace</div>
+        <div class="feature-desc">Buy and sell items with your neighbors</div>
+      </a>
+      <a href="/society/lostandfound.html" class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-title">Lost & Found</div>
+        <div class="feature-desc">Report or find lost items in the community</div>
+      </a>
+      <a href="/society/carpooling.html" class="feature-card">
+        <div class="feature-icon">🚗</div>
+        <div class="feature-title">Carpooling</div>
+        <div class="feature-desc">Share rides and connect with residents</div>
+      </a>
+      <a href="/society/guide.html" class="feature-card">
+        <div class="feature-icon">📖</div>
+        <div class="feature-title">Community Guide</div>
+        <div class="feature-desc">Rules, amenities, and important info</div>
+      </a>
+      <a href="/society/announcements.html" class="feature-card">
+        <div class="feature-icon">📢</div>
+        <div class="feature-title">Announcements</div>
+        <div class="feature-desc">Latest updates from the community</div>
+      </a>
+      <a href="/society/profile.html" class="feature-card">
+        <div class="feature-icon">👤</div>
+        <div class="feature-title">My Profile</div>
+        <div class="feature-desc">Manage your account and settings</div>
+      </a>
+    </div>
+
+    <div style="background: rgba(26,74,58,0.08); border-left: 4px solid #1a4a3a; padding: 24px; border-radius: 8px; margin-bottom: 40px;">
+      <h3 style="color: #1a4a3a; margin-bottom: 8px;">🎯 Start Exploring</h3>
+      <p style="color: #8a7a6a;">Click on any feature above to start using it. All these features are fully functional and ready for you to use with your neighbors across all 14 towers.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import SocietyNav from '../../js/components/SocietyNav.js';
+    const nav = document.getElementById('societyNav');
+    nav.innerHTML = new SocietyNav().render();
+  </script>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

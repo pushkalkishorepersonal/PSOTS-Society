@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Community Guide — PSOTS Society</title>
+  <meta name="description" content="Complete community guide for Prestige Song of the South — amenity rules, timings, penalties from ROR v2.0."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --jade:        #1a4a3a;
+      --jade-light:  #2d6b54;
+      --gold:       #b8882a;
+      --gold-light: #d4a84b;
+      --gold-pale:  #f0d898;
+      --cream:       #f8f2e8;
+      --cream-dark:  #ede5d5;
+      --surface:     #fffcf7;
+      --ink:        #1a1208;
+      --ink-soft:   #3d2f1e;
+      --muted:      #8a7a6a;
+      --border:      rgba(160,130,90,0.20);
+      --white:      #ffffff;
+      --red:        #c0392b;
+      --blue:       #1d6fa4;
+      --green:      #16a34a;
+      --amber:      #d97706;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);}
+
+    /* ── PSOTS NAV ── */
+    .disclaimer-bar{background:var(--jade);color:rgba(255,255,255,0.7);padding:7px 2rem;font-size:11.5px;text-align:center;position:fixed;top:0;left:0;right:0;z-index:300;letter-spacing:0.2px;line-height:1.5}
+    .disclaimer-bar strong{color:var(--gold-pale)}
+    .psots-nav{position:fixed;top:34px;left:0;right:0;z-index:200;background:rgba(250,246,240,0.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border-psots);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 3.5rem;transition:box-shadow 0.3s}
+    .psots-nav.scrolled{box-shadow:0 4px 24px rgba(26,18,8,0.08)}
+    .nav-brand{display:flex;align-items:center;gap:13px;cursor:pointer;text-decoration:none}
+    .nav-logo{width:44px;height:44px;display:flex;align-items:center;justify-content:center;}
+    .nav-brand-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#1a1208;letter-spacing:0.3px}
+    .nav-brand-sub{font-size:9.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px}
+    .nav-links{display:flex;align-items:center;gap:2px}
+    .nav-link{padding:7px 15px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'Nunito Sans',sans-serif;letter-spacing:0.2px;transition:all 0.15s;text-decoration:none;display:inline-flex;align-items:center}
+    .nav-link:hover,.nav-link.active{color:var(--jade);background:rgba(26,74,58,0.07);font-weight:600}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-back{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:7px 15px;border-radius:8px;transition:all 0.15s}
+    .nav-back:hover{color:var(--jade);background:rgba(26,74,58,0.07)}
+    .nav-auth-pill{display:none;font-size:12.5px;font-weight:600;color:var(--jade);background:rgba(26,74,58,0.08);padding:6px 14px;border-radius:20px;font-family:'Nunito Sans',sans-serif}
+    .nav-auth-pill.show{display:inline-flex;align-items:center;gap:6px}
+
+    /* ── AUTH GATE ── */
+    .guide-loading{text-align:center;padding:8rem 2rem}
+    .loader-ring{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--jade);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.5rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-text{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--muted)}
+    .auth-gate-wrap{max-width:520px;margin:8rem auto;padding:0 2rem;text-align:center}
+    .gate-icon{font-size:3rem;margin-bottom:1.5rem}
+    .gate-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;color:var(--ink);margin-bottom:0.8rem}
+    .gate-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:2rem}
+    .pending-box{background:#fffbeb;border:1px solid #fde68a;border-radius:14px;padding:1.5rem 2rem;color:#92400e;font-size:14px;line-height:1.7;margin-bottom:1.5rem}
+    .btn-jade{display:inline-flex;align-items:center;gap:6px;background:var(--jade);color:var(--gold-pale);padding:11px 24px;border-radius:10px;font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all 0.2s;text-decoration:none}
+    .btn-jade:hover{background:var(--jade-light)}
+    @media(max-width:768px){.psots-nav{padding:0 1.2rem}.nav-links{display:none}.guide-body{grid-template-columns:1fr}.sidebar{display:none}.guide-content{padding:2rem 1.5rem 4rem}.page-header{padding:2rem 1.5rem}.quick-nav{padding:0 1rem}.two-col{grid-template-columns:1fr}.waste-grid{grid-template-columns:1fr}.timing-grid{grid-template-columns:1fr 1fr}}
+    .page-header{background:var(--ink);padding:3rem 5rem 3.5rem;position:relative;overflow:hidden}
+    .page-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
+    .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+    .back-link{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.5);font-size:13px;text-decoration:none;transition:color .2s}
+    .back-link:hover{color:var(--gold)}
+    .version-badge{background:rgba(196,154,60,0.15);border:1px solid rgba(196,154,60,0.3);color:var(--gold);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:1px}
+    .header-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:.8rem}
+    .eyebrow-line{width:32px;height:1px;background:var(--gold)}
+    .eyebrow-text{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;font-weight:600}
+    .page-header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.4rem,5vw,3.8rem);font-weight:300;color:white;line-height:1.1;margin-bottom:.8rem}
+    .page-header p{font-size:14px;color:rgba(255,255,255,0.5);max-width:560px;line-height:1.7}
+    .disclaimer-note{margin-top:1.5rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 16px;font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");}
+    .quick-nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 5rem;overflow-x:auto;display:flex;gap:0;position:sticky;top:0;z-index:50}
+    .quick-nav::-webkit-scrollbar{display:none}
+    .qnav-item{padding:1rem 1.2rem;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif}
+    .qnav-item:hover{color:var(--ink)}
+    .qnav-item.active{color:var(--ink);border-bottom-color:var(--gold);font-weight:600}
+    .guide-body{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 200px)}
+    .sidebar{background:var(--white);border-right:1px solid var(--border);padding:2rem 0;position:sticky;top:51px;height:calc(100vh - 51px);overflow-y:auto}
+    .sidebar::-webkit-scrollbar{width:4px}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    .sidebar-section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 1.5rem;margin-bottom:.5rem;margin-top:1.5rem}
+    .sidebar-section-title:first-child{margin-top:0}
+    .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 1.5rem;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;text-decoration:none}
+    .sidebar-link:hover{color:var(--ink);background:var(--cream)}
+    .sidebar-link.active{color:var(--ink);font-weight:600;border-left-color:var(--gold);background:var(--cream)}
+    .sidebar-icon{font-size:14px}
+    .guide-content{padding:3rem 4rem 6rem;max-width:900px}
+    .guide-section{margin-bottom:4rem;scroll-margin-top:60px}
+    .section-header{margin-bottom:2rem}
+    .section-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:.6rem}
+    .section-eyebrow-line{width:24px;height:1px;background:var(--gold)}
+    .section-eyebrow-text{font-size:10.5px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;font-weight:600}
+    .guide-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;color:var(--ink);line-height:1.1}
+    .section-subtitle{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.6}
+    .info-card{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:1.75rem;margin-bottom:14px}
+    .info-card h3{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+    .rule-list{list-style:none}
+    .rule-list li{padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px;color:var(--ink-soft);line-height:1.65;display:flex;gap:10px;align-items:flex-start}
+    .rule-list li:last-child{border-bottom:none;padding-bottom:0}
+    .rule-bullet{color:var(--gold);font-size:10px;margin-top:6px;flex-shrink:0}
+    .timing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+    .timing-card{background:var(--cream);border-radius:12px;padding:1.25rem;border:1px solid var(--border);text-align:center}
+    .timing-icon{font-size:1.6rem;margin-bottom:6px}
+    .timing-name{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+    .timing-hours{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:500;color:var(--ink);line-height:1.3}
+    .timing-note{font-size:11px;color:var(--muted);margin-top:4px}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .alert-card{border-radius:12px;padding:1rem 1.25rem;font-size:13.5px;line-height:1.65;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+    .alert-card.red{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+    .alert-card.amber{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+    .alert-card.green{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+    .alert-card.blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+    .alert-icon{flex-shrink:0;font-size:15px;margin-top:1px}
+    .penalty-wrap{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px}
+    .penalty-table{width:100%;border-collapse:collapse}
+    .penalty-table thead{background:var(--ink)}
+    .penalty-table th{text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.6);padding:12px 16px}
+    .penalty-table th:last-child{text-align:right}
+    .penalty-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--ink-soft);vertical-align:top}
+    .penalty-table tr:last-child td{border-bottom:none}
+    .penalty-table tr:hover td{background:var(--cream)}
+    .penalty-amt{font-weight:700;text-align:right;color:var(--ink);white-space:nowrap}
+    .penalty-section-row td{background:var(--cream-dark);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 16px}
+    .penalty-note{font-size:11px;color:var(--muted);margin-top:3px}
+    .booking-table-wrap{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px}
+    .booking-table{width:100%;border-collapse:collapse}
+    .booking-table th{background:var(--cream-dark);text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 16px}
+    .booking-table td{padding:11px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+    .booking-table tr:last-child td{border-bottom:none}
+    .booking-table td:first-child{font-weight:600;color:var(--ink)}
+    .charges-table-wrap{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px}
+    .charges-table{width:100%;border-collapse:collapse}
+    .charges-table th{background:var(--cream-dark);text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 16px}
+    .charges-table th:last-child{text-align:right}
+    .charges-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+    .charges-table tr:last-child td{border-bottom:none}
+    .charges-table .amt{text-align:right;font-weight:600;color:var(--ink)}
+    .escalation-steps{display:flex;flex-direction:column;gap:0}
+    .escalation-step{display:flex;gap:1rem;align-items:flex-start;padding:1rem 1.25rem;background:var(--white);border:1px solid var(--border);border-bottom:none}
+    .escalation-step:first-child{border-radius:14px 14px 0 0}
+    .escalation-step:last-child{border-radius:0 0 14px 14px;border-bottom:1px solid var(--border)}
+    .step-num{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+    .step-info h4{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+    .step-info p{font-size:12.5px;color:var(--muted)}
+    .step-info a{color:var(--blue);font-weight:500}
+    .waste-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+    .waste-card{border-radius:12px;padding:1.25rem;border:1px solid}
+    .waste-card.green{background:#f0fdf4;border-color:#bbf7d0}
+    .waste-card.blue-w{background:#eff6ff;border-color:#bfdbfe}
+    .waste-card.red-w{background:#fef2f2;border-color:#fecaca}
+    .waste-card h4{font-size:13px;font-weight:700;margin-bottom:8px}
+    .waste-card.green h4{color:#166534}
+    .waste-card.blue-w h4{color:#1e40af}
+    .waste-card.red-w h4{color:#991b1b}
+    .waste-card ul{list-style:none}
+    .waste-card ul li{font-size:12px;color:var(--ink-soft);padding:3px 0;display:flex;gap:6px}
+    .waste-card ul li::before{content:'·';color:var(--muted)}
+    .source-note{background:var(--cream-dark);border-radius:12px;padding:1rem 1.25rem;font-size:12px;color:var(--muted);line-height:1.65;border:1px solid var(--border);margin-top:3rem}
+  </style>
+</head>
+<body>
+
+<div id="societyNav"></div>
+
+<!-- LOADING STATE -->
+<div id="guideLoading" class="guide-loading">
+  <div class="loader-ring"></div>
+  <p class="loading-text">Loading guide…</p>
+</div>
+
+<!-- NOT LOGGED IN GATE -->
+<div id="guideGate" class="auth-gate-wrap" style="display:none">
+  <div class="gate-icon">🔒</div>
+  <h2 class="gate-title">Sign in to view the Guide</h2>
+  <p class="gate-sub">The Community Guide is available to registered PSOTS residents. Sign in to access rules, timings, and penalty reference.</p>
+  <a href="/society/register.html?next=/guide.html" class="btn-jade">Sign In / Register</a>
+</div>
+
+<!-- PENDING APPROVAL GATE -->
+<div id="guidePending" class="auth-gate-wrap" style="display:none">
+  <div class="gate-icon">⏳</div>
+  <h2 class="gate-title">Registration Pending</h2>
+  <div class="pending-box">Your registration is pending verification. The Community Guide is available to verified residents. Admin verifies within 24–48 hours.</div>
+  <a href="/society/profile.html" class="btn-jade">View My Status</a>
+</div>
+
+<!-- GUIDE CONTENT (shown only to approved residents) -->
+<div id="guideContent" style="display:none">
+<div class="quick-nav">
+  <button class="qnav-item active" onclick="goTo('contacts-section',this)">📞 Contacts</button>
+  <button class="qnav-item" onclick="goTo('pool-section',this)">🏊 Pool</button>
+  <button class="qnav-item" onclick="goTo('sports-section',this)">🏋️ Gym & Sports</button>
+  <button class="qnav-item" onclick="goTo('events-section',this)">🎭 Events</button>
+  <button class="qnav-item" onclick="goTo('vehicles-section',this)">🚗 Vehicles</button>
+  <button class="qnav-item" onclick="goTo('waste-section',this)">♻️ Waste</button>
+  <button class="qnav-item" onclick="goTo('movein-section',this)">🏠 Move-in/out</button>
+  <button class="qnav-item" onclick="goTo('pets-section',this)">🐾 Pets</button>
+  <button class="qnav-item" onclick="goTo('elevator-section',this)">🔼 Elevator</button>
+  <button class="qnav-item" onclick="goTo('penalties-section',this)">⚠️ All Penalties</button>
+</div>
+<div class="guide-body">
+<aside class="sidebar">
+  <div class="sidebar-section-title">Quick Access</div>
+  <a class="sidebar-link" onclick="goTo('contacts-section',this)"><span class="sidebar-icon">📞</span> Official Contacts</a>
+  <a class="sidebar-link" onclick="goTo('escalation-section',this)"><span class="sidebar-icon">📋</span> Escalation Path</a>
+  <div class="sidebar-section-title">Amenities</div>
+  <a class="sidebar-link" onclick="goTo('pool-section',this)"><span class="sidebar-icon">🏊</span> Swimming Pool</a>
+  <a class="sidebar-link" onclick="goTo('sports-section',this)"><span class="sidebar-icon">🏋️</span> Gym & Indoor Sports</a>
+  <a class="sidebar-link" onclick="goTo('outdoor-section',this)"><span class="sidebar-icon">🏆</span> Outdoor Sports</a>
+  <a class="sidebar-link" onclick="goTo('theatre-section',this)"><span class="sidebar-icon">🎬</span> Movie Theatre</a>
+  <a class="sidebar-link" onclick="goTo('banquet-section',this)"><span class="sidebar-icon">🎊</span> Banquet Halls</a>
+  <a class="sidebar-link" onclick="goTo('events-section',this)"><span class="sidebar-icon">🎭</span> Amphitheatre</a>
+  <div class="sidebar-section-title">Rules</div>
+  <a class="sidebar-link" onclick="goTo('vehicles-section',this)"><span class="sidebar-icon">🚗</span> Vehicles & Parking</a>
+  <a class="sidebar-link" onclick="goTo('waste-section',this)"><span class="sidebar-icon">♻️</span> Waste Management</a>
+  <a class="sidebar-link" onclick="goTo('movein-section',this)"><span class="sidebar-icon">🏠</span> Move-in & Move-out</a>
+  <a class="sidebar-link" onclick="goTo('interior-section',this)"><span class="sidebar-icon">🔨</span> Interior Works</a>
+  <a class="sidebar-link" onclick="goTo('pets-section',this)"><span class="sidebar-icon">🐾</span> Pets</a>
+  <a class="sidebar-link" onclick="goTo('elevator-section',this)"><span class="sidebar-icon">🔼</span> Elevator</a>
+  <a class="sidebar-link" onclick="goTo('visitors-section',this)"><span class="sidebar-icon">👥</span> Visitors</a>
+  <a class="sidebar-link" onclick="goTo('ev-section',this)"><span class="sidebar-icon">⚡</span> EV Charging</a>
+  <div class="sidebar-section-title">Reference</div>
+  <a class="sidebar-link" onclick="goTo('penalties-section',this)"><span class="sidebar-icon">⚠️</span> All Penalties</a>
+  <a class="sidebar-link" onclick="goTo('booking-section',this)"><span class="sidebar-icon">📅</span> Booking Policy</a>
+</aside>
+<main class="guide-content">
+
+<!-- CONTACTS -->
+<section class="guide-section" id="contacts-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Official Channels</span></div>
+    <h2>Contacts & Escalation</h2>
+    <p class="section-subtitle">Always raise tickets via MyGate first. Email EC only after helpdesk escalation fails.</p>
+  </div>
+  <div class="two-col">
+    <div class="info-card">
+      <h3>🏢 Property Management Helpdesk</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>📞 <strong>+91 63665 61152</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>📞 +91 804140 4804</span></li>
+        <li><span class="rule-bullet">●</span><span>✉️ sots.helpdesk@prestigeconstructions.co.in</span></li>
+        <li><span class="rule-bullet">●</span><span>⚠️ Always raise tickets via <strong>MyGate app</strong> first</span></li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>📧 Association Emails</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>EC: <strong>ec@psots.in</strong><br><span style="font-size:12px;color:var(--muted)">Governance, escalations, event approvals</span></span></li>
+        <li><span class="rule-bullet">●</span><span>Finance: <strong>finance@psots.in</strong><br><span style="font-size:12px;color:var(--muted)">CAM dues, maintenance, payments</span></span></li>
+      </ul>
+    </div>
+  </div>
+  <div id="escalation-section" class="escalation-steps">
+    <div class="escalation-step"><div class="step-num">1</div><div class="step-info"><h4>Property Management (PPMS) Helpdesk</h4><p>All tickets via MyGate app. First point of contact for all issues.</p></div></div>
+    <div class="escalation-step"><div class="step-num">2</div><div class="step-info"><h4>PPMS Point of Contact — Manjunath G</h4><p>If helpdesk does not resolve within reasonable time.</p></div></div>
+    <div class="escalation-step"><div class="step-num">3</div><div class="step-info"><h4>Finance / Estate Manager</h4><p>Finance → <a href="mailto:finance@psots.in">finance@psots.in</a> · All others → Estate Manager (hiring in progress)</p></div></div>
+    <div class="escalation-step"><div class="step-num">4</div><div class="step-info"><h4>Executive Committee</h4><p>Final escalation → <a href="mailto:ec@psots.in">ec@psots.in</a> · Use only after all lower levels exhausted.</p></div></div>
+  </div>
+</section>
+
+<!-- SWIMMING POOL -->
+<section class="guide-section" id="pool-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Amenities</span></div>
+    <h2>🏊 Swimming Pool</h2>
+  </div>
+  <div class="alert-card amber"><span class="alert-icon">⏰</span><span><strong>Closed every Monday.</strong> Open all other days: 6:00 AM – 1:00 PM and 3:00 PM – 8:00 PM. Timings subject to change — check MyGate for updates.</span></div>
+  <div class="info-card">
+    <h3>Rules</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Proper swimwear and <strong>head caps mandatory</strong>. No undergarments, boxers, pants, denims, or T-shirts.</span></li>
+      <li><span class="rule-bullet">●</span><span>Shower before entering the pool — always.</span></li>
+      <li><span class="rule-bullet">●</span><span>Children under 15 must be accompanied by an adult (18+) at all times.</span></li>
+      <li><span class="rule-bullet">●</span><span>Children under 4 years are <strong>not allowed</strong> in the main pool.</span></li>
+      <li><span class="rule-bullet">●</span><span>No food, refreshments, or colored drinks. Only water in plastic/steel bottles allowed.</span></li>
+      <li><span class="rule-bullet">●</span><span>No pets in or around the pool area.</span></li>
+      <li><span class="rule-bullet">●</span><span>No diving, rough play, acrobatics, or boisterous behaviour.</span></li>
+      <li><span class="rule-bullet">●</span><span>No cycling or skateboards in the pool periphery area.</span></li>
+      <li><span class="rule-bullet">●</span><span>Persons under influence of alcohol or intoxicants are prohibited.</span></li>
+      <li><span class="rule-bullet">●</span><span>Residents with open wounds, infections, or contagious diseases cannot use the pool.</span></li>
+      <li><span class="rule-bullet">●</span><span>Training limited to maximum <strong>30% of pool area</strong> at any given time.</span></li>
+      <li><span class="rule-bullet">●</span><span>Do not use clubhouse amenities or elevators before drying off and changing.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card blue"><span class="alert-icon">ℹ️</span><span>Residents use the pool at their own risk. PSOTSAOA and EC are not responsible for accidents or injuries.</span></div>
+</section>
+
+<!-- GYM & INDOOR SPORTS -->
+<section class="guide-section" id="sports-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Amenities</span></div>
+    <h2>🏋️ Gym & Indoor Sports</h2>
+    <p class="section-subtitle">All indoor amenities require MyGate booking. Residents-only — no guests.</p>
+  </div>
+  <div class="timing-grid">
+    <div class="timing-card"><div class="timing-icon">🏋️</div><div class="timing-name">Gym</div><div class="timing-hours">Book via MyGate</div><div class="timing-note">Gym shoes mandatory. No personal equipment. Under-18 needs adult.</div></div>
+    <div class="timing-card"><div class="timing-icon">🏸</div><div class="timing-name">Badminton</div><div class="timing-hours">Book via MyGate</div><div class="timing-note">Non-marking soles mandatory. No trainers/coaches — ever.</div></div>
+    <div class="timing-card"><div class="timing-icon">🏓</div><div class="timing-name">Table Tennis</div><div class="timing-hours">Book via MyGate</div><div class="timing-note">No food/colored drinks. Restore equipment after use.</div></div>
+    <div class="timing-card"><div class="timing-icon">🧘</div><div class="timing-name">Yoga Room</div><div class="timing-hours">Book via MyGate</div><div class="timing-note">Yoga only. Switch off lights/fans on exit.</div></div>
+    <div class="timing-card"><div class="timing-icon">💃</div><div class="timing-name">Movement Studio</div><div class="timing-hours">Book via MyGate</div><div class="timing-note">Dance and aerobic exercises only.</div></div>
+    <div class="timing-card"><div class="timing-icon">🧖</div><div class="timing-name">Sauna</div><div class="timing-hours">Book via MyGate</div><div class="timing-note">Consult doctor before use. Shower before entering.</div></div>
+  </div>
+  <div class="info-card">
+    <h3>Gym Key Rules</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Gym-specific shoes mandatory — no outdoor shoes.</span></li>
+      <li><span class="rule-bullet">●</span><span>Carry a towel — wipe equipment after use.</span></li>
+      <li><span class="rule-bullet">●</span><span>Do not drop weights. Stack back to original position after use.</span></li>
+      <li><span class="rule-bullet">●</span><span>No personal equipment brought to gym.</span></li>
+      <li><span class="rule-bullet">●</span><span>Trainers allowed — max <strong>1 trainer to 2 residents</strong> at a time.</span></li>
+      <li><span class="rule-bullet">●</span><span>Trainers pay 10% of monthly earnings as maintenance charges.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card amber"><span class="alert-icon">⚠️</span><span><strong>No trainers/coaches for Badminton, Squash, Cricket, or Tennis — at any time.</strong> Trainers for Football/Basketball only Monday–Thursday. Friday–Sunday reserved for all residents.</span></div>
+</section>
+
+<!-- OUTDOOR SPORTS -->
+<section class="guide-section" id="outdoor-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Amenities</span></div>
+    <h2>🏆 Outdoor Sports</h2>
+  </div>
+  <div class="info-card">
+    <h3>Football, Basketball, Cricket, Tennis</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>All courts require prior booking via <strong>MyGate app</strong>.</span></li>
+      <li><span class="rule-bullet">●</span><span>Deposit your Clubhouse ID card at Property Management Office before collecting keys.</span></li>
+      <li><span class="rule-bullet">●</span><span>Only water and sports drinks allowed. No food or colored drinks.</span></li>
+      <li><span class="rule-bullet">●</span><span>Littering: <strong>₹2,000 cleaning charge</strong> per instance.</span></li>
+      <li><span class="rule-bullet">●</span><span>You are responsible for switching lights off, locking gates, and returning keys after your slot.</span></li>
+      <li><span class="rule-bullet">●</span><span>Any damage due to negligence billed on actuals to the booking resident.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- MOVIE THEATRE -->
+<section class="guide-section" id="theatre-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Amenities</span></div>
+    <h2>🎬 Movie Theatre</h2>
+  </div>
+  <div class="charges-table-wrap">
+    <table class="charges-table">
+      <thead><tr><th>Slot</th><th>Time</th><th class="amt">Charges</th></tr></thead>
+      <tbody>
+        <tr><td>Morning</td><td>9:00 AM – 12:30 PM</td><td class="amt">₹500</td></tr>
+        <tr><td>Afternoon</td><td>1:00 PM – 4:30 PM</td><td class="amt">₹500</td></tr>
+        <tr><td>Evening</td><td>6:00 PM – 9:30 PM</td><td class="amt">₹500</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="info-card">
+    <h3>Rules & Booking</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Book via <strong>MyGate app</strong> up to 30 days in advance. Max 3 days/month, 2 slots/day per flat.</span></li>
+      <li><span class="rule-bullet">●</span><span>No food, snacks, popcorn, or drinks inside the theatre.</span></li>
+      <li><span class="rule-bullet">●</span><span>No smoking, alcohol, or intoxicants.</span></li>
+      <li><span class="rule-bullet">●</span><span>Collect all trash at end of session — <strong>₹1,000 cleaning charge</strong> if littered.</span></li>
+      <li><span class="rule-bullet">●</span><span>Cancellation up to 7 days before — amount credited to advance payment ledger (not cash refunded).</span></li>
+      <li><span class="rule-bullet">●</span><span>Content must comply with Indian law. No obscene or illegal material.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- BANQUET HALLS -->
+<section class="guide-section" id="banquet-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Amenities</span></div>
+    <h2>🎊 Banquet Halls & Terrace</h2>
+  </div>
+  <div class="charges-table-wrap">
+    <table class="charges-table">
+      <thead><tr><th>Venue</th><th>Capacity</th><th>Slot Times</th><th class="amt">Charges (Jan 2026 onwards)</th></tr></thead>
+      <tbody>
+        <tr><td>Banquet Hall — Small</td><td>50 people</td><td>9AM–3PM or 4PM–10PM</td><td class="amt">₹4,000/slot</td></tr>
+        <tr><td>Banquet Hall — Large</td><td>100 people</td><td>9AM–3PM or 4PM–10PM</td><td class="amt">₹5,500/slot</td></tr>
+        <tr><td>Open Terrace</td><td>50 people</td><td>9AM–3PM or 4PM–10PM</td><td class="amt">₹2,500/slot</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="two-col">
+    <div class="info-card">
+      <h3>Booking Rules</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Book via <strong>MyGate</strong> up to 60 days advance. Max 3 days/month, 2 slots/day per flat.</span></li>
+        <li><span class="rule-bullet">●</span><span>Events end by <strong>10:00 PM</strong>. Silent hours 2 PM–4 PM.</span></li>
+        <li><span class="rule-bullet">●</span><span>No cooking inside halls.</span></li>
+        <li><span class="rule-bullet">●</span><span>No decorations that damage walls or paint.</span></li>
+        <li><span class="rule-bullet">●</span><span>No pets inside banquet halls.</span></li>
+        <li><span class="rule-bullet">●</span><span>No smoking, alcohol, or intoxicants.</span></li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Cancellation Policy</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>60–31 days before: <strong>100% refund</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>30–16 days before: <strong>50% refund</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>15–0 days before: <strong>No refund</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>Amounts credited to advance ledger — not cash refunded.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="alert-card red"><span class="alert-icon">⚠️</span><span>Garbage not segregated or littered after event: <strong>₹5,000 cleaning charge.</strong> Must be cleared within 1 hour of event end.</span></div>
+</section>
+
+<!-- AMPHITHEATRE -->
+<section class="guide-section" id="events-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Community Events</span></div>
+    <h2>🎭 Amphitheatre & Community Events</h2>
+  </div>
+  <div class="charges-table-wrap">
+    <table class="charges-table">
+      <thead><tr><th>Permitted Hours</th><th>Without Electricity</th><th class="amt">With Electricity</th></tr></thead>
+      <tbody><tr><td>8 AM – 10 PM (Silent: 2–4 PM)</td><td>No charges</td><td class="amt">₹200/hour + GST</td></tr></tbody>
+    </table>
+  </div>
+  <div class="info-card">
+    <h3>Booking & Rules</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Book <strong>30 days in advance</strong> (with stalls) or <strong>15 days</strong> (without stalls) — email helpdesk + ec@psots.in with Annexure EP-001.</span></li>
+      <li><span class="rule-bullet">●</span><span>Events end by <strong>10:00 PM</strong>. New Year events till 12:30 AM with EC approval. Silent hours 2–4 PM.</span></li>
+      <li><span class="rule-bullet">●</span><span>Area must be cleaned by 6 PM (morning events) or 9 AM next day (evening events) — <strong>₹5,000 cleaning charge</strong> if not.</span></li>
+      <li><span class="rule-bullet">●</span><span>Only PSOTSAOA empanelled vendors for food stalls.</span></li>
+      <li><span class="rule-bullet">●</span><span>Police permission required for loud instruments in common areas.</span></li>
+      <li><span class="rule-bullet">●</span><span>Crackers/fireworks only on concrete podium roads with EC approval.</span></li>
+      <li><span class="rule-bullet">●</span><span>No political events inside PSOTS — ever.</span></li>
+      <li><span class="rule-bullet">●</span><span>Smoking and alcohol strictly prohibited in Amphitheatre and all common areas.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card green"><span class="alert-icon">✅</span><span><strong>EC organises only:</strong> Republic Day (Jan 26), Independence Day (Aug 15), Karnataka Rajyotsava (Nov 1), vaccination camps, and vendor/flea market events. All other community events are resident-organised.</span></div>
+</section>
+
+<!-- VEHICLES -->
+<section class="guide-section" id="vehicles-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>🚗 Vehicles & Parking</h2>
+  </div>
+  <div class="two-col">
+    <div class="info-card">
+      <h3>Traffic Rules</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Speed limit: <strong>15 km/h</strong> — podium and basements both</span></li>
+        <li><span class="rule-bullet">●</span><span>Drive <strong>clockwise only</strong> on concrete roads</span></li>
+        <li><span class="rule-bullet">●</span><span>Keep left. No overtaking. No high beams at night.</span></li>
+        <li><span class="rule-bullet">●</span><span>PSOTS is a <strong>honk-free community</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>Pedestrians always have right of way</span></li>
+        <li><span class="rule-bullet">●</span><span>No vehicles on pathways, non-concrete paths, or lawns</span></li>
+        <li><span class="rule-bullet">●</span><span>No driving lessons — strictly prohibited</span></li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Parking Rules</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Park only in your <strong>allotted basement parking spot</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>No parking in visitor slots (podium level)</span></li>
+        <li><span class="rule-bullet">●</span><span>Emergency/Disabled parking — strictly for intended use</span></li>
+        <li><span class="rule-bullet">●</span><span>Guest parking free up to 2 days. Apply for visitor pass 3 days in advance for longer stays.</span></li>
+        <li><span class="rule-bullet">●</span><span>Guest parking charges: <strong>4W ₹250/day · 2W ₹100/day</strong> (beyond 2 days)</span></li>
+        <li><span class="rule-bullet">●</span><span>No outside vehicles in basements</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-card">
+    <h3>Parking Rental (Vacant Slots)</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Individual slot: <strong>₹1,500/month</strong> incl. GST · Linked slot: <strong>₹2,500/month</strong></span></li>
+      <li><span class="rule-bullet">●</span><span>Minimum 6 months commitment. Apply by emailing: sots.helpdesk@prestigeconstructions.co.in</span></li>
+      <li><span class="rule-bullet">●</span><span>Sub-letting of rented slots is strictly prohibited. Auto-renewed for max 3 years total.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card red"><span class="alert-icon">⚠️</span><span>Security can lock vehicles in violation. Vehicles parked unauthorised beyond 5 days reported to local police.</span></div>
+</section>
+
+<!-- WASTE -->
+<section class="guide-section" id="waste-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>♻️ Garbage Segregation & Waste</h2>
+  </div>
+  <div class="waste-grid">
+    <div class="waste-card green"><h4>🟢 Wet/Organic Waste</h4><ul><li>Vegetable/fruit peels</li><li>Cooked food/leftovers</li><li>Egg shells, bones</li><li>Tea bags, coffee grinds</li><li>Fallen leaves, puja flowers</li><li>Food-soiled tissue</li></ul></div>
+    <div class="waste-card blue-w"><h4>🔵 Dry Waste</h4><ul><li>Plastic/paper covers, bottles</li><li>Newspapers, cardboard</li><li>Metal cans, foil containers</li><li>Unbroken glass bottles</li><li>Thermocol, rubber, mops</li><li>Hair, coconut shells</li></ul></div>
+    <div class="waste-card red-w"><h4>🔴 Sanitary/Reject Waste</h4><ul><li>Diapers, sanitary pads</li><li>Medicines, bandages</li><li>Nails, blades, broken glass (wrap in paper)</li><li>Used syringes</li><li>Swept dust, used tissues</li></ul></div>
+  </div>
+  <div class="info-card">
+    <h3>Collection Timings</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Keep waste outside apartment only between <strong>9:00 AM – 12:00 PM</strong> daily.</span></li>
+      <li><span class="rule-bullet">●</span><span>Take bins back inside by <strong>12:30 PM</strong> after collection.</span></li>
+      <li><span class="rule-bullet">●</span><span>Early morning? Use CPCB-certified compostable bags — not before <strong>6:00 AM</strong>.</span></li>
+      <li><span class="rule-bullet">●</span><span>Wet waste not collected if not segregated or in plastic bags.</span></li>
+      <li><span class="rule-bullet">●</span><span>Never put paint, thinner, cement into drains or toilets.</span></li>
+      <li><span class="rule-bullet">●</span><span>Never put diapers or sanitary napkins in drains or toilets.</span></li>
+      <li><span class="rule-bullet">●</span><span>E-waste (batteries, bulbs, CDs) — hand over separately to housekeeping.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card amber"><span class="alert-icon">⚠️</span><span>Garbage kept outside apartment beyond allowed timings: <strong>₹500 fine per instance.</strong></span></div>
+</section>
+
+<!-- MOVE-IN/OUT -->
+<section class="guide-section" id="movein-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>🏠 Move-in & Move-out</h2>
+  </div>
+  <div class="two-col">
+    <div class="info-card">
+      <h3>Charges</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>New owner (purchase): <strong>₹2,000 + GST</strong> one-time membership. No move-in/out charge.</span></li>
+        <li><span class="rule-bullet">●</span><span>Tenant move-in: <strong>₹1,500 + GST</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>Tenant move-out: <strong>₹1,500 + GST</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>Blood relation transfers: <strong>No membership charge</strong></span></li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Key Rules</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Apply via MyGate <strong>at least 15 days before</strong> move date</span></li>
+        <li><span class="rule-bullet">●</span><span>Move-in/out: <strong>9 AM – 6 PM only</strong> — not on public holidays</span></li>
+        <li><span class="rule-bullet">●</span><span><strong>Service lifts only</strong> for luggage, furniture, boxes</span></li>
+        <li><span class="rule-bullet">●</span><span>NOC approval takes maximum 7 days</span></li>
+        <li><span class="rule-bullet">●</span><span>Get admin NOC + finance NOC before move-out</span></li>
+        <li><span class="rule-bullet">●</span><span>Return RFID sticker and Clubhouse ID card on move-out day</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="alert-card red"><span class="alert-icon">⚠️</span><span>If previous occupant had unpaid dues and moved out without NOC, <strong>all dues transfer to the new occupant/owner.</strong></span></div>
+</section>
+
+<!-- INTERIOR WORKS -->
+<section class="guide-section" id="interior-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>🔨 Interior Works</h2>
+  </div>
+  <div class="info-card">
+    <h3>Permit & Timings</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Work permit required before any interior work — apply at Property Management Office.</span></li>
+      <li><span class="rule-bullet">●</span><span>Debris removal charge: <strong>₹3,000</strong> (mandatory, one-time, non-refundable).</span></li>
+      <li><span class="rule-bullet">●</span><span>Permitted hours: <strong>9 AM – 2 PM</strong> and <strong>4 PM – 6 PM</strong> only.</span></li>
+      <li><span class="rule-bullet">●</span><span><strong>No work on Sundays or Public Holidays.</strong></span></li>
+      <li><span class="rule-bullet">●</span><span>Service lifts only for interior materials.</span></li>
+      <li><span class="rule-bullet">●</span><span>No core cutting in structural elements (columns, beams, slabs).</span></li>
+      <li><span class="rule-bullet">●</span><span>No dish antenna / DTH installation on apartments.</span></li>
+      <li><span class="rule-bullet">●</span><span>Workers must have security passes. No overnight stay for workers.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- PETS -->
+<section class="guide-section" id="pets-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>🐾 Pets</h2>
+  </div>
+  <div class="alert-card green"><span class="alert-icon">✅</span><span>Pets can move freely throughout PSOTS. This policy follows Animal Welfare Board of India guidelines and Government of Karnataka notification.</span></div>
+  <div class="two-col">
+    <div class="info-card">
+      <h3>Where Pets Are NOT Allowed</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Inside the Club House</span></li>
+        <li><span class="rule-bullet">●</span><span>Swimming pool and pool periphery</span></li>
+        <li><span class="rule-bullet">●</span><span>Inside Supermarket and Café</span></li>
+        <li><span class="rule-bullet">●</span><span>Skating rink, indoor/outdoor sports areas</span></li>
+        <li><span class="rule-bullet">●</span><span>Children's play areas</span></li>
+        <li><span class="rule-bullet">●</span><span>Inside Banquet Halls</span></li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Registration Required</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Register pet with Property Management Office — email helpdesk with Annexure PP1.</span></li>
+        <li><span class="rule-bullet">●</span><span>Provide: breed, age, vaccination date, next vaccination date.</span></li>
+        <li><span class="rule-bullet">●</span><span>Keep vaccination records updated.</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-card">
+    <h3>Conduct Rules</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Always keep pets on <strong>leash</strong> in common areas.</span></li>
+      <li><span class="rule-bullet">●</span><span>Clean up pet waste immediately — dispose in <strong>bio-waste bins only</strong> (not dry waste bins).</span></li>
+      <li><span class="rule-bullet">●</span><span>If pet urinates on pathways — water down the area.</span></li>
+      <li><span class="rule-bullet">●</span><span>Passenger lifts: if another resident is uncomfortable, step out and give preference.</span></li>
+      <li><span class="rule-bullet">●</span><span>Only adults should handle pets in common areas.</span></li>
+      <li><span class="rule-bullet">●</span><span>Do not leave pets alone outside apartments or chain them in common areas.</span></li>
+      <li><span class="rule-bullet">●</span><span>Commercial breeding of pets inside PSOTS is prohibited.</span></li>
+      <li><span class="rule-bullet">●</span><span>Barking is natural — cannot be used to restrict pets. Make efforts to control during night hours.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card red"><span class="alert-icon">⚠️</span><span>Failure to clean pet waste in common areas: <strong>₹1,000 fine per instance.</strong></span></div>
+</section>
+
+<!-- ELEVATOR -->
+<section class="guide-section" id="elevator-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>🔼 Elevator Usage</h2>
+  </div>
+  <div class="info-card">
+    <h3>Rules</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Do not press buttons repeatedly or hold elevator doors open with foot.</span></li>
+      <li><span class="rule-bullet">●</span><span>Follow overload limits — last person must step out on overload alarm.</span></li>
+      <li><span class="rule-bullet">●</span><span>Children under 6 must not travel alone in elevators.</span></li>
+      <li><span class="rule-bullet">●</span><span><strong>Service lifts only</strong> for goods, luggage, furniture during move-in/out.</span></li>
+      <li><span class="rule-bullet">●</span><span>No scratching, writing, or vandalising elevator walls — <strong>₹1,000 fine</strong> per incident.</span></li>
+      <li><span class="rule-bullet">●</span><span>No littering. No smoking or drinking.</span></li>
+      <li><span class="rule-bullet">●</span><span>Always give way to people alighting first.</span></li>
+      <li><span class="rule-bullet">●</span><span>In case of fire — <strong>do not use elevators.</strong></span></li>
+    </ul>
+  </div>
+  <div class="alert-card blue"><span class="alert-icon">🆘</span><span><strong>Stuck in elevator?</strong> Hit the alarm button and inform security. Do not panic — there is enough air. Do not exit without checking lift is level with the floor. Emergency contact numbers are displayed inside every elevator.</span></div>
+</section>
+
+<!-- VISITORS -->
+<section class="guide-section" id="visitors-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>👥 Visitor Management</h2>
+  </div>
+  <div class="two-col">
+    <div class="info-card">
+      <h3>Guests</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>Guests approved via <strong>MyGate app</strong> by resident before entry.</span></li>
+        <li><span class="rule-bullet">●</span><span>Guests may use parks and kids' play area but <strong>not sports amenities or swimming pool.</strong></span></li>
+        <li><span class="rule-bullet">●</span><span>Guests park only in designated visitor parking areas.</span></li>
+        <li><span class="rule-bullet">●</span><span>Any damage by guests is the resident's responsibility.</span></li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Service Staff & Delivery</h3>
+      <ul class="rule-list">
+        <li><span class="rule-bullet">●</span><span>All daily service staff must have Property Management Office ID cards.</span></li>
+        <li><span class="rule-bullet">●</span><span>Register daily service staff in MyGate app.</span></li>
+        <li><span class="rule-bullet">●</span><span>Couriers and delivery need resident approval via MyGate before entry.</span></li>
+        <li><span class="rule-bullet">●</span><span>Encourage all service staff to use service lifts.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EV CHARGING -->
+<section class="guide-section" id="ev-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Rules</span></div>
+    <h2>⚡ Electric Vehicle Charging</h2>
+  </div>
+  <div class="info-card">
+    <h3>Key Rules</h3>
+    <ul class="rule-list">
+      <li><span class="rule-bullet">●</span><span>Installation only by a <strong>licensed Class-1 Electrical Contractor</strong>.</span></li>
+      <li><span class="rule-bullet">●</span><span>Only <strong>AC slow charging</strong> (230V/15A single phase, max 2.5KW) permitted.</span></li>
+      <li><span class="rule-bullet">●</span><span>BESCOM energy meter must be in homeowner's name.</span></li>
+      <li><span class="rule-bullet">●</span><span>Installation only in <strong>your own registered parking slot</strong> — not rented slots.</span></li>
+      <li><span class="rule-bullet">●</span><span>Three-phase power connections not permitted.</span></li>
+      <li><span class="rule-bullet">●</span><span>Must include: Modular Fire Extinguisher + RCBO protection.</span></li>
+      <li><span class="rule-bullet">●</span><span>Sign undertaking on ₹100 stamp paper. Submit BESCOM bill + contractor license.</span></li>
+    </ul>
+  </div>
+  <div class="alert-card red"><span class="alert-icon">⚠️</span><span>Non-compliance penalty: <strong>₹5,000 per month.</strong> Residents are fully liable for any damage from their EVCS installation. Existing installations must be compliant within 31 days of notification.</span></div>
+</section>
+
+<!-- COMPLETE PENALTIES -->
+<section class="guide-section" id="penalties-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Reference</span></div>
+    <h2>⚠️ Complete Penalties & Charges</h2>
+    <p class="section-subtitle">All 29 official penalty entries from PSOTS Rules of Residency v2.0. Paid via MyGate — no cash accepted.</p>
+  </div>
+  <div class="alert-card amber"><span class="alert-icon">ℹ️</span><span>Fines are per instance unless stated. Non-payment may result in suspension of facility access. Association reserves the right to revise penalties.</span></div>
+  <div class="penalty-wrap">
+    <table class="penalty-table">
+      <thead><tr><th>#</th><th>Area</th><th>Violation</th><th>Penalty</th></tr></thead>
+      <tbody>
+        <tr class="penalty-section-row"><td colspan="4">Common Areas</td></tr>
+        <tr><td>1</td><td>Common Area</td><td>Failure to keep common areas clean, noise, improper trash disposal</td><td class="penalty-amt">₹1,000/instance</td></tr>
+        <tr><td>2</td><td>Common Area</td><td>Common area encroachment not cleared<div class="penalty-note">Removal costs billed on actuals; may be reported to authorities</div></td><td class="penalty-amt">₹5,000 + removal</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Vehicles & Parking</td></tr>
+        <tr><td>3</td><td>Vehicles</td><td>Loss of Parking Sticker / RFID</td><td class="penalty-amt">₹500</td></tr>
+        <tr><td>4</td><td>Vehicles</td><td>Speed limit violation (over 15 km/h)</td><td class="penalty-amt">₹500</td></tr>
+        <tr><td>5</td><td>Vehicles</td><td>Wrong direction driving (one-way violation)</td><td class="penalty-amt">₹1,500 (2W)<br>₹3,000 (4W)</td></tr>
+        <tr><td>6</td><td>Vehicles</td><td>Driving in No-Vehicle Zone</td><td class="penalty-amt">₹500</td></tr>
+        <tr><td>7</td><td>Vehicles</td><td>Driving lesson inside society<div class="penalty-note">Repeat: Reported to authorities</div></td><td class="penalty-amt">₹2,000 (first)</td></tr>
+        <tr><td>8</td><td>Vehicles</td><td>Parking in Emergency Vehicle / Disabled Only places</td><td class="penalty-amt">₹1,000</td></tr>
+        <tr><td>9</td><td>Vehicles</td><td>Guest parking beyond 2 days<div class="penalty-note">Up to 2 days: free</div></td><td class="penalty-amt">4W: ₹250/day<br>2W: ₹100/day</td></tr>
+        <tr><td>10</td><td>Vehicles</td><td>Unauthorized parking<div class="penalty-note">Beyond 5 days: reported to authorities</div></td><td class="penalty-amt">4W: ₹1,000/day<br>2W: ₹500/day</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Garbage & Waste</td></tr>
+        <tr><td>11</td><td>Waste</td><td>Non-compliance with waste policy (improper disposal, debris in common areas)</td><td class="penalty-amt">₹500</td></tr>
+        <tr><td>12</td><td>Waste</td><td>Garbage kept outside apartment beyond allowed timings</td><td class="penalty-amt">₹500</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Events & Sports</td></tr>
+        <tr><td>13</td><td>Amphitheatre</td><td>Litter/trash not cleaned after event<div class="penalty-note">Cleaned by 6PM (morning) or 9AM next day (evening events)</div></td><td class="penalty-amt">₹5,000</td></tr>
+        <tr><td>14</td><td>Outdoor Sports</td><td>Littering in outdoor sports facilities (football, basketball, cricket, tennis)</td><td class="penalty-amt">₹2,000</td></tr>
+        <tr><td>15</td><td>Movie Theatre</td><td>Garbage left/littered in or around theatre</td><td class="penalty-amt">₹1,000</td></tr>
+        <tr><td>16</td><td>Banquet Hall</td><td>Garbage not segregated or littered in/around hall/clubhouse</td><td class="penalty-amt">₹5,000</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Interior Works</td></tr>
+        <tr><td>17</td><td>Interior Works</td><td>Debris removal charge (mandatory for all interior work)</td><td class="penalty-amt">₹3,000 one-time</td></tr>
+        <tr><td>18</td><td>Interior Works</td><td>Failure to remove construction waste/debris</td><td class="penalty-amt">₹3,000 fine</td></tr>
+        <tr><td>19</td><td>Interior Works</td><td>Construction/structure in common area</td><td class="penalty-amt">₹5,000 + removal</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Elevator, Pets & Other</td></tr>
+        <tr><td>20</td><td>Elevator</td><td>Vandalism/damage to elevator walls or equipment</td><td class="penalty-amt">₹1,000/incident</td></tr>
+        <tr><td>21</td><td>Pets</td><td>Failure to clean pet waste in common areas</td><td class="penalty-amt">₹1,000</td></tr>
+        <tr><td>22</td><td>Vendor</td><td>Area not cleaned within 2 hours after event/stall</td><td class="penalty-amt">₹10,000</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Move-in / Move-out / Membership</td></tr>
+        <tr><td>23</td><td>Move-in/out</td><td>Tenant move-in charge</td><td class="penalty-amt">₹1,500 + GST</td></tr>
+        <tr><td>24</td><td>Move-in/out</td><td>Tenant move-out charge</td><td class="penalty-amt">₹1,500 + GST</td></tr>
+        <tr><td>25</td><td>Membership</td><td>Owner association membership (on purchase)<div class="penalty-note">Not applicable for blood relation transfers</div></td><td class="penalty-amt">₹2,000 + GST</td></tr>
+        <tr class="penalty-section-row"><td colspan="4">Coaches, Trainers & Vendors</td></tr>
+        <tr><td>26</td><td>Coaches</td><td>Maintenance charges — Gym, Studio, Outdoor, Pool trainers<div class="penalty-note">Paid in advance each month</div></td><td class="penalty-amt">10% of monthly earnings</td></tr>
+        <tr><td>27</td><td>Vendor</td><td>Non-refundable empanelment application charge</td><td class="penalty-amt">₹2,000 + GST</td></tr>
+        <tr><td>28</td><td>Vendor</td><td>Security deposit for stalls/events</td><td class="penalty-amt">₹5,000 cheque (refundable)</td></tr>
+        <tr><td>29</td><td>Vendor</td><td>Minimum stall/banner/kiosk charges<div class="penalty-note">Signage ₹5,000/30 days · Food stall ₹6,000/8hrs · Kiosk 3×3: ₹3,500/12hrs</div></td><td class="penalty-amt">As per policy</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- BOOKING POLICY -->
+<section class="guide-section" id="booking-section">
+  <div class="section-header">
+    <div class="section-eyebrow"><div class="section-eyebrow-line"></div><span class="section-eyebrow-text">Reference</span></div>
+    <h2>📅 Booking Policy</h2>
+    <p class="section-subtitle">All bookings via MyGate app. From official Appendix I of ROR v2.0.</p>
+  </div>
+  <div class="booking-table-wrap">
+    <table class="booking-table">
+      <thead><tr><th>Amenity</th><th>Advance Booking</th><th>Max Days/Month</th><th>Max Slots/Day</th><th>Cool Down</th></tr></thead>
+      <tbody>
+        <tr><td>Banquet Halls & Terrace</td><td>60 days</td><td>2 days</td><td>2 slots</td><td>—</td></tr>
+        <tr><td>Movie Theatre</td><td>30 days</td><td>5 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Badminton / Squash</td><td>2 days (from 10 PM)</td><td>30 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Basketball / Football</td><td>2 days (from 10 PM)</td><td>30 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Cricket / Tennis</td><td>2 days (from 10 PM)</td><td>30 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Gym</td><td>2 days (from 10 PM)</td><td>30 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Yoga / Movement Studio</td><td>2 days (from 10 PM)</td><td>30 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Table Tennis / Snooker</td><td>2 days (from 10 PM)</td><td>30 days</td><td>1 slot</td><td>60 mins</td></tr>
+        <tr><td>Recreation Room</td><td>2 days (from 10 PM)</td><td>5 bookings max</td><td>1 hr/booking</td><td>60 mins</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="alert-card blue"><span class="alert-icon">📱</span><span>All bookings through <strong>MyGate app only.</strong> Present your MyGate ID or Clubhouse Card when entering any amenity.</span></div>
+</section>
+
+<div class="source-note">
+  📖 <strong>Source:</strong> This guide summarises the PSOTS Rules of Residency v2.0 (October 2025), Penalties Schedule, and Appendix I Booking Policy, published by PSOTSAOA Executive Committee. For the complete legal document, contact <a href="mailto:ec@psots.in" style="color:var(--blue);font-weight:500;">ec@psots.in</a> or request a soft copy via the MyGate Helpdesk.<br><br>
+  ⚠️ Published by PSOTS Society (psots.in), an independent resident initiative. Not affiliated with PSOTSAOA or its Executive Committee. Rules may be updated by the Association — always verify with MyGate for the most current version.
+</div>
+
+</main>
+</div>
+</div><!-- /guideContent -->
+
+<script>
+function goTo(id, el) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  if(el && el.classList.contains('qnav-item')) {
+    document.querySelectorAll('.qnav-item').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+  }
+  if(el && el.classList.contains('sidebar-link')) {
+    document.querySelectorAll('.sidebar-link').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+  }
+}
+window.addEventListener('scroll',()=>{
+  document.getElementById('mainNav')?.classList.toggle('scrolled', window.scrollY > 10);
+  const sections=document.querySelectorAll('.guide-section');
+  let current='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)current=s.id});
+  document.querySelectorAll('.sidebar-link').forEach(l=>{
+    l.classList.remove('active');
+    if(l.getAttribute('onclick')&&l.getAttribute('onclick').includes(current))l.classList.add('active');
+  });
+});
+</script>
+
+<script type="module">
+import session from '/js/core/auth.js';
+import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
+
+// Render shared nav
+await renderSocietyNav('societyNav', 'guide');
+
+const loading  = document.getElementById('guideLoading');
+const gate     = document.getElementById('guideGate');
+const pending  = document.getElementById('guidePending');
+const content  = document.getElementById('guideContent');
+
+function show(el) {
+  [loading, gate, pending, content].forEach(e => e.style.display = 'none');
+  el.style.display = el === content ? 'block' : 'block';
+}
+
+let _fired = false;
+session.onChange(({ user, resident }) => {
+  _fired = true;
+  if (!user) {
+    window.location.href = '/residents.html?next=/guide.html';
+    return;
+  }
+  const approved = resident?.status === 'approved';
+  if (!approved) { show(pending); return; }
+  show(content);
+});
+
+// Timeout fallback — if auth hasn't resolved in 6s, redirect to sign-in
+setTimeout(() => {
+  if (!_fired) window.location.href = '/residents.html?next=/guide.html';
+}, 6000);
+</script>
+
+<footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+      PSOTS Society · society.psots.in
+    </p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+      <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+      <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+      <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+      <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+      This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+    </p>
+  </div>
+</footer>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

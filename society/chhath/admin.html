@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSOTS Admin — Chhath 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+  :root {
+    --or:#e85c00; --gold:#ffc200; --ink:#1a0800; --cream:#fdf5e0;
+    --warm:#fff8f0; --br:#6b3010; --lbr:#a05828; --green:#2e7d32;
+    --red:#c0392b; --bg:#f5f0e8; --white:#fff;
+    --shadow: 0 4px 24px rgba(26,8,0,.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+  /* ── LOGIN SCREEN ─────────────────── */
+  #loginScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a0800, #3d1200);
+  }
+  .login-box {
+    background: var(--white); border-radius: 24px; padding: 2.5rem 2rem;
+    width: min(400px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    text-align: center;
+  }
+  .login-icon { font-size: 3rem; margin-bottom: .8rem; }
+  .login-title { font-family: 'DM Sans', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--ink); margin-bottom: .3rem; }
+  .login-sub { font-size: .82rem; color: var(--lbr); margin-bottom: 2rem; }
+  .login-input {
+    width: 100%; padding: .82rem 1rem; border: 2px solid #f0d5b8; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--ink);
+    background: var(--warm); outline: none; margin-bottom: 1rem; text-align: center;
+    letter-spacing: .2em; transition: border-color .2s;
+  }
+  .login-input:focus { border-color: var(--or); }
+  .btn-login {
+    width: 100%; background: linear-gradient(135deg, var(--or), #c93800); color: #fff;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-style: italic;
+    font-size: 1.1rem; padding: .9rem; border-radius: 12px; border: none; cursor: pointer;
+    box-shadow: 0 4px 18px rgba(232,92,0,.4); transition: transform .2s;
+  }
+  .btn-login:hover { transform: translateY(-2px); }
+  .login-err { color: var(--red); font-size: .82rem; margin-top: .6rem; display: none; }
+
+  /* ── ADMIN LAYOUT ─────────────────── */
+  #adminApp { display: none; }
+
+  .admin-nav {
+    background: linear-gradient(135deg, #1a0800, #3d1200); height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  }
+  .an-brand { font-family: 'DM Sans', sans-serif; font-size: .95rem; color: var(--gold); }
+  .an-sub { font-size: .58rem; color: rgba(255,198,0,.45); letter-spacing: .12em; text-transform: uppercase; }
+  .an-actions { display: flex; gap: .8rem; align-items: center; }
+  .btn-save-all {
+    background: var(--gold); color: var(--ink); border: none; border-radius: 50px;
+    padding: .42rem 1.1rem; font-size: .78rem; font-weight: 700; cursor: pointer;
+    transition: background .2s; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-save-all:hover { background: #e6ac00; }
+  .btn-logout { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.2); border-radius: 50px; padding: .38rem .9rem; font-size: .72rem; cursor: pointer; }
+
+  /* ── TABS ─────────────────────────── */
+  .tabs { display: flex; gap: 0; background: var(--white); border-bottom: 1px solid #f0d5b8; overflow-x: auto; position: sticky; top: 56px; z-index: 99; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: .9rem 1.4rem; font-size: .78rem; font-weight: 600; color: var(--lbr);
+    background: none; border: none; border-bottom: 3px solid transparent;
+    cursor: pointer; white-space: nowrap; transition: all .2s;
+    letter-spacing: .04em;
+  }
+  .tab-btn.active { color: var(--or); border-bottom-color: var(--or); }
+  .tab-btn:hover { color: var(--or); }
+
+  /* ── TAB CONTENT ──────────────────── */
+  .tab-panel { display: none; max-width: 900px; margin: 0 auto; padding: 2rem 1.2rem; }
+  .tab-panel.active { display: block; }
+
+  /* ── CARDS ────────────────────────── */
+  .admin-card {
+    background: var(--white); border-radius: 16px; padding: 1.6rem;
+    box-shadow: var(--shadow); border: 1px solid rgba(200,100,0,.08); margin-bottom: 1.4rem;
+  }
+  .ac-title { font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1.2rem; display: flex; align-items: center; gap: .5rem; }
+  .ac-sub { font-size: .78rem; color: var(--lbr); margin-bottom: 1.2rem; line-height: 1.5; }
+
+  /* ── FORM ELEMENTS ────────────────── */
+  .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media(max-width:520px) { .fg { grid-template-columns: 1fr; } }
+  .fg3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media(max-width:600px) { .fg3 { grid-template-columns: 1fr 1fr; } }
+  .ff { display: flex; flex-direction: column; }
+  .ff label { font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #b08060; margin-bottom: .35rem; }
+  .ff input, .ff select, .ff textarea {
+    padding: .7rem .95rem; border: 1.5px solid #f0d5b8; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--ink);
+    background: var(--warm); outline: none; transition: border-color .2s;
+  }
+  .ff input:focus, .ff select:focus, .ff textarea:focus { border-color: var(--or); }
+  .ff textarea { resize: vertical; min-height: 80px; }
+  .ff .note { font-size: .65rem; color: #c8a880; margin-top: .22rem; }
+
+  /* Rupee input */
+  .rupee-wrap { display: flex; border: 1.5px solid #f0d5b8; border-radius: 10px; overflow: hidden; background: var(--warm); transition: border-color .2s; }
+  .rupee-wrap:focus-within { border-color: var(--or); }
+  .rupee-pfx { background: #fff0e0; color: var(--or); font-weight: 700; padding: .7rem .8rem; display: flex; align-items: center; font-size: 1rem; border-right: 1px solid #f0d5b8; }
+  .rupee-inp { flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; color: var(--ink); padding: .7rem .7rem; background: transparent; -moz-appearance: textfield; }
+  .rupee-inp::-webkit-outer-spin-button,.rupee-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* ── BUTTONS ──────────────────────── */
+  .btn-primary { background: linear-gradient(135deg, var(--or), #c93800); color: #fff; border: none; border-radius: 10px; padding: .65rem 1.3rem; font-size: .85rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: transform .2s; box-shadow: 0 3px 12px rgba(232,92,0,.3); }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-secondary { background: var(--warm); color: var(--or); border: 1.5px solid rgba(232,92,0,.3); border-radius: 10px; padding: .62rem 1.2rem; font-size: .82rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+  .btn-secondary:hover { background: #fff0e0; border-color: var(--or); }
+  .btn-danger { background: #fff0f0; color: var(--red); border: 1.5px solid rgba(192,57,43,.25); border-radius: 8px; padding: .4rem .75rem; font-size: .74rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-danger:hover { background: #ffe0e0; }
+  .btn-success { background: #f0fff4; color: var(--green); border: 1.5px solid rgba(46,125,50,.25); border-radius: 8px; padding: .4rem .75rem; font-size: .74rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-success:hover { background: #dcfce7; }
+  .btn-icon { background: none; border: none; cursor: pointer; font-size: 1rem; padding: .3rem; border-radius: 6px; transition: background .15s; }
+  .btn-icon:hover { background: #f5e8d8; }
+
+  /* ── TOAST ────────────────────────── */
+  #toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--ink); color: #fff; padding: .7rem 1.4rem; border-radius: 50px;
+    font-size: .85rem; font-weight: 500; z-index: 9999; pointer-events: none;
+    transition: transform .35s ease; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { background: var(--green); }
+  #toast.error { background: var(--red); }
+
+  /* ── CONTRIBUTORS TABLE ───────────── */
+  .con-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+  .con-table th { background: var(--warm); padding: .65rem .9rem; text-align: left; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lbr); border-bottom: 2px solid #f0d5b8; }
+  .con-table td { padding: .62rem .9rem; border-bottom: 1px solid #f8eed8; vertical-align: middle; }
+  .con-table tr:hover td { background: #fffaf5; }
+  .status-badge { display: inline-block; border-radius: 50px; padding: .22rem .65rem; font-size: .68rem; font-weight: 700; }
+  .status-badge.verified { background: #dcfce7; color: var(--green); }
+  .status-badge.pending  { background: #fff8dc; color: #a07000; }
+  .status-badge.rejected { background: #ffe0e0; color: var(--red); }
+  .con-name-cell { font-weight: 600; color: var(--ink); }
+  .con-flat-cell { color: var(--lbr); }
+  .con-amt-cell  { font-family: 'DM Sans', sans-serif; font-weight: 700; color: var(--or); }
+  .action-btns { display: flex; gap: .4rem; }
+  .con-search-bar { width: 100%; padding: .65rem 1rem; border: 1.5px solid #f0d5b8; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: .88rem; color: var(--ink); background: var(--warm); outline: none; margin-bottom: 1rem; }
+  .con-search-bar:focus { border-color: var(--or); }
+  .con-filter-row { display: flex; gap: .6rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .filter-chip { background: var(--warm); border: 1.5px solid #f0d5b8; color: var(--lbr); border-radius: 50px; padding: .3rem .85rem; font-size: .74rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .filter-chip.active { background: var(--or); color: #fff; border-color: var(--or); }
+  .total-bar { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, var(--or), #c93800); border-radius: 10px; padding: .75rem 1rem; margin-top: .8rem; color: #fff; }
+  .total-bar .tl { font-size: .76rem; opacity: .8; }
+  .total-bar .tv { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; }
+
+  /* ── ANNOUNCEMENT EDITOR ──────────── */
+  .ann-item-edit {
+    background: var(--warm); border: 1px solid #f0d5b8; border-radius: 12px;
+    padding: 1.1rem; margin-bottom: .85rem; position: relative;
+  }
+  .ann-item-edit .ann-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
+  .ann-item-edit .ann-num { font-size: .7rem; font-weight: 700; color: var(--or); text-transform: uppercase; letter-spacing: .1em; }
+  .ann-tag-select { font-size: .7rem; border: 1px solid #f0d5b8; border-radius: 6px; padding: .25rem .5rem; color: var(--lbr); background: #fff; }
+
+  /* ── ARGHYA TIMING EDITOR ─────────── */
+  .arghya-edit-card { background: var(--warm); border-radius: 14px; padding: 1.4rem; border: 1px solid #f0d5b8; }
+  .arghya-edit-title { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+
+  /* ── BROADCAST COMPOSER ───────────── */
+  .broadcast-preview { background: #dcfce7; border: 1px solid #a5d6a7; border-radius: 12px; padding: 1rem; font-size: .84rem; line-height: 1.65; color: #1a3a1a; white-space: pre-wrap; font-family: monospace; min-height: 100px; margin-bottom: 1rem; }
+  .char-count { font-size: .68rem; color: var(--lbr); text-align: right; margin-top: .25rem; }
+
+  /* ── SUMMARY STATS ────────────────── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: .9rem; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--white); border-radius: 12px; padding: 1rem; border: 1px solid rgba(200,100,0,.1); text-align: center; }
+  .stat-val { font-family: 'DM Sans', sans-serif; font-size: 1.3rem; font-weight: 900; color: var(--or); }
+  .stat-val.green { color: var(--green); }
+  .stat-lbl { font-size: .62rem; color: var(--lbr); margin-top: .18rem; letter-spacing: .05em; }
+
+  /* ── SPINNER ─────────────────────── */
+  .sp { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 5px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-state { text-align: center; padding: 2.5rem; color: var(--lbr); }
+  </style>
+</head>
+<body>
+
+<!-- ════ LOGIN SCREEN (redirects to portal) ════ -->
+<div id="loginScreen" style="display:none"></div>
+
+<!-- ════ ADMIN APP ════ -->
+<div id="adminApp">
+
+  <!-- Nav -->
+  <div class="admin-nav">
+    <div><div class="an-brand">🪔 PSOTS Admin</div><div class="an-sub">Chhath 2026 · Committee Panel</div></div>
+    <div class="an-actions">
+      <button class="btn-save-all" onclick="saveAll()">💾 Save All Changes</button>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('contributors')">🙏 Contributors</button>
+    <button class="tab-btn" onclick="switchTab('finance')">💰 Finance</button>
+    <button class="tab-btn" onclick="switchTab('announcements')">📢 Announcements</button>
+    <button class="tab-btn" onclick="switchTab('timings')">⏰ Arghya Timings</button>
+    <button class="tab-btn" onclick="switchTab('broadcast')">📲 Broadcast</button>
+    <button class="tab-btn" onclick="switchTab('manual')">✍️ Manual Entry</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <!-- ═══ DASHBOARD TAB ═══ -->
+  <div class="tab-panel active" id="tab-dashboard">
+    <div class="stat-grid" id="dashStats">
+      <div class="stat-card"><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Total Collected</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-count">—</div><div class="stat-lbl">Contributors</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-pending">—</div><div class="stat-lbl">Pending Verify</div></div>
+      <div class="stat-card"><div class="stat-val green" id="s-verified">—</div><div class="stat-lbl">Verified ✅</div></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">🔔 Pending Verifications</div>
+      <div id="pendingList"><div class="loading-state">Loading…</div></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">📅 Event Countdown</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:2rem;font-weight:900;color:var(--or)" id="adminCountdown">—</div>
+      <div style="font-size:.8rem;color:var(--lbr);margin-top:.3rem">Days until Chhath Puja 2026 (Nov 1)</div>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">🔗 Quick Links</div>
+      <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+        <a href="index.html" target="_blank" style="text-decoration:none"><button class="btn-secondary">🌐 View Live Site</button></a>
+        <button class="btn-secondary" onclick="switchTab('contributors')">🙏 Verify Payments</button>
+        <button class="btn-secondary" onclick="switchTab('broadcast')">📲 Send Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONTRIBUTORS TAB ═══ -->
+  <div class="tab-panel" id="tab-contributors">
+    <div class="admin-card">
+      <div class="ac-title">🙏 All Contributors — 2026</div>
+      <div class="ac-sub">Mark payments as verified (✅) once you confirm the UPI transfer in your PhonePe/GPay app. Only verified entries show on the public website.</div>
+      <input class="con-search-bar" type="text" id="conSearchAdmin" placeholder="🔍  Search by name, flat or UTR…" oninput="filterAdminCon()"/>
+      <div class="con-filter-row">
+        <span style="font-size:.72rem;color:var(--lbr)">Filter:</span>
+        <div class="filter-chip active" onclick="setFilter('all',this)">All</div>
+        <div class="filter-chip" onclick="setFilter('pending',this)">Pending</div>
+        <div class="filter-chip" onclick="setFilter('verified',this)">Verified ✅</div>
+        <div class="filter-chip" onclick="setFilter('rejected',this)">Rejected</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="con-table">
+          <thead><tr><th>#</th><th>Name</th><th>Flat</th><th>Mobile</th><th>Amount</th><th>App</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="conTableBody"><tr><td colspan="9" class="loading-state">Loading contributors…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="total-bar"><span class="tl">Total Verified</span><span class="tv" id="conVerifiedTotal">—</span></div>
+      <div style="margin-top:.8rem;display:flex;gap:.7rem;flex-wrap:wrap">
+        <button class="btn-primary" onclick="loadAdminCon()">🔄 Refresh List</button>
+        <button class="btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
+        <button class="btn-secondary" onclick="bulkVerifyVisible()">✅ Verify All Visible</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FINANCE TAB ═══ -->
+  <div class="tab-panel" id="tab-finance">
+    <div class="admin-card">
+      <div class="ac-title">💰 2026 Financial Overview</div>
+      <div class="ac-sub">These numbers show on the public website financial section. Update them as contributions come in.</div>
+      <div class="fg">
+        <div class="ff"><label>Carry Forward from 2025</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="f-carry" value="104670"/></div><div class="note">Fixed — ₹1,04,670 verified from last year</div></div>
+        <div class="ff"><label>Total Collected 2026 (Live)</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="f-collected" value="0"/></div><div class="note">Auto-updates from verified contributions</div></div>
+        <div class="ff"><label>2026 Budget (Planned)</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="f-budget" value="282000"/></div></div>
+        <div class="ff"><label>Expenses Incurred So Far</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="f-expenses" value="0"/></div></div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">📊 2026 Expense Breakdown</div>
+      <div class="ac-sub">Update actual spend per category as you make payments. Shows on public site as progress bars.</div>
+      <div class="fg fg3">
+        <div class="ff"><label>Tent & Decoration</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="exp-tent" value="0"/></div></div>
+        <div class="ff"><label>Kharna Prasad</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="exp-kharna" value="0"/></div></div>
+        <div class="ff"><label>Thekua Prasad</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="exp-thekua" value="0"/></div></div>
+        <div class="ff"><label>Audio & Visuals</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="exp-av" value="0"/></div></div>
+        <div class="ff"><label>Cultural Activities</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="exp-cultural" value="0"/></div></div>
+        <div class="ff"><label>Miscellaneous</label><div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="exp-misc" value="0"/></div></div>
+      </div>
+      <div style="display:flex;gap:.7rem;margin-top:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" onclick="saveFinance()">💾 Save Finance Data</button>
+        <button class="btn-secondary" onclick="calcTotal()">🔢 Auto-Calculate Total</button>
+      </div>
+      <div id="finance-total" style="margin-top:1rem;font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700;color:var(--or);display:none"></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">📈 2025 Reference (Read-only)</div>
+      <div class="fg fg3">
+        <div class="ff"><label>Collected 2025</label><input type="text" value="₹2,35,553" readonly style="background:#f5f0e8;color:var(--lbr)"/></div>
+        <div class="ff"><label>Expenses 2025</label><input type="text" value="₹1,98,383" readonly style="background:#f5f0e8;color:var(--lbr)"/></div>
+        <div class="ff"><label>Surplus 2025</label><input type="text" value="₹1,04,670" readonly style="background:#f5f0e8;color:var(--lbr)"/></div>
+        <div class="ff"><label>Contributors 2025</label><input type="text" value="141" readonly style="background:#f5f0e8;color:var(--lbr)"/></div>
+        <div class="ff"><label>Vratis 2025</label><input type="text" value="15" readonly style="background:#f5f0e8;color:var(--lbr)"/></div>
+        <div class="ff"><label>Budget 2025</label><input type="text" value="₹2,82,000" readonly style="background:#f5f0e8;color:var(--lbr)"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ANNOUNCEMENTS TAB ═══ -->
+  <div class="tab-panel" id="tab-announcements">
+    <div class="admin-card">
+      <div class="ac-title">📢 Manage Announcements</div>
+      <div class="ac-sub">Add, edit or remove announcements. These show on the public website and dashboard tile. Drag to reorder (coming soon).</div>
+      <div id="annList"></div>
+      <button class="btn-primary" onclick="addAnn()" style="margin-top:.5rem">+ Add Announcement</button>
+    </div>
+  </div>
+
+  <!-- ═══ ARGHYA TIMINGS TAB ═══ -->
+  <div class="tab-panel" id="tab-timings">
+    <div class="admin-card">
+      <div class="ac-title">⏰ Arghya Timings</div>
+      <div class="ac-sub">These timings appear prominently in the hero section of the website. Update them once you have confirmed sunset/sunrise times for 2026 from the Panchang.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
+        <div class="arghya-edit-card">
+          <div class="arghya-edit-title">🌇 Sandhya Arghya — Evening</div>
+          <div class="fg" style="grid-template-columns:1fr 1fr">
+            <div class="ff"><label>Time</label><input type="time" id="t-evening" value="17:45"/></div>
+            <div class="ff"><label>Date</label><input type="date" id="d-evening" value="2026-11-03"/></div>
+          </div>
+          <div class="ff"><label>Location</label><input type="text" id="l-evening" value="Society Ghat — Prestige Song of the South"/></div>
+        </div>
+        <div class="arghya-edit-card">
+          <div class="arghya-edit-title">🌅 Usha Arghya — Morning</div>
+          <div class="fg" style="grid-template-columns:1fr 1fr">
+            <div class="ff"><label>Time</label><input type="time" id="t-morning" value="06:15"/></div>
+            <div class="ff"><label>Date</label><input type="date" id="d-morning" value="2026-11-04"/></div>
+          </div>
+          <div class="ff"><label>Location</label><input type="text" id="l-morning" value="Society Ghat — Prestige Song of the South"/></div>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="ff"><label>Kharna Prasad Time</label><input type="time" id="t-kharna" value="19:00"/></div>
+        <div class="ff"><label>Kharna Date</label><input type="date" id="d-kharna" value="2026-11-02"/></div>
+      </div>
+      <button class="btn-primary" onclick="saveTimings()">💾 Save Timings</button>
+      <div style="font-size:.72rem;color:var(--lbr);margin-top:.7rem">💡 Tip: Confirm exact sunset/sunrise times from a Panchang app closer to the event date.</div>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">🗓 All Four Days — Quick Edit</div>
+      <div id="dayEditorList"></div>
+    </div>
+  </div>
+
+  <!-- ═══ BROADCAST TAB ═══ -->
+  <div class="tab-panel" id="tab-broadcast">
+    <div class="admin-card">
+      <div class="ac-title">📲 WhatsApp Broadcast Message</div>
+      <div class="ac-sub">Compose a message to send to your WhatsApp broadcast list. The message opens in WhatsApp ready to send — you select the broadcast list and hit send.</div>
+      <div class="fg">
+        <div class="ff" style="grid-column:1/-1">
+          <label>Message</label>
+          <textarea id="broadMsg" rows="6" placeholder="Type your announcement or update here…" oninput="updatePreview()">🪔 *PSOTS Chhath Puja 2026 Update*
+
+</textarea>
+          <div class="char-count"><span id="charCount">0</span> characters</div>
+        </div>
+      </div>
+      <div class="ff" style="margin-bottom:1rem">
+        <label>Quick Templates</label>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
+          <button class="filter-chip" onclick="loadTemplate('reminder')">⏰ Payment Reminder</button>
+          <button class="filter-chip" onclick="loadTemplate('timing')">🌅 Arghya Timing</button>
+          <button class="filter-chip" onclick="loadTemplate('prasad')">🙏 Prasad Update</button>
+          <button class="filter-chip" onclick="loadTemplate('thankyou')">🎉 Thank You</button>
+        </div>
+      </div>
+      <div class="ff" style="margin-bottom:1.2rem">
+        <label>Message Preview (as WhatsApp)</label>
+        <div class="broadcast-preview" id="broadPreview">Your message will appear here…</div>
+      </div>
+      <button class="btn-primary" onclick="sendBroadcast()" style="font-size:.95rem;padding:.75rem 1.5rem">📲 Open in WhatsApp to Send</button>
+      <p style="font-size:.7rem;color:var(--lbr);margin-top:.6rem">This opens WhatsApp with the message ready. Select your "PSOTS Chhath 2026" broadcast list and tap send.</p>
+    </div>
+  </div>
+
+  <!-- ═══ MANUAL ENTRY TAB ═══ -->
+  <div class="tab-panel" id="tab-manual">
+
+    <div class="admin-card">
+      <div class="ac-title">✍️ Manual Contribution Entry</div>
+      <div class="ac-sub">
+        Use this to enter contributions for: <strong>cash payments</strong>, <strong>senior citizens</strong> who aren't tech-savvy, <strong>anonymous donors</strong>, or anyone who paid directly without filling the form. These entries are marked as <em>Admin Entry</em> for transparency.
+      </div>
+
+      <!-- Entry type selector -->
+      <div style="display:flex;gap:.6rem;margin-bottom:1.4rem;flex-wrap:wrap">
+        <div class="filter-chip active" id="et-cash"      onclick="setEntryType('cash',this)">💵 Cash</div>
+        <div class="filter-chip"        id="et-upi"       onclick="setEntryType('upi',this)">📲 UPI (helped them)</div>
+        <div class="filter-chip"        id="et-anon"      onclick="setEntryType('anonymous',this)">🎭 Anonymous</div>
+        <div class="filter-chip"        id="et-senior"    onclick="setEntryType('senior',this)">👴 Senior Citizen</div>
+        <div class="filter-chip"        id="et-corporate" onclick="setEntryType('corporate',this)">🏢 Corporate/Group</div>
+      </div>
+
+      <div class="fg">
+        <div class="ff">
+          <label>Name <span id="me-name-req" style="color:var(--or)">*</span></label>
+          <input type="text" id="me-name" placeholder="Full name (leave blank if anonymous)"/>
+        </div>
+        <div class="ff">
+          <label>Flat / Unit No.</label>
+          <input type="text" id="me-flat" placeholder="e.g. B-204"/>
+        </div>
+        <div class="ff">
+          <label>Mobile Number</label>
+          <input type="tel" id="me-mobile" placeholder="10-digit (optional for cash)" maxlength="10"/>
+        </div>
+        <div class="ff">
+          <label>Amount (₹) <span style="color:var(--or)">*</span></label>
+          <div class="rupee-wrap"><span class="rupee-pfx">₹</span><input class="rupee-inp" type="number" id="me-amount" placeholder="e.g. 501"/></div>
+        </div>
+        <div class="ff">
+          <label>Payment Method</label>
+          <select id="me-method">
+            <option value="Cash">💵 Cash — collected in person</option>
+            <option value="UPI (Admin Assisted)">📲 UPI — I helped them pay</option>
+            <option value="Bank Transfer">🏦 Direct Bank Transfer</option>
+            <option value="Cheque">📄 Cheque</option>
+            <option value="Anonymous">🎭 Anonymous — source unknown</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="ff">
+          <label>Date Received</label>
+          <input type="date" id="me-date"/>
+        </div>
+        <div class="ff" style="grid-column:1/-1">
+          <label>Note / Remarks</label>
+          <input type="text" id="me-note" placeholder="e.g. Collected from Mrs. Sharma at ghat, 80 yrs, no phone. Or: Group contribution from Tower A residents."/>
+        </div>
+        <div class="ff" style="grid-column:1/-1">
+          <label>Send WhatsApp Confirmation to</label>
+          <select id="me-wa-send">
+            <option value="yes">Yes — send confirmation to their number</option>
+            <option value="no">No — no WhatsApp (anonymous / no number)</option>
+            <option value="proxy">Send to a family member's number instead</option>
+          </select>
+        </div>
+        <div class="ff" id="me-proxy-wrap" style="display:none;grid-column:1/-1">
+          <label>Family Member / Proxy WhatsApp Number</label>
+          <input type="tel" id="me-proxy" placeholder="10-digit WhatsApp number of family member" maxlength="10"/>
+          <div class="note">e.g. Son/daughter who can read the confirmation to the senior citizen</div>
+        </div>
+      </div>
+
+      <!-- Preview card -->
+      <div id="me-preview" style="display:none;background:linear-gradient(135deg,#fff5e8,#ffe8cc);border:1px solid rgba(232,92,0,.2);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem">
+        <div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--or);margin-bottom:.5rem;font-weight:700">Entry Preview</div>
+        <div id="me-preview-content" style="font-size:.85rem;color:var(--br);line-height:1.7"></div>
+      </div>
+
+      <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+        <button class="btn-primary" onclick="previewManualEntry()">👁 Preview</button>
+        <button class="btn-primary" onclick="submitManualEntry()" id="me-submit-btn">✍️ Save Entry</button>
+        <button class="btn-secondary" onclick="clearManualForm()">🗑 Clear Form</button>
+      </div>
+
+      <div id="me-success" style="display:none;background:#f0fff4;border:1px solid #a5d6a7;border-radius:12px;padding:1rem 1.2rem;margin-top:1rem">
+        <div style="font-weight:700;color:var(--green);margin-bottom:.3rem">✅ Entry saved successfully!</div>
+        <div style="font-size:.84rem;color:#555" id="me-success-msg"></div>
+      </div>
+    </div>
+
+    <!-- Recent manual entries -->
+    <div class="admin-card">
+      <div class="ac-title">📋 Recent Manual Entries</div>
+      <div id="manualEntriesList"><div class="loading-state">Loading…</div></div>
+    </div>
+
+    <!-- Bulk import -->
+    <div class="admin-card">
+      <div class="ac-title">📥 Bulk Entry — Paste List</div>
+      <div class="ac-sub">Quickly enter multiple cash contributions at once. Format: one per line — <code>Name, Flat, Amount</code><br/>Example: <code>Sunita Devi, 5432, 501</code></div>
+      <div class="ff" style="margin-bottom:.9rem">
+        <label>Paste Entries (one per line: Name, Flat, Amount)</label>
+        <textarea id="bulk-input" rows="8" placeholder="Sunita Devi, 5432, 501&#10;Ramesh Kumar, 1234, 1001&#10;Anonymous, , 101"></textarea>
+      </div>
+      <div class="fg" style="grid-template-columns:1fr 1fr auto;align-items:flex-end">
+        <div class="ff"><label>Default Method</label><select id="bulk-method"><option>Cash</option><option>UPI (Admin Assisted)</option><option>Anonymous</option></select></div>
+        <div class="ff"><label>Date Received</label><input type="date" id="bulk-date"/></div>
+        <button class="btn-primary" onclick="processBulkEntry()" style="height:42px">Process →</button>
+      </div>
+      <div id="bulk-preview" style="margin-top:1rem"></div>
+    </div>
+
+  </div>
+
+  <!-- ═══ SETTINGS TAB ═══ -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="admin-card">
+      <div class="ac-title">⚙️ Site Configuration</div>
+      <div class="fg">
+        <div class="ff"><label>Apps Script URL</label><input type="text" id="s-scriptUrl" placeholder="https://script.google.com/macros/s/…/exec"/><div class="note">Paste your Google Apps Script deployment URL here</div></div>
+        <div class="ff"><label>UPI ID</label><input type="text" id="s-upiId" value="9482088904-3@ybl"/></div>
+        <div class="ff"><label>Primary WhatsApp</label><input type="text" id="s-waOrg" value="919482088904"/></div>
+        <div class="ff"><label>Second Contact</label><input type="text" id="s-waOrg2" value="919902837002"/></div>
+        <div class="ff"><label>Event Start Date</label><input type="date" id="s-eventDate" value="2026-11-01"/></div>
+        <div class="ff"><label>Contribution Deadline</label><input type="date" id="s-deadline" value="2026-10-25"/></div>
+      </div>
+      <button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+    </div>
+
+    <div class="admin-card">
+      <div class="ac-title">🗄 Data Management</div>
+      <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="exportAll()">📥 Export All Data (JSON)</button>
+        <button class="btn-secondary" onclick="exportCSV()">📊 Export Contributors CSV</button>
+        <button class="btn-danger" onclick="clearLocalData()">🗑 Clear Local Cache</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end adminApp -->
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════ */
+const SCRIPT_URL_KEY = 'psots_script_url';
+
+let allConData = [];
+let filterMode = 'all';
+let announcements = [];
+
+/* ═══════════════════════════════════════════════════
+   AUTH — Google Sign-In
+═══════════════════════════════════════════════════ */
+function getAdminEmails() {
+  const base  = (window.PSOTS && window.PSOTS.adminEmails) || [];
+  const extra = JSON.parse(localStorage.getItem('psots_admins') || '[]');
+  return [...new Set([...base, ...extra])];
+}
+
+window.addEventListener('load', () => {
+  const adminEmails = getAdminEmails();
+
+  // 1. Already logged into admin session
+  const adminSaved = localStorage.getItem('psots_admin_user');
+  if (adminSaved) {
+    const u = JSON.parse(adminSaved);
+    if (adminEmails.includes(u.email)) { enterAdmin(u); return; }
+    localStorage.removeItem('psots_admin_user');
+  }
+
+  // 2. Already logged into portal — reuse session
+  const portalSaved = localStorage.getItem('psots_user');
+  if (portalSaved) {
+    const u = JSON.parse(portalSaved);
+    if (adminEmails.includes(u.email)) {
+      localStorage.setItem('psots_admin_user', JSON.stringify(u));
+      enterAdmin(u); return;
+    }
+    // Logged in but not admin — send back to portal
+    window.location.href = 'portal.html';
+    return;
+  }
+
+  // 3. Not logged in at all — redirect to portal login
+  window.location.href = 'portal.html?next=admin';
+});
+
+function handleAdminLogin(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  if (!getAdminEmails().includes(payload.email)) {
+    document.getElementById('loginErr').style.display = 'block';
+    return;
+  }
+  const u = { name: payload.name, email: payload.email, picture: payload.picture };
+  localStorage.setItem('psots_admin_user', JSON.stringify(u));
+  enterAdmin(u);
+}
+
+function enterAdmin(u) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  // Show user in nav
+  const nav = document.querySelector('.an-actions');
+  nav.insertAdjacentHTML('afterbegin', `
+    <div style="display:flex;align-items:center;gap:.5rem;margin-right:.5rem">
+      ${u.picture ? `<img src="${u.picture}" style="width:28px;height:28px;border-radius:50%;object-fit:cover"/>` : ''}
+      <span style="font-size:.75rem;color:rgba(255,255,255,.8)">${u.name}</span>
+    </div>`);
+  initAdmin();
+}
+
+function logout() {
+  localStorage.removeItem('psots_admin_user');
+  if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+  location.reload();
+}
+
+function changePw() {
+  const cur = document.getElementById('pw-current').value;
+  const nw  = document.getElementById('pw-new').value;
+  const cnf = document.getElementById('pw-confirm').value;
+  const stored = localStorage.getItem('psots_admin_pw') || DEFAULT_PW_HASH;
+  if (btoa(cur) !== stored) return toast('❌ Current password incorrect', 'error');
+  if (nw.length < 8) return toast('Password must be at least 8 characters', 'error');
+  if (nw !== cnf) return toast('New passwords do not match', 'error');
+  localStorage.setItem('psots_admin_pw', btoa(nw));
+  toast('✅ Password updated successfully!', 'success');
+  document.getElementById('pw-current').value = '';
+  document.getElementById('pw-new').value = '';
+  document.getElementById('pw-confirm').value = '';
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+function initAdmin() {
+  loadScriptUrl();
+  loadAdminCon();
+  loadAnnouncements();
+  loadDayEditor();
+  initBroadcast();
+  updateAdminCountdown();
+  setInterval(updateAdminCountdown, 60000);
+}
+
+function getScriptUrl() {
+  return document.getElementById('s-scriptUrl')?.value || localStorage.getItem(SCRIPT_URL_KEY) || '';
+}
+
+function loadScriptUrl() {
+  const url = localStorage.getItem(SCRIPT_URL_KEY) || '';
+  const el = document.getElementById('s-scriptUrl');
+  if (el && url) el.value = url;
+}
+
+function saveSettings() {
+  const url = document.getElementById('s-scriptUrl').value.trim();
+  if (url) localStorage.setItem(SCRIPT_URL_KEY, url);
+  // Save other settings to localStorage
+  ['upiId','waOrg','waOrg2','eventDate','deadline'].forEach(k => {
+    const el = document.getElementById('s-' + k);
+    if (el) localStorage.setItem('psots_' + k, el.value);
+  });
+  toast('✅ Settings saved!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════ */
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════
+   CONTRIBUTORS
+═══════════════════════════════════════════════════ */
+async function loadAdminCon() {
+  const url = getScriptUrl();
+  const tbody = document.getElementById('conTableBody');
+  tbody.innerHTML = '<tr><td colspan="9" class="loading-state">🪔 Loading from Google Sheets…</td></tr>';
+
+  if (!url) {
+    // Demo data
+    allConData = [
+      {ts:'2026-10-01 10:30',name:'Pushkal Kishore',flat:'15167',mobile:'9482088904',amount:5001,method:'GPay',date:'01/10/2026',status:'Pending Verification'},
+      {ts:'2026-10-02 11:00',name:'Ratnesh Singh',flat:'15165',mobile:'9876543210',amount:1100,method:'PhonePe',date:'02/10/2026',status:'✅ Received'},
+      {ts:'2026-10-02 14:22',name:'Praveen Kumar',flat:'2172',mobile:'9123456789',amount:5001,method:'GPay',date:'02/10/2026',status:'Pending Verification'},
+      {ts:'2026-10-03 09:10',name:'Rekha Sinha',flat:'9045',mobile:'9988776655',amount:11000,method:'Direct Transfer',date:'03/10/2026',status:'✅ Received'},
+      {ts:'2026-10-03 16:45',name:'Anupam Rai',flat:'5143',mobile:'9012345678',amount:1001,method:'PayTM',date:'03/10/2026',status:'Pending Verification'},
+    ];
+    renderConTable(allConData);
+    updateDashStats();
+    return;
+  }
+
+  try {
+    const res = await fetch(url + '?action=list_all&admin=1');
+    const data = await res.json();
+    allConData = data.all || [];
+    renderConTable(allConData);
+    updateDashStats();
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:#c03000">⚠️ Could not connect to Google Sheets. Check your Apps Script URL in Settings.</td></tr>';
+  }
+}
+
+function renderConTable(data) {
+  const tbody = document.getElementById('conTableBody');
+  const q = document.getElementById('conSearchAdmin')?.value.toLowerCase() || '';
+  let filtered = data.filter(r => {
+    const match = !q || Object.values(r).join(' ').toLowerCase().includes(q);
+    if (!match) return false;
+    if (filterMode === 'pending')  return !r.status?.includes('Received') && !r.status?.includes('Rejected');
+    if (filterMode === 'verified') return r.status?.includes('Received');
+    if (filterMode === 'rejected') return r.status?.includes('Rejected');
+    return true;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--lbr)">No entries found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r, i) => {
+    const isVerified = r.status?.includes('Received');
+    const isRejected = r.status?.includes('Rejected');
+    const badge = isVerified ? 'verified' : isRejected ? 'rejected' : 'pending';
+    const label = isVerified ? '✅ Verified' : isRejected ? '❌ Rejected' : '⏳ Pending';
+    return `
+      <tr>
+        <td>${i+1}</td>
+        <td class="con-name-cell">${r.name||'—'}</td>
+        <td class="con-flat-cell">${r.flat||'—'}</td>
+        <td style="font-size:.78rem;color:var(--lbr)">${r.mobile||'—'}</td>
+        <td class="con-amt-cell">₹${parseInt(r.amount||0).toLocaleString('en-IN')}</td>
+        <td style="font-size:.78rem">${r.method||'UPI'}</td>
+        <td style="font-size:.75rem;color:var(--lbr)">${r.date||'—'}</td>
+        <td><span class="status-badge ${badge}">${label}</span></td>
+        <td>
+          <div class="action-btns">
+            ${!isVerified ? `<button class="btn-success" onclick="updateStatus(${i},'✅ Received')">✅</button>` : ''}
+            ${!isRejected ? `<button class="btn-danger"  onclick="updateStatus(${i},'❌ Rejected')">❌</button>` : ''}
+            <button class="btn-icon" onclick="sendWAConfirm('${r.name}','${r.flat}','${r.amount}','${r.mobile}')">📲</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  // Update verified total
+  const verTotal = filtered.filter(r => r.status?.includes('Received')).reduce((s,r) => s + (parseFloat(r.amount)||0), 0);
+  document.getElementById('conVerifiedTotal').textContent = '₹' + verTotal.toLocaleString('en-IN');
+  updateDashStats();
+  updatePendingList();
+}
+
+async function updateStatus(idx, newStatus) {
+  const url = getScriptUrl();
+  const row = allConData[idx];
+  if (!row) return;
+  row.status = newStatus;
+
+  if (url) {
+    try {
+      await fetch(url, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ action: 'updateStatus', row: row.rowIndex, status: newStatus }),
+      });
+    } catch(e) { console.warn(e); }
+  }
+
+  toast(newStatus.includes('Received') ? '✅ Marked as Verified!' : '❌ Marked as Rejected', newStatus.includes('Received') ? 'success' : 'error');
+  renderConTable(allConData);
+
+  // Auto-send WhatsApp thank you if verified
+  if (newStatus.includes('Received')) {
+    setTimeout(() => sendWAConfirm(row.name, row.flat, row.amount, row.mobile), 800);
+  }
+}
+
+function sendWAConfirm(name, flat, amount, mobile) {
+  const msg = encodeURIComponent(
+    `🪔 *जय छठ मइया!*\n\nनमस्ते ${name} जी 🙏\n\nYour contribution of *₹${parseInt(amount).toLocaleString('en-IN')}* for *PSOTS Chhath Puja 2026 — पंच वर्ष महोत्सव* has been *verified* by the committee!\n\n🏠 Flat: ${flat}\n💰 Amount: ₹${parseInt(amount).toLocaleString('en-IN')}\n\nEvent: Nov 1–4, 2026\nKharna: Nov 2 | Thekua: Nov 4\n\nआपके योगदान के लिए हृदय से धन्यवाद! 🙏\n— PSOTS Chhath Committee`
+  );
+  window.open(`https://wa.me/91${mobile}?text=${msg}`, '_blank');
+}
+
+function setFilter(mode, el) {
+  filterMode = mode;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderConTable(allConData);
+}
+
+function filterAdminCon() { renderConTable(allConData); }
+
+function bulkVerifyVisible() {
+  if (!confirm('Mark all currently visible entries as Verified? This will send WhatsApp confirmations to each contributor.')) return;
+  const rows = document.querySelectorAll('#conTableBody tr');
+  rows.forEach((_, i) => {
+    if (allConData[i] && !allConData[i].status?.includes('Received')) {
+      updateStatus(i, '✅ Received');
+    }
+  });
+}
+
+function exportCSV() {
+  const headers = ['Timestamp','Name','Flat','Mobile','Amount','App','Date','Status'];
+  const rows = allConData.map(r => headers.map(h => r[h.toLowerCase()] || '').join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+  a.download = 'PSOTS_Chhath_2026_Contributors.csv';
+  a.click();
+  toast('📥 CSV exported!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════ */
+function updateDashStats() {
+  const all      = allConData;
+  const verified = all.filter(r => r.status?.includes('Received'));
+  const pending  = all.filter(r => !r.status?.includes('Received') && !r.status?.includes('Rejected'));
+  const total    = verified.reduce((s,r) => s + (parseFloat(r.amount)||0), 0);
+  document.getElementById('s-total').textContent    = '₹' + total.toLocaleString('en-IN');
+  document.getElementById('s-count').textContent    = all.length;
+  document.getElementById('s-pending').textContent  = pending.length;
+  document.getElementById('s-verified').textContent = verified.length;
+}
+
+function updatePendingList() {
+  const pending = allConData.filter(r => !r.status?.includes('Received') && !r.status?.includes('Rejected'));
+  const el = document.getElementById('pendingList');
+  if (!pending.length) { el.innerHTML = '<p style="color:var(--green);font-size:.9rem">✅ No pending verifications!</p>'; return; }
+  el.innerHTML = pending.slice(0,5).map((r,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem .9rem;background:var(--warm);border-radius:10px;border:1px solid #f5e8d8;margin-bottom:.5rem">
+      <div>
+        <span style="font-weight:600;font-size:.88rem">${r.name}</span>
+        <span style="color:var(--lbr);font-size:.75rem;margin-left:.5rem">Flat ${r.flat}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <span style="font-family:'DM Sans',sans-serif;font-weight:700;color:var(--or)">₹${parseInt(r.amount||0).toLocaleString('en-IN')}</span>
+        <button class="btn-success" onclick="switchTab('contributors')">Verify →</button>
+      </div>
+    </div>`).join('') + (pending.length > 5 ? `<p style="font-size:.78rem;color:var(--lbr);margin-top:.4rem">+${pending.length-5} more pending…</p>` : '');
+}
+
+function updateAdminCountdown() {
+  const diff = new Date('2026-11-01T06:00:00') - new Date();
+  const days = Math.floor(diff / 86400000);
+  const el = document.getElementById('adminCountdown');
+  if (el) el.textContent = days > 0 ? days + ' days' : '🎉 Event is here!';
+}
+
+/* ═══════════════════════════════════════════════════
+   FINANCE
+═══════════════════════════════════════════════════ */
+function calcTotal() {
+  const ids = ['exp-tent','exp-kharna','exp-thekua','exp-av','exp-cultural','exp-misc'];
+  const total = ids.reduce((s,id) => s + (parseFloat(document.getElementById(id).value)||0), 0);
+  document.getElementById('f-expenses').value = total;
+  const el = document.getElementById('finance-total');
+  el.style.display = 'block';
+  el.textContent = 'Total Expenses: ₹' + total.toLocaleString('en-IN');
+  toast('✅ Total calculated: ₹' + total.toLocaleString('en-IN'), 'success');
+}
+
+async function saveFinance() {
+  const data = {
+    action: 'updateFinance',
+    carry: document.getElementById('f-carry').value,
+    collected: document.getElementById('f-collected').value,
+    budget: document.getElementById('f-budget').value,
+    expenses: document.getElementById('f-expenses').value,
+    expTent: document.getElementById('exp-tent').value,
+    expKharna: document.getElementById('exp-kharna').value,
+    expThekua: document.getElementById('exp-thekua').value,
+    expAV: document.getElementById('exp-av').value,
+    expCultural: document.getElementById('exp-cultural').value,
+    expMisc: document.getElementById('exp-misc').value,
+  };
+  localStorage.setItem('psots_finance', JSON.stringify(data));
+  const url = getScriptUrl();
+  if (url) {
+    try {
+      await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    } catch(e) {}
+  }
+  toast('✅ Finance data saved!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   ANNOUNCEMENTS
+═══════════════════════════════════════════════════ */
+function loadAnnouncements() {
+  const saved = localStorage.getItem('psots_announcements');
+  announcements = saved ? JSON.parse(saved) : [
+    { tag:'🎊 5th Year', meta:'2026 — Grand Celebration', text:"This year marks our पंच वर्ष महोत्सव! Grander ghat, extended cultural programme. ₹1,04,670 carried forward from 2025." },
+    { tag:'🙏 Prasad', meta:'2026 — Prasad Details', text:'2nd Nov खरना प्रसाद & 4th Nov ठेकुआ प्रसाद for all PSOTS residents after Arghya.' },
+    { tag:'🤝 Volunteer', meta:'2026 — Volunteers', text:'Volunteers needed for ghat decoration on 2nd November. Breakfast provided for all volunteers.' },
+    { tag:'⏰ Important', meta:'2026 — Deadline', text:'Contribute before 25th October 2026 to be on the prasad list.' },
+  ];
+  renderAnnouncements();
+}
+
+function renderAnnouncements() {
+  const el = document.getElementById('annList');
+  el.innerHTML = announcements.map((a, i) => `
+    <div class="ann-item-edit">
+      <div class="ann-header">
+        <span class="ann-num">Announcement ${i+1}</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input class="ann-tag-select" type="text" value="${a.tag}" onchange="announcements[${i}].tag=this.value" style="width:120px"/>
+          <button class="btn-danger" onclick="removeAnn(${i})">🗑</button>
+        </div>
+      </div>
+      <div class="fg" style="grid-template-columns:1fr">
+        <div class="ff"><label>Date / Meta Label</label><input type="text" value="${a.meta}" onchange="announcements[${i}].meta=this.value"/></div>
+        <div class="ff"><label>Message Text</label><textarea onchange="announcements[${i}].text=this.value">${a.text}</textarea></div>
+      </div>
+    </div>`).join('');
+}
+
+function addAnn() {
+  announcements.push({ tag:'📌 New', meta:'2026 — Update', text:'Enter your announcement here…' });
+  renderAnnouncements();
+  toast('✅ New announcement added', 'success');
+}
+
+function removeAnn(i) {
+  if (!confirm('Remove this announcement?')) return;
+  announcements.splice(i, 1);
+  renderAnnouncements();
+  toast('🗑 Removed', 'error');
+}
+
+async function saveAnnouncements() {
+  localStorage.setItem('psots_announcements', JSON.stringify(announcements));
+  const url = getScriptUrl();
+  if (url) {
+    try {
+      await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'updateAnnouncements', data: announcements }) });
+    } catch(e) {}
+  }
+  toast('✅ Announcements saved!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   TIMINGS
+═══════════════════════════════════════════════════ */
+function loadDayEditor() {
+  const days = [
+    { num:'01', name:'Nahay Khay', hindi:'नहाय खाय', desc:'Holy bath and sattvic meal. Ghat sanctification.', time:'05:30', location:'Society Ghat' },
+    { num:'02', name:'Kharna', hindi:'खरना', desc:'Full-day fast. खीर प्रसाद for all PSOTS residents.', time:'19:00', location:'Community Hall' },
+    { num:'03', name:'Sandhya Arghya', hindi:'संध्या अर्घ्य', desc:'Offerings to setting sun. Live bhajans, aarti.', time:'17:45', location:'Society Ghat' },
+    { num:'04', name:'Usha Arghya', hindi:'उषा अर्घ्य', desc:'Dawn offering to rising sun. ठेकुआ प्रसाद for all.', time:'06:15', location:'Society Ghat' },
+  ];
+  const el = document.getElementById('dayEditorList');
+  el.innerHTML = days.map((d,i) => `
+    <div style="background:var(--warm);border:1px solid #f0d5b8;border-radius:12px;padding:1.1rem;margin-bottom:.8rem">
+      <div style="font-weight:700;font-size:.9rem;color:var(--ink);margin-bottom:.7rem">Nov 0${i+1} — ${d.name} (${d.hindi})</div>
+      <div class="fg">
+        <div class="ff"><label>Time</label><input type="time" value="${d.time}" id="day-time-${i}"/></div>
+        <div class="ff"><label>Location</label><input type="text" value="${d.location}" id="day-loc-${i}"/></div>
+        <div class="ff" style="grid-column:1/-1"><label>Description</label><input type="text" value="${d.desc}" id="day-desc-${i}"/></div>
+      </div>
+    </div>`).join('');
+}
+
+function saveTimings() {
+  const timings = {
+    evening: { time: document.getElementById('t-evening').value, date: document.getElementById('d-evening').value, location: document.getElementById('l-evening').value },
+    morning: { time: document.getElementById('t-morning').value, date: document.getElementById('d-morning').value, location: document.getElementById('l-morning').value },
+    kharna:  { time: document.getElementById('t-kharna').value,  date: document.getElementById('d-kharna').value },
+  };
+  localStorage.setItem('psots_timings', JSON.stringify(timings));
+  toast('✅ Arghya timings saved!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   BROADCAST
+═══════════════════════════════════════════════════ */
+const TEMPLATES = {
+  reminder: `🪔 *PSOTS Chhath Puja 2026 — Payment Reminder*\n\nनमस्ते 🙏\n\nKindly contribute before *25th October 2026* to be included in the prasad list.\n\n💰 Pay via UPI: Visit psots.in\n📱 UPI: 9482088904-3@ybl\n\nDue dates:\n• Kharna Prasad: Nov 2\n• Thekua Prasad: Nov 4\n\nजय छठ मइया! 🪔`,
+  timing:   `🌇🌅 *PSOTS Chhath Puja 2026 — Arghya Timings*\n\n📅 Schedule:\n\n🌊 Nov 1 — Nahay Khay: 5:30 AM\n🍚 Nov 2 — Kharna Prasad: 7:00 PM\n🌇 Nov 3 — *Sandhya Arghya: 5:45 PM*\n🌅 Nov 4 — *Usha Arghya: 6:15 AM*\n\nVenue: Society Ghat — Prestige Song of the South\n\nजय छठ मइया! 🙏`,
+  prasad:   `🙏 *PSOTS Chhath Puja 2026 — Prasad Update*\n\nप्रसाद की व्यवस्था:\n\n🍚 *खरना प्रसाद* — Nov 2, 7:00 PM\n(Community Hall)\n\n🪄 *ठेकुआ प्रसाद* — Nov 4, After Arghya\n(Society Ghat)\n\nसभी PSOTS निवासियों का स्वागत है 🙏\nजय छठ मइया! 🪔`,
+  thankyou: `🎉🪔 *PSOTS Chhath Puja 2026 — Thank You!*\n\nप्रिय निवासी जी,\n\nहमारा छठ पूजा 2026 का पंच वर्ष महोत्सव आपके सहयोग से सफल रहा!\n\nThank you for your contribution and participation. May Chhath Maiya bless you and your family with health, happiness and prosperity. 🙏\n\nजय छठ मइया! 🪔\n— PSOTS Chhath Committee`
+};
+
+function initBroadcast() {
+  updatePreview();
+}
+
+function loadTemplate(key) {
+  document.getElementById('broadMsg').value = TEMPLATES[key];
+  updatePreview();
+  toast('✅ Template loaded', 'success');
+}
+
+function updatePreview() {
+  const msg = document.getElementById('broadMsg').value;
+  document.getElementById('broadPreview').textContent = msg || 'Your message will appear here…';
+  document.getElementById('charCount').textContent = msg.length;
+}
+
+function sendBroadcast() {
+  const msg = document.getElementById('broadMsg').value.trim();
+  if (!msg) return toast('Please type a message first', 'error');
+  const wa = localStorage.getItem('psots_waOrg') || '919482088904';
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
+  toast('📲 Opening WhatsApp…', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   SAVE ALL
+═══════════════════════════════════════════════════ */
+function saveAll() {
+  saveFinance();
+  saveAnnouncements();
+  saveSettings();
+  saveTimings();
+  toast('✅ All changes saved!', 'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════ */
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type ? `show ${type}` : 'show';
+  setTimeout(() => el.className = '', 3000);
+}
+
+function exportAll() {
+  const data = {
+    contributors: allConData,
+    finance: localStorage.getItem('psots_finance'),
+    announcements: announcements,
+    timings: localStorage.getItem('psots_timings'),
+    exported: new Date().toISOString(),
+  };
+  const a = document.createElement('a');
+  a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+  a.download = 'PSOTS_Chhath_2026_Export.json';
+  a.click();
+  toast('📥 Data exported!', 'success');
+}
+
+function clearLocalData() {
+  if (!confirm('Clear all locally cached data? (Settings and password will be preserved)')) return;
+  ['psots_finance','psots_announcements','psots_timings'].forEach(k => localStorage.removeItem(k));
+  toast('🗑 Cache cleared', 'error');
+}
+
+/* ═══════════════════════════════════════════════════
+   MANUAL ENTRY
+═══════════════════════════════════════════════════ */
+let currentEntryType = 'cash';
+function setEntryType(type, el) {
+  currentEntryType = type;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  // Auto-set method
+  const methodMap = { cash:'Cash', upi:'UPI (Admin Assisted)', anonymous:'Anonymous', senior:'Cash', corporate:'Bank Transfer' };
+  document.getElementById('me-method').value = methodMap[type] || 'Cash';
+  // Anonymous: clear name
+  if (type === 'anonymous') {
+    document.getElementById('me-name').value = 'Anonymous Donor';
+    document.getElementById('me-wa-send').value = 'no';
+    waConfirmChange();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('me-date').valueAsDate = new Date();
+  document.getElementById('bulk-date').valueAsDate = new Date();
+  document.getElementById('me-wa-send').addEventListener('change', waConfirmChange);
+  loadManualEntries();
+});
+
+function waConfirmChange() {
+  const v = document.getElementById('me-wa-send').value;
+  document.getElementById('me-proxy-wrap').style.display = v === 'proxy' ? 'block' : 'none';
+}
+
+function previewManualEntry() {
+  const name   = document.getElementById('me-name').value.trim() || 'Anonymous';
+  const flat   = document.getElementById('me-flat').value.trim() || '—';
+  const amount = document.getElementById('me-amount').value;
+  const method = document.getElementById('me-method').value;
+  const date   = document.getElementById('me-date').value;
+  const note   = document.getElementById('me-note').value.trim();
+  if (!amount) { toast('Please enter an amount', 'error'); return; }
+  const dateStr = date ? new Date(date).toLocaleDateString('en-IN') : '—';
+  document.getElementById('me-preview-content').innerHTML =
+    `👤 <b>${name}</b> · 🏠 Flat ${flat}<br/>💰 ₹${parseInt(amount).toLocaleString('en-IN')} · 📲 ${method}<br/>📅 ${dateStr}<br/>${note ? '📝 ' + note : ''}`;
+  document.getElementById('me-preview').style.display = 'block';
+}
+
+async function submitManualEntry() {
+  const name   = document.getElementById('me-name').value.trim() || 'Anonymous Donor';
+  const flat   = document.getElementById('me-flat').value.trim();
+  const mobile = document.getElementById('me-mobile').value.trim();
+  const amount = document.getElementById('me-amount').value;
+  const method = document.getElementById('me-method').value;
+  const date   = document.getElementById('me-date').value;
+  const note   = document.getElementById('me-note').value.trim();
+  const waSend = document.getElementById('me-wa-send').value;
+  const proxy  = document.getElementById('me-proxy').value.trim();
+
+  if (!amount || parseInt(amount) < 1) return toast('Amount is required', 'error');
+
+  const btn = document.getElementById('me-submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="sp"></span>Saving…';
+
+  const ts      = new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata'});
+  const dateStr = date ? new Date(date).toLocaleDateString('en-IN', {day:'2-digit',month:'2-digit',year:'numeric'}) : ts.split(',')[0];
+  const entry   = {
+    timestamp: ts, name, flat, mobile, amount, date: dateStr,
+    method: method + (note ? ` (${note})` : ''),
+    status: '✅ Received',  // Admin entries are auto-verified
+    enteredBy: 'Admin',
+  };
+
+  const url = getScriptUrl();
+  if (url && !url.includes('YOUR_APPS_SCRIPT')) {
+    try {
+      await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(entry) });
+    } catch(e) { console.warn(e); }
+  }
+
+  // Add to local data
+  allConData.unshift({...entry, rowIndex: allConData.length + 2});
+
+  // WhatsApp confirmation
+  const waTarget = waSend === 'proxy' ? proxy : (waSend === 'yes' ? mobile : null);
+  if (waTarget && /^\d{10}$/.test(waTarget)) {
+    const msg = encodeURIComponent(
+      `🪔 *जय छठ मइया!*\n\nनमस्ते ${name} जी 🙏\n\nYour contribution of *₹${parseInt(amount).toLocaleString('en-IN')}* for *PSOTS Chhath Puja 2026* has been recorded by the committee.\n\n🏠 Flat: ${flat||'—'}\n💰 ₹${parseInt(amount).toLocaleString('en-IN')}\n📅 ${dateStr}\n\nजय छठ मइया! 🪔\n— PSOTS Chhath Committee`
+    );
+    window.open(`https://wa.me/91${waTarget}?text=${msg}`, '_blank');
+  }
+
+  btn.disabled = false; btn.textContent = '✍️ Save Entry';
+  document.getElementById('me-success').style.display = 'block';
+  document.getElementById('me-success-msg').textContent = `₹${parseInt(amount).toLocaleString('en-IN')} from ${name} (Flat ${flat||'—'}) saved and marked Verified.${waTarget ? ' WhatsApp sent.' : ''}`;
+  toast('✅ Entry saved!', 'success');
+  clearManualForm();
+  loadManualEntries();
+  updateDashStats();
+}
+
+function clearManualForm() {
+  ['me-name','me-flat','me-mobile','me-note','me-proxy'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('me-amount').value = '';
+  document.getElementById('me-date').valueAsDate = new Date();
+  document.getElementById('me-preview').style.display = 'none';
+  setTimeout(() => { document.getElementById('me-success').style.display = 'none'; }, 3000);
+}
+
+function loadManualEntries() {
+  const el = document.getElementById('manualEntriesList');
+  const manual = allConData.filter(r => r.method?.includes('Admin') || r.method?.includes('Cash') || r.method?.includes('Anonymous') || r.enteredBy === 'Admin');
+  if (!manual.length) { el.innerHTML = '<div style="color:var(--lbr);font-size:.84rem;padding:.5rem 0">No manual entries yet.</div>'; return; }
+  el.innerHTML = manual.slice(0,10).map((r,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--warm);border-radius:9px;border:1px solid #f5e8d8;margin-bottom:.4rem">
+      <div>
+        <span style="font-weight:600;font-size:.84rem">${r.name||'—'}</span>
+        <span style="color:var(--lbr);font-size:.72rem;margin-left:.4rem">Flat ${r.flat||'—'}</span>
+        <div style="font-size:.68rem;color:#c8a880;margin-top:.1rem">${r.date||'—'} · ${r.method?.split('(')[0]||'Cash'}</div>
+      </div>
+      <span style="font-family:'DM Sans',sans-serif;font-weight:700;color:var(--or)">₹${parseInt(r.amount||0).toLocaleString('en-IN')}</span>
+    </div>`).join('');
+}
+
+function processBulkEntry() {
+  const lines  = document.getElementById('bulk-input').value.trim().split('\n').filter(l => l.trim());
+  const method = document.getElementById('bulk-method').value;
+  const date   = document.getElementById('bulk-date').value;
+  const dateStr = date ? new Date(date).toLocaleDateString('en-IN', {day:'2-digit',month:'2-digit',year:'numeric'}) : new Date().toLocaleDateString('en-IN');
+  const parsed  = lines.map(l => {
+    const parts = l.split(',').map(s => s.trim());
+    return { name: parts[0]||'Anonymous', flat: parts[1]||'—', amount: parts[2]?.replace(/[^\d]/g,'')||'0' };
+  }).filter(p => parseInt(p.amount) > 0);
+
+  if (!parsed.length) { toast('No valid entries found. Format: Name, Flat, Amount', 'error'); return; }
+
+  const total = parsed.reduce((s,p) => s + parseInt(p.amount), 0);
+  document.getElementById('bulk-preview').innerHTML = `
+    <div style="background:var(--warm);border:1px solid #f0d5b8;border-radius:12px;padding:1rem;margin-bottom:.8rem">
+      <div style="font-size:.7rem;color:var(--or);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem">Preview — ${parsed.length} entries · Total ₹${total.toLocaleString('en-IN')}</div>
+      ${parsed.map(p => `<div style="font-size:.82rem;color:var(--br);margin-bottom:.3rem">✅ ${p.name} · Flat ${p.flat} · ₹${parseInt(p.amount).toLocaleString('en-IN')}</div>`).join('')}
+    </div>
+    <button class="btn-primary" onclick="confirmBulk(${JSON.stringify(parsed).replace(/"/g,'&quot;')}, '${method}', '${dateStr}')">✅ Confirm & Save All ${parsed.length} Entries</button>`;
+}
+
+async function confirmBulk(entries, method, dateStr) {
+  const url = getScriptUrl();
+  const ts  = new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata'});
+  let saved = 0;
+  for (const e of entries) {
+    const row = { timestamp:ts, name:e.name, flat:e.flat, mobile:'', amount:e.amount, date:dateStr, method, status:'✅ Received', enteredBy:'Admin Bulk' };
+    if (url && !url.includes('YOUR_APPS_SCRIPT')) {
+      try { await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(row) }); } catch(e) {}
+    }
+    allConData.unshift(row); saved++;
+  }
+  toast(`✅ ${saved} entries saved!`, 'success');
+  document.getElementById('bulk-input').value = '';
+  document.getElementById('bulk-preview').innerHTML = '';
+  loadManualEntries();
+  updateDashStats();
+}
+
+// Add portal link to quick links in dashboard
+document.addEventListener('DOMContentLoaded', () => {
+  const ql = document.querySelector('#tab-dashboard .admin-card:last-child div');
+  if (ql) {
+    const btn = document.createElement('a');
+    btn.href = 'portal.html'; btn.target = '_blank'; btn.style.textDecoration = 'none';
+    btn.innerHTML = '<button class="btn-secondary">👤 View User Portal</button>';
+    ql.appendChild(btn);
+  }
+});
+
+// Auto-load manual entries when tab is shown
+const origSwitch = switchTab;
+
+// Auto-check auth on load
+// Auth handled by window.addEventListener('load') above
+</script>
+</body>
+</html>

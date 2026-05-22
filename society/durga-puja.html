@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Durga Puja & Navratri — PSOTS Society</title>
+  <meta name="description" content="Celebrate Durga Puja and Navratri at Prestige Song of the South."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --jade:        #1a4a3a;
+      --jade-light:  #2d6b54;
+      --gold:       #b8882a;
+      --gold-light: #d4a84b;
+      --gold-pale:  #f0d898;
+      --cream:       #faf6f0;
+      --cream-dark:  #f0e8db;
+      --ink:        #1a1208;
+      --ink-soft:   #3d2f1e;
+      --muted:      #8a7a6a;
+      --border:      rgba(160,130,90,0.22);
+      --white:      #ffffff;
+    }
+    body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;}
+    
+    .hero {
+      background: var(--jade);
+      color: white;
+      text-align: center;
+      padding: 80px 24px;
+      margin-top: 64px;
+    }
+    .hero-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 8px; color: var(--gold-pale); }
+    .hero p { font-size: 1.2rem; opacity: 0.9; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+
+    .container { max-width: 800px; margin: -40px auto 60px; padding: 0 24px; position: relative; z-index: 10; }
+    
+    .card { 
+      background: var(--white); 
+      border-radius: 16px; 
+      border: 1px solid var(--border); 
+      padding: 32px; 
+      margin-bottom: 24px; 
+      box-shadow: 0 8px 30px rgba(26,18,8,0.05);
+    }
+    
+    .countdown-section { text-align: center; border: 2px solid var(--gold); }
+    .countdown-title { font-size: 14px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px; }
+    
+    .countdown-grid { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .countdown-unit { 
+      text-align: center; 
+      background: var(--cream); 
+      border-radius: 12px; 
+      padding: 16px 20px; 
+      min-width: 90px; 
+      border: 1px solid var(--border);
+    }
+    .countdown-unit .num { display: block; font-size: 36px; font-weight: 800; color: var(--jade); font-family: 'Playfair Display', serif; line-height: 1; }
+    .countdown-unit .label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
+
+    h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 16px; color: var(--jade); }
+    
+    .feature-list { list-style: none; }
+    .feature-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; font-size: 1.1rem; }
+    .feature-icon { font-size: 20px; flex-shrink: 0; }
+
+    .cta-card { background: var(--jade); color: white; text-align: center; }
+    .cta-card h2 { color: var(--gold-pale); }
+    .cta-card p { margin-bottom: 24px; opacity: 0.9; }
+    .btn { 
+      display: inline-block; 
+      background: var(--gold); 
+      color: var(--ink); 
+      padding: 14px 32px; 
+      border-radius: 8px; 
+      text-decoration: none; 
+      font-weight: 700; 
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 60px 24px; }
+      .hero h1 { font-size: 2.2rem; }
+      .countdown-unit { min-width: 70px; padding: 12px 10px; }
+      .countdown-unit .num { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="societyNav"></div>
+
+<div class="hero">
+  <span class="hero-emoji">🪔</span>
+  <h1>Durga Puja / Navratri</h1>
+  <p>Prestige Song of the South</p>
+</div>
+
+<div class="container">
+  <div class="card countdown-section">
+    <div class="countdown-title">Next Celebration</div>
+    <div id="countdown"></div>
+  </div>
+
+  <section class="card">
+    <h2>About Durga Puja</h2>
+    <p>Navratri and Durga Puja celebrate the divine feminine — nine nights of devotion, dance, and the victory of good over evil. It is one of India's most vibrant festivals, celebrated with immense energy through garba, dandiya, and community gatherings.</p>
+  </section>
+
+  <section class="card">
+    <h2>How We Celebrate at PSOTS</h2>
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-icon">🎶</span><span>Vibrant Garba and Dandiya nights for all residents.</span></li>
+      <li class="feature-item"><span class="feature-icon">🪔</span><span>Durga idol installation and traditional puja at the clubhouse.</span></li>
+      <li class="feature-item"><span class="feature-icon">👗</span><span>Traditional dress celebrations and community competitions.</span></li>
+      <li class="feature-item"><span class="feature-icon">🍱</span><span>Grand community feast for all resident families.</span></li>
+    </ul>
+  </section>
+
+  <div class="card cta-card">
+    <h2>Be Part of the Celebration</h2>
+    <p>Join PSOTS Society to stay updated on all community events, timings, and participation details.</p>
+    <a href="/society/login.html" class="btn">Join PSOTS Society →</a>
+  </div>
+</div>
+
+<script type="module">
+import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
+await renderSocietyNav('societyNav', 'admin');
+
+function startCountdown(targetDate) {
+  function update() {
+    const now = new Date();
+    let target = new Date(targetDate);
+    // If date passed this year, use next year
+    if (target < now) {
+      target.setFullYear(target.getFullYear() + 1);
+    }
+    const diff = target - now;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('countdown').innerHTML = `
+      <div class="countdown-grid">
+        <div class="countdown-unit"><span class="num">${days}</span><span class="label">Days</span></div>
+        <div class="countdown-unit"><span class="num">${String(hours).padStart(2,'0')}</span><span class="label">Hours</span></div>
+        <div class="countdown-unit"><span class="num">${String(mins).padStart(2,'0')}</span><span class="label">Mins</span></div>
+        <div class="countdown-unit"><span class="num">${String(secs).padStart(2,'0')}</span><span class="label">Secs</span></div>
+      </div>`;
+  }
+  update();
+  setInterval(update, 1000);
+}
+
+startCountdown('October 2, 2025 00:00:00');
+</script>
+
+<footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+      PSOTS Society · society.psots.in
+    </p>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+      <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+      <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+      <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+      <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+      This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+    </p>
+  </div>
+</footer>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

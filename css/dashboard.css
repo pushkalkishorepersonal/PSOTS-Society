@@ -1,0 +1,291 @@
+/* ============================================================
+   PSOTS Dashboard — Styles for society/index.html
+   ============================================================ */
+
+/* ── CONTAINER (Mobile-First) ────────────────────────────– */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 2.5rem 1.8rem;
+  }
+}
+
+/* ── HERO BAR (Mobile-First) ────────────────────────────– */
+.hero-bar {
+  background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade) 55%, var(--jade-light) 100%);
+  color: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 18px;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0 8px 32px rgba(26,74,58,0.28);
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.52s var(--ease-smooth) both;
+}
+
+.hero-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.hero-bar-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-bar-content h1 {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+
+.hero-bar-content p {
+  font-size: 14px;
+  opacity: 0.84;
+  line-height: 1.6;
+}
+
+.pending-badge {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.26);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  width: fit-content;
+  align-self: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 640px) {
+  .hero-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2.2rem 2.5rem;
+    gap: 1.5rem;
+  }
+  .hero-bar-content h1 {
+    font-size: 26px;
+  }
+}
+
+/* ── FEATURE GRID (Mobile-First) ────────────────────────– */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.6rem;
+  }
+}
+
+/* ── TILE ────────────────────────────────────────────────– */
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 1.8rem 1.4rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--t-base), box-shadow var(--t-base),
+              border-color var(--t-base);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
+  justify-content: flex-start;
+  animation: fadeUp 0.52s var(--ease-smooth) both;
+}
+
+.tile:nth-child(1) { animation-delay: 0.08s; }
+.tile:nth-child(2) { animation-delay: 0.14s; }
+.tile:nth-child(3) { animation-delay: 0.20s; }
+.tile:nth-child(4) { animation-delay: 0.26s; }
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(184,136,42,0.07), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--t-base);
+}
+
+.tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(184,136,42,0.30);
+  box-shadow: var(--shadow-lift);
+}
+
+.tile:hover::after {
+  opacity: 1;
+}
+
+.tile:active {
+  transform: translateY(-1px);
+  transition: transform var(--t-snap);
+}
+
+.tile-icon {
+  font-size: 2rem;
+  margin-bottom: 0.9rem;
+  line-height: 1;
+  transition: transform var(--t-spring);
+  display: inline-block;
+}
+
+.tile:hover .tile-icon {
+  transform: scale(1.10) rotate(-4deg);
+}
+
+.tile-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.tile-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── TILE STATES ────────────────────────────────────────– */
+.tile-active {
+  border: 1.5px solid var(--jade) !important;
+  background: var(--jade-pale);
+}
+
+.tile-preview {
+  border: 1px dashed var(--border) !important;
+  opacity: 0.72;
+  background: var(--cream);
+  filter: grayscale(0.15);
+}
+
+.tile-preview:hover {
+  transform: none !important;
+}
+
+/* ── BADGE LIVE ──────────────────────────────────────────– */
+.badge-live {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(22,163,74,0.24);
+}
+
+/* ── SECTION HEADER ──────────────────────────────────────– */
+.section-header {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+  color: var(--ink);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 44px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  border-radius: 2px;
+}
+
+/* ── GROUP SECTION TITLE ─────────────────────────────────– */
+.group-section-title {
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+/* ── LOADING STATE ───────────────────────────────────────– */
+.loading-tile {
+  background: linear-gradient(90deg,
+    var(--surface) 0%,
+    var(--cream) 50%,
+    var(--surface) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────– */
+@media (max-width: 375px) {
+  .hero-bar {
+    padding: 1.5rem 1.2rem;
+    border-radius: 14px;
+  }
+  .hero-bar-content h1 {
+    font-size: 22px;
+  }
+  .tile {
+    padding: 1.5rem 1.2rem;
+  }
+}

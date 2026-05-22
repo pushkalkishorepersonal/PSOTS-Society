@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About PSOTS Society</title>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --jade: #1a4a3a; --gold: #b8882a; --cream: #f8f2e8; --cream-dark: #ede5d5;
+      --ink: #1a1208; --muted: #8a7a6a; --border: rgba(160,130,90,0.22);
+      --font-serif: 'Playfair Display', Georgia, serif; --font-sans: 'Nunito Sans', system-ui, sans-serif;
+    }
+    body { font-family: var(--font-sans); background: var(--cream); color: var(--ink); line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 12px; color: var(--jade); }
+    h2 { font-family: var(--font-serif); font-size: 1.4rem; margin-top: 32px; margin-bottom: 16px; color: var(--jade); }
+    p { margin-bottom: 16px; }
+    ul { margin-left: 20px; margin-bottom: 16px; }
+    li { margin-bottom: 10px; }
+    .highlight { background: rgba(26, 74, 58, 0.08); padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid var(--jade); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏢 About PSOTS Society</h1>
+
+    <h2>Our Mission</h2>
+    <p>PSOTS Society is a digital resident portal for Prestige Song of the South, Bangalore — serving over 2,100 residents across 14 towers. We're built by residents, for residents, to make community living seamless, transparent, and respectful of everyone's privacy.</p>
+
+    <h2>Built by Residents</h2>
+    <div class="highlight">
+      <p><strong>This platform exists because residents asked for it.</strong> We solved real problems: approving new residents fairly, connecting neighbors for carpools and secondhand goods, managing community feedback, and keeping everyone informed — all while respecting privacy.</p>
+    </div>
+
+    <h2>Open & Transparent</h2>
+    <ul>
+      <li><strong>Privacy-First:</strong> Admins see your name initial, not your full identity. No ads, no tracking, no data selling.</li>
+      <li><strong>Contact Relay:</strong> Connect with other residents without exposing your phone or email</li>
+      <li><strong>Data Access:</strong> See who accessed your data and when</li>
+      <li><strong>Right to Forget:</strong> Delete your account and we anonymize your posts</li>
+    </ul>
+
+    <h2>How to Contribute</h2>
+    <p>Have an idea to improve PSOTS? Found a bug? Want to contribute code or design?</p>
+    <ul>
+      <li><strong>Report a Bug:</strong> Profile → Feedback (or email: security@psots.in)</li>
+      <li><strong>Suggest a Feature:</strong> Profile → Feedback</li>
+      <li><strong>Security Issues:</strong> Report to security@psots.in (we take this seriously)</li>
+      <li><strong>Questions:</strong> Contact us at privacy@psots.in</li>
+    </ul>
+
+    <h2>Technology</h2>
+    <ul>
+      <li><strong>Frontend:</strong> Vanilla JavaScript (no framework bloat)</li>
+      <li><strong>Database:</strong> Firebase Firestore (India-hosted)</li>
+      <li><strong>Auth:</strong> Firebase Auth (Google, Email OTP, Telegram OTP)</li>
+      <li><strong>Hosting:</strong> Cloudflare Pages (fast, secure, worldwide)</li>
+      <li><strong>API:</strong> Cloudflare Workers (serverless backend)</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <ul>
+      <li><strong>General:</strong> admin@psots.in</li>
+      <li><strong>Privacy:</strong> privacy@psots.in</li>
+      <li><strong>Security:</strong> security@psots.in</li>
+      <li><strong>Telegram:</strong> @psots_telegram_bot</li>
+    </ul>
+
+    <p style="margin-top: 40px; font-size: 13px; color: var(--muted);">
+      <a href="/" style="color: var(--jade); text-decoration: none;">← Back to Home</a>
+    </p>
+  </div>
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

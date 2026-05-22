@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contributors — PSOTS Chhath 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+  .filter-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+  .chip{background:var(--warm);border:1.5px solid #f0d5b8;color:var(--lbr);border-radius:50px;padding:.3rem .85rem;font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s}
+  .chip.on{background:var(--or);color:#fff;border-color:var(--or)}
+  .con-search{width:100%;padding:.7rem 1rem .7rem 2.5rem;border:1.5px solid #f0d5b8;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--ink);background:var(--warm);outline:none;transition:border-color .2s;margin-bottom:1rem}
+  .con-search:focus{border-color:var(--or)}
+  .search-wrap{position:relative}
+  .search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--lbr)}
+  .con-item{display:grid;grid-template-columns:28px 1fr auto auto;align-items:center;gap:.75rem;padding:.68rem .9rem;background:var(--warm);border-radius:10px;border:1px solid #f0dfc8;margin-bottom:.45rem;transition:background .15s}
+  .con-item:hover{background:#fff5e8}
+  .ci-rank{font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;color:rgba(107,58,24,.65)}
+  .ci-name{font-weight:500;font-size:.88rem;color:var(--ink)}
+  .ci-flat{font-size:.76rem;color:#6b3a18}
+  .ci-type{font-size:.72rem;color:#6b3a18;display:flex;align-items:center;gap:.25rem}
+  .ci-amt{font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;color:var(--or);white-space:nowrap}
+  .ci-dot{width:8px;height:8px;border-radius:50%;background:#4caf50;flex-shrink:0}
+  .ci-dot.p{background:var(--gold)}
+  .con-list{max-height:none;overflow:visible}
+  .total-bar{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,var(--or),#c93800);border-radius:10px;padding:.8rem 1rem;margin-top:.8rem;color:#fff}
+  .tb-l{font-size:.8rem;opacity:1}
+  .tb-v{font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700}
+  .legend{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.8rem;font-size:.78rem;color:#6b3a18}
+  .leg-item{display:flex;align-items:center;gap:.3rem}
+  .leg-dot{width:8px;height:8px;border-radius:50%}
+  </style>
+</head>
+<body>
+<nav class="page-nav">
+  <a class="page-nav-back" href="../index.html"><span class="page-nav-back-icon">←</span> Home</a>
+  <div class="page-nav-title">🙏 Contributors</div>
+  <button style="background:none;border:none;cursor:pointer;font-size:.75rem;color:rgba(255,220,120,.55);font-family:'DM Sans',sans-serif" onclick="loadList()">🔄 Refresh</button>
+</nav>
+<div class="page-hero" style="background:linear-gradient(135deg,#c94000,#8b2800)">
+  <span class="ph-icon">🙏</span>
+  <div class="ph-title">Contributors 2026</div>
+  <div class="ph-sub" id="subLine">Loading…</div>
+</div>
+<div class="page-content">
+  <div class="card">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="con-search" type="text" id="searchInp" placeholder="Search by name or flat number…" oninput="filterList()"/>
+    </div>
+    <div class="filter-row">
+      <span style="font-size:.78rem;color:#6b3a18">Show:</span>
+      <div class="chip on" onclick="setFilter('all',this)">All</div>
+      <div class="chip"    onclick="setFilter('verified',this)">Verified ✅</div>
+      <div class="chip"    onclick="setFilter('portal',this)">Portal Users 🔐</div>
+      <div class="chip"    onclick="setFilter('guest',this)">Guests 👤</div>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#4caf50"></div>Verified by committee</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>Pending verification</div>
+    </div>
+    <div id="conList"><div class="loading">🪔 Loading contributors…</div></div>
+    <div class="total-bar"><span class="tb-l">Total Collected 2026</span><span class="tb-v" id="totalAmt">—</span></div>
+    <div style="margin-top:.8rem;display:flex;gap:.7rem;flex-wrap:wrap">
+      <a href="payment.html" style="text-decoration:none"><button class="btn-primary">💰 Contribute Now</button></a>
+      <a href="../portal.html" style="text-decoration:none"><button class="btn-secondary">👤 View My History</button></a>
+    </div>
+  </div>
+</div>
+<script>
+let allData=[],filterMode='all';
+const su=localStorage.getItem('psots_script_url')||'';
+async function loadList(){
+  const el=document.getElementById('conList');
+  el.innerHTML='<div class="loading">🪔 Loading…</div>';
+  if(!su||su.includes('YOUR_APPS')){
+    allData=[
+      {name:'Pushkal Kishore',flat:'15167',amount:5001,status:'✅ Received',accountType:'Portal 🔐'},
+      {name:'Ratnesh Singh',flat:'15165',amount:1100,status:'✅ Received',accountType:'Guest 👤'},
+      {name:'Praveen Kumar',flat:'2172',amount:5001,status:'✅ Received',accountType:'Portal 🔐'},
+      {name:'Rekha Sinha',flat:'9045',amount:11000,status:'✅ Received',accountType:'Portal 🔐'},
+      {name:'Anupam Rai',flat:'5143',amount:1001,status:'Pending Verification',accountType:'Guest 👤'},
+      {name:'Anonymous Donor',flat:'—',amount:501,status:'✅ Received',accountType:'Admin Entry'},
+    ];
+    renderList(allData);return;
+  }
+  try{const r=await fetch(su+'?action=list'),d=await r.json();allData=d.contributors||[];renderList(allData);}
+  catch(e){el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span>Could not load. Check connection and try again.</div>';}
+}
+function renderList(data){
+  const q=document.getElementById('searchInp').value.toLowerCase();
+  let f=data.filter(r=>{
+    const m=!q||r.name.toLowerCase().includes(q)||String(r.flat).toLowerCase().includes(q);
+    if(!m)return false;
+    if(filterMode==='verified')return r.status?.includes('Received');
+    if(filterMode==='portal')return r.accountType?.includes('Portal');
+    if(filterMode==='guest')return r.accountType?.includes('Guest');
+    return true;
+  });
+  const total=f.filter(r=>r.status?.includes('Received')).reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  document.getElementById('totalAmt').textContent='₹'+total.toLocaleString('en-IN');
+  document.getElementById('subLine').textContent=data.length+' contributors · ₹'+total.toLocaleString('en-IN')+' collected';
+  if(!f.length){document.getElementById('conList').innerHTML='<div class="empty"><span class="empty-icon">🙏</span>No contributors found.</div>';return;}
+  document.getElementById('conList').innerHTML=f.map((c,i)=>{
+    const isV=c.status?.includes('Received');
+    const isPortal=c.accountType?.includes('Portal');
+    const isGuest=c.accountType?.includes('Guest');
+    const typeIcon=isPortal?'🔐':isGuest?'👤':'✍️';
+    return `<div class="con-item">
+      <div class="ci-rank">#${i+1}</div>
+      <div><div class="ci-name">${c.name}</div><div class="ci-flat">Flat ${c.flat} <span style="margin-left:.3rem">${typeIcon}</span></div></div>
+      <div class="ci-amt">₹${parseInt(c.amount||0).toLocaleString('en-IN')}</div>
+      <div class="ci-dot ${isV?'':'p'}" title="${isV?'Verified ✅':'Pending'}"></div>
+    </div>`;
+  }).join('');
+}
+function filterList(){renderList(allData)}
+function setFilter(m,el){filterMode=m;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderList(allData)}
+loadList();
+</script>
+</body>
+</html>

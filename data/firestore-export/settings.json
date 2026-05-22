@@ -1,0 +1,22 @@
+[
+  {
+    "id": "contact",
+    "adminWhatsapp": "919482088904",
+    "adminTelegram": "pushkalkishore",
+    "adminEmail": "pushkalkishore@gmail.com",
+    "adminName": "Pushkal Kishore"
+  },
+  {
+    "id": "platform",
+    "siteName": "MySociety",
+    "siteUrl": "https://society.psots.in",
+    "approvalTimeHours": "48",
+    "maintenanceMode": "false",
+    "contactEmail": "",
+    "announcementBannerEnabled": false,
+    "welcomeMessage": "",
+    "platformName": "PSOTS Society",
+    "lastUpdated": "2026-04-16T18:22:34.124Z",
+    "maintenanceModeEnabled": false
+  }
+]

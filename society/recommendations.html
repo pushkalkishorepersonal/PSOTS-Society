@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSOTS — Recommendations</title>
+  <meta name="description" content="Find trusted doctors, restaurants, plumbers & services recommended by residents."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --jade:        #1a4a3a;
+      --jade-light:  #2d6b54;
+      --gold:        #b8882a;
+      --cream:       #faf6f0;
+      --cream-dark:  #ede5d5;
+      --surface:     #fffcf7;
+      --ink:         #1a1208;
+      --muted:       #8a7a6a;
+      --border:      rgba(160,130,90,0.22);
+      --shadow:      0 6px 28px rgba(139,90,26,0.10);
+      --font-serif:  'Playfair Display', Georgia, serif;
+      --font-sans:   'Nunito Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    }
+
+    #societyNav { margin-bottom: 0; }
+
+    .page-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px 40px;
+    }
+
+    .page-hero {
+      margin-bottom: 40px;
+    }
+
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-family: var(--font-serif);
+      font-size: 40px;
+      font-weight: 400;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .page-sub {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      transition: all 0.2s;
+      font-family: var(--font-sans);
+    }
+
+    .tab-btn:hover { background: var(--cream-dark); }
+    .tab-btn.active { background: var(--jade); color: white; border-color: var(--jade); }
+
+    .search-box {
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: var(--font-sans);
+    }
+
+    .search-input:focus { outline: none; border-color: var(--jade); }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-jade {
+      background: var(--jade);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      transition: opacity 0.2s;
+    }
+
+    .btn-jade:hover { opacity: 0.9; }
+
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .contact-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .card-rating {
+      color: #f59e0b;
+    }
+
+    .card-recommended {
+      color: var(--muted);
+    }
+
+    .card-description {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-sm {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-call {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-call:hover { opacity: 0.9; }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: white;
+    }
+
+    .btn-whatsapp:hover { opacity: 0.9; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-text {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .loader-ring {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--jade);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 60px auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gate-wrap {
+      text-align: center;
+      padding: 80px 20px;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .gate-icon { font-size: 48px; margin-bottom: 16px; }
+    .gate-title { font-family: var(--font-serif); font-size: 24px; margin-bottom: 12px; }
+    .gate-sub { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+
+    #globalToast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: var(--jade);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal.active { display: flex; align-items: center; justify-content: center; }
+    .modal-content { background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-family: var(--font-serif); font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+    .form-field { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: var(--font-sans); }
+    .form-input:focus { outline: none; border-color: var(--jade); }
+    .form-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .btn-cancel { background: var(--cream-dark); color: var(--ink); flex: 1; }
+    .btn-submit { background: var(--jade); color: white; flex: 1; }
+
+    @media (max-width: 640px) {
+      .page-wrap { padding: 50px 16px 30px; }
+      .page-title { font-size: 28px; }
+      .recommendations-grid { grid-template-columns: 1fr; }
+      .btn-sm { padding: 10px 8px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="societyNav"></div>
+
+<div id="app">
+  <div class="loader-ring"></div>
+</div>
+
+<div id="globalToast"></div>
+
+<!-- Add Recommendation Modal -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <h2 class="modal-title">Add Recommendation</h2>
+    <form id="addForm">
+      <div class="form-field">
+        <label class="form-label">Name *</label>
+        <input id="recName" type="text" class="form-input" placeholder="e.g. Dr. Sharma" required maxlength="80"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Category *</label>
+        <select id="recCategory" class="form-input" required>
+          <option value="">Select category</option>
+          <option value="doctors">🏥 Doctors</option>
+          <option value="home">🔧 Home Services</option>
+          <option value="education">📚 Education</option>
+          <option value="professional">💼 Professional</option>
+          <option value="domestic">👩‍🍳 Domestic Help</option>
+          <option value="wellness">💪 Wellness</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Phone (WhatsApp/Call) *</label>
+        <input id="recPhone" type="tel" class="form-input" placeholder="10-digit mobile number" required maxlength="20"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Rating *</label>
+        <select id="recRating" class="form-input" required>
+          <option value="">Select rating</option>
+          <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
+          <option value="4">⭐⭐⭐⭐ (4 stars)</option>
+          <option value="3">⭐⭐⭐ (3 stars)</option>
+          <option value="2">⭐⭐ (2 stars)</option>
+          <option value="1">⭐ (1 star)</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Why do you recommend? *</label>
+        <textarea id="recDesc" class="form-input" placeholder="e.g. Excellent service, reasonable pricing" maxlength="200" rows="3" required style="resize: vertical;"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-sm btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-sm btn-submit">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import session from '/js/core/auth.js';
+import { db } from '/js/core/firebase.js';
+import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
+import {
+  collection, query, where, orderBy, getDocs,
+  doc, setDoc, serverTimestamp, Timestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = document.getElementById('app');
+const COLL = 'recommendations';
+
+const CATEGORIES = {
+  doctors: { name: 'Doctors', icon: '🏥' },
+  home: { name: 'Home Services', icon: '🔧' },
+  education: { name: 'Education', icon: '📚' },
+  professional: { name: 'Professional', icon: '💼' },
+  domestic: { name: 'Domestic Help', icon: '👩‍🍳' },
+  wellness: { name: 'Wellness', icon: '💪' }
+};
+
+let currentCategory = 'doctors';
+let recommendations = [];
+let currentUser = null;
+let currentResident = null;
+
+await renderSocietyNav('societyNav', 'recommendations');
+
+function toast(msg, ok = true) {
+  const t = document.getElementById('globalToast');
+  t.innerHTML = `<div class="toast" style="background: ${ok ? 'var(--jade)' : '#dc2626'}">${msg}</div>`;
+  setTimeout(() => t.innerHTML = '', 3000);
+}
+
+function renderStarRating(rating) {
+  return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+function buildPage(user, resident) {
+  currentUser = user;
+  currentResident = resident;
+  const isApproved = resident?.status === 'approved';
+
+  app.innerHTML = `
+    <div class="page-wrap">
+      <div class="page-hero">
+        <div class="page-eyebrow">Community</div>
+        <h1 class="page-title">Recommendations</h1>
+        <p class="page-sub">Find trusted doctors, restaurants, plumbers & services recommended by residents.</p>
+      </div>
+
+      <div class="tab-bar" id="categoryTabs"></div>
+
+      <div class="controls">
+        <input type="text" class="search-input" id="searchBox" placeholder="Search by name…"/>
+        ${isApproved ? '<button class="btn-jade" onclick="openModal()">+ Add Recommendation</button>' : ''}
+      </div>
+
+      <div id="content"></div>
+    </div>
+  `;
+
+  renderCategoryTabs();
+  loadAndRender();
+  document.getElementById('searchBox').addEventListener('input', loadAndRender);
+}
+
+function renderCategoryTabs() {
+  const tabs = document.getElementById('categoryTabs');
+  tabs.innerHTML = Object.entries(CATEGORIES).map(([key, cat]) =>
+    `<button class="tab-btn ${key === currentCategory ? 'active' : ''}" onclick="switchCategory('${key}')">${cat.icon} ${cat.name}</button>`
+  ).join('');
+}
+
+window.switchCategory = function(cat) {
+  currentCategory = cat;
+  renderCategoryTabs();
+  loadAndRender();
+};
+
+async function loadAndRender() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loader-ring"></div>';
+
+  try {
+    const q = query(
+      collection(db, COLL),
+      where('status', '==', 'approved'),
+      where('category', '==', currentCategory)
+    );
+    recommendations = (await getDocs(q)).docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const search = document.getElementById('searchBox')?.value.toLowerCase() || '';
+    let filtered = recommendations;
+    if (search) {
+      filtered = filtered.filter(r => r.name.toLowerCase().includes(search));
+    }
+
+    if (filtered.length === 0) {
+      content.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">${CATEGORIES[currentCategory].icon}</div>
+          <div class="empty-text">No recommendations yet</div>
+          <p style="margin-top: 8px; font-size: 14px;">Be the first to recommend!</p>
+        </div>
+      `;
+    } else {
+      content.innerHTML = `<div class="recommendations-grid">${filtered.map(renderCard).join('')}</div>`;
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="empty-state"><div class="empty-text">Error loading recommendations</div></div>`;
+  }
+}
+
+function renderCard(rec) {
+  const phone = (rec.phone || '').replace(/\D/g, '');
+  const name = rec.name || rec.subcategory || CATEGORIES[rec.category]?.name || rec.category;
+  const subcategory = rec.subcategory || CATEGORIES[rec.category]?.name || rec.category;
+  const desc = (rec.description || '').substring(0, 150).replace(/\n/g, ' ').trim();
+  return `
+    <div class="contact-card">
+      <div class="card-header">
+        <div class="card-icon">${CATEGORIES[rec.category]?.icon || '💼'}</div>
+        <div style="flex: 1;">
+          <div class="card-title">${name}</div>
+          <div class="card-subtitle">${subcategory}</div>
+        </div>
+      </div>
+      ${desc ? `<div class="card-description">${desc}</div>` : ''}
+      <div class="card-actions">
+        ${phone ? `<a href="tel:+91${phone}" class="btn-sm btn-call">📞 Call</a>` : ''}
+        ${phone ? `<a href="https://wa.me/91${phone}" class="btn-sm btn-whatsapp" target="_blank">💬 WhatsApp</a>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderGate() {
+  app.innerHTML = `
+    <div class="gate-wrap">
+      <div class="gate-icon">🔒</div>
+      <h2 class="gate-title">Sign in to view Recommendations</h2>
+      <p class="gate-sub">See trusted recommendations from your neighbors in PSOTS Society.</p>
+      <a href="/society/register.html" class="btn-jade">Sign In / Register</a>
+    </div>
+  `;
+}
+
+window.openModal = function() {
+  document.getElementById('addModal').classList.add('active');
+};
+
+window.closeModal = function() {
+  document.getElementById('addModal').classList.remove('active');
+  document.getElementById('addForm').reset();
+};
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('recName').value.trim();
+  const category = document.getElementById('recCategory').value;
+  const phone = document.getElementById('recPhone').value.trim();
+  const rating = document.getElementById('recRating').value;
+  const description = document.getElementById('recDesc').value.trim();
+
+  if (!name || !category || !phone || !rating || !description) {
+    toast('Please fill all fields', false);
+    return;
+  }
+
+  try {
+    await setDoc(doc(collection(db, COLL), `${Date.now()}_${currentUser.uid}`), {
+      name,
+      category,
+      phone,
+      rating: parseInt(rating),
+      description,
+      recommendedBy: currentResident.flatNumber,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      approvedBy: null
+    });
+    toast('✅ Recommendation submitted for approval!');
+    closeModal();
+  } catch (err) {
+    toast('Error submitting recommendation', false);
+  }
+});
+
+session.onChange(({ user, resident }) => {
+  if (!user) {
+    renderGate();
+  } else {
+    buildPage(user, resident);
+  }
+});
+</script>
+
+<script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

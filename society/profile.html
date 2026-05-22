@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
+  <link rel="manifest" href="/society/manifest.json"/>
+  <meta name="theme-color" content="#1a4a3a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="PSOTS"/>
+  <link rel="apple-touch-icon" href="/assets/psots-icon-192.png"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile · PSOTS Society</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Nunito+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/polish.css">
+
+  <style>
+    /* Profile-specific styling */
+    body { background: var(--cream); }
+    .profile-wrapper { padding-bottom: 100px; }
+
+    .profile-header {
+      background: var(--grad-jade);
+      border-radius: var(--r-2xl);
+      padding: 40px 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-lift);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      animation: fadeUp 0.6s var(--ease-smooth) both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent 60%);
+      pointer-events: none;
+    }
+
+    .profile-header-content {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    .profile-header h1 {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .profile-header-meta {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .profile-status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: var(--r-md);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .profile-avatar-section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 3px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    /* Tile cards layout */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (min-width: 768px) {
+      .profile-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 1024px) {
+      .profile-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .tile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      box-shadow: var(--elev-1);
+      transition: var(--t-base);
+      animation: fadeUp 0.6s var(--ease-smooth) both;
+    }
+
+    .tile-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--elev-3);
+      border-color: rgba(184,136,42,0.25);
+    }
+
+    .tile-card::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      opacity: 0;
+      transition: opacity var(--t-base);
+    }
+
+    .tile-card:hover::before { opacity: 1; }
+
+    .tile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tile-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--jade-pale);
+      border-radius: var(--r-md);
+      color: var(--jade);
+    }
+
+    .tile-title {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .tile-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .info-value.placeholder {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Full-width sections */
+    .full-width-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--elev-1);
+      animation: fadeUp 0.6s var(--ease-smooth) both;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-icon {
+      font-size: 24px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--jade-pale);
+      border-radius: var(--r-md);
+      color: var(--jade);
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background: var(--surface);
+      transition: var(--t-snap);
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--jade);
+      box-shadow: var(--shadow-focus-jade);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--r-md);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--t-fast);
+      font-family: var(--font-sans);
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--jade);
+      color: white;
+      box-shadow: 0 2px 8px rgba(26,74,58,0.2);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--jade-light);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-jade);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--jade);
+      border: 1.5px solid var(--jade);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--jade-pale);
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #a93226;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: var(--r-md);
+      margin-bottom: 16px;
+      font-size: 13px;
+      display: none;
+      border-left: 4px solid;
+      animation: slideInLeft 0.24s var(--ease-smooth);
+    }
+
+    .message.success {
+      background: var(--green-bg);
+      border-left-color: var(--jade);
+      color: var(--jade);
+    }
+
+    .message.error {
+      background: var(--red-bg);
+      border-left-color: var(--red);
+      color: var(--red);
+    }
+
+    .message.show { display: block; }
+
+    .info-box {
+      background: var(--jade-pale);
+      border: 1px solid rgba(26,74,58,0.2);
+      border-radius: var(--r-md);
+      padding: 14px;
+      font-size: 13px;
+      color: var(--jade);
+      margin-bottom: 16px;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .modal.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.36s var(--ease-spring);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.94) translateY(12px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--t-fast);
+    }
+
+    .modal-close:hover { color: var(--ink); }
+
+    .device-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .device-item {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .device-info { flex: 1; }
+    .device-label { font-weight: 600; font-size: 13px; color: var(--ink); }
+    .device-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .access-log {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 14px;
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    .privacy-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .privacy-toggle:last-child { border-bottom: none; }
+
+    .toggle-label { font-size: 13px; color: var(--ink); font-weight: 500; }
+    .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* Checkbox */
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--border-strong);
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--t-fast);
+    }
+
+    input[type="checkbox"]:checked {
+      background: var(--jade);
+      border-color: var(--jade);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: '✓';
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Tab Navigation */
+    .profile-tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      margin-bottom: 28px;
+      overflow-x: auto;
+      box-shadow: var(--elev-1);
+      scrollbar-width: none;
+    }
+    .profile-tabs::-webkit-scrollbar { display: none; }
+
+    .profile-tab-btn {
+      padding: 16px 24px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      white-space: nowrap;
+      transition: color 0.18s, border-color 0.18s;
+    }
+
+    .profile-tab-btn:hover {
+      color: var(--ink);
+    }
+
+    .profile-tab-btn.active {
+      color: var(--jade);
+      border-bottom-color: var(--jade);
+      font-weight: 600;
+    }
+
+    .profile-tab-content {
+      display: none;
+    }
+
+    .profile-tab-content.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .profile-header {
+        flex-direction: column;
+        padding: 20px 16px;
+        gap: 16px;
+      }
+
+      .profile-header-content { padding-right: 0; }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .tile-card {
+        padding: 16px;
+      }
+
+      .tile-icon { font-size: 24px; }
+      .tile-title { font-size: 14px; }
+      .info-label { font-size: 12px; }
+      .info-value { font-size: 13px; }
+
+      .full-width-section {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .section-header { margin-bottom: 16px; }
+      .section-icon { font-size: 20px; }
+      .section-title { font-size: 14px; }
+
+      .modal-content {
+        padding: 20px;
+        margin: 16px;
+        max-height: 90vh;
+      }
+
+      .profile-tabs {
+        gap: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 16px;
+      }
+
+      .profile-tab-btn {
+        padding: 12px 14px;
+        font-size: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .device-item {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .device-info {
+        width: 100%;
+      }
+
+      .device-item button {
+        width: 100%;
+      }
+
+      .family-member-item,
+      .tenant-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .privacy-toggle {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .privacy-toggle > div:first-child {
+        flex: 1;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-header {
+        padding: 16px 12px;
+      }
+
+      .tile-card {
+        padding: 12px;
+      }
+
+      .tile-header {
+        gap: 8px;
+      }
+
+      .tile-icon { font-size: 20px; }
+      .tile-title { font-size: 13px; }
+      .info-label { font-size: 11px; }
+      .info-value { font-size: 12px; }
+
+      .full-width-section {
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .section-icon { font-size: 18px; }
+      .section-title { font-size: 13px; }
+
+      .profile-tabs {
+        gap: 2px;
+        padding: 0 12px;
+      }
+
+      .profile-tab-btn {
+        padding: 10px 12px;
+        font-size: 11px;
+      }
+
+      .modal-content {
+        padding: 16px;
+        margin: 12px;
+      }
+
+      .modal-header h2 {
+        font-size: 16px;
+      }
+
+      .form-group label {
+        font-size: 12px;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 14px;
+      }
+
+      [style*="display: grid; grid-template-columns: repeat(auto-fit"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; padding: 12px 20px;
+      border-radius: 4px; color: white; font-size: 14px; z-index: 10000;
+    }
+    .toast-success { background-color: #4caf50; }
+    .toast-error { background-color: #f44336; }
+    .toast-info { background-color: #2196f3; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="societyNav"></div>
+
+  <div class="main-content profile-wrapper">
+
+    <!-- Hero Profile Card -->
+    <div class="profile-header">
+      <div class="profile-header-content">
+        <h1 id="greetingName" style="color: #f8f2e8;">My Profile</h1>
+        <p class="profile-header-meta" style="color: #f0e8db;">Manage your resident profile and preferences</p>
+        <div class="profile-status-badge" id="profileStatus">Pending Approval</div>
+      </div>
+      <div class="profile-avatar-section">
+        <div class="profile-avatar" id="profileAvatar">👤</div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="profile-tabs" role="tablist">
+      <button class="profile-tab-btn active" onclick="switchProfileTab('overview')" role="tab" aria-selected="true">Overview</button>
+      <button class="profile-tab-btn" onclick="switchProfileTab('family')" role="tab" aria-selected="false">Family</button>
+      <button class="profile-tab-btn" onclick="switchProfileTab('devices')" role="tab" aria-selected="false">Devices</button>
+      <button class="profile-tab-btn" onclick="switchProfileTab('privacy')" role="tab" aria-selected="false">Privacy</button>
+      <button class="profile-tab-btn" onclick="switchProfileTab('account')" role="tab" aria-selected="false">Account</button>
+    </div>
+
+    <!-- Tab: Overview -->
+    <div id="tab-overview" class="profile-tab-content active">
+
+    <!-- Basic Information Grid -->
+    <div class="profile-grid">
+      <!-- Flat & Resident Info -->
+      <div class="tile-card" style="animation-delay: 0.1s;">
+        <div class="tile-header">
+          <div class="tile-icon">🏘️</div>
+          <div class="tile-title">Residence</div>
+        </div>
+        <div class="tile-body">
+          <div class="info-row">
+            <div class="info-label">Flat Number</div>
+            <div class="info-value" id="flatNumber">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Resident Type</div>
+            <div class="info-value" id="residentType">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="tile-card" style="animation-delay: 0.15s;">
+        <div class="tile-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="tile-icon">👤</div>
+            <div class="tile-title">Personal Info</div>
+          </div>
+          <button onclick="openEditPersonalModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 8px;">✏️</button>
+        </div>
+        <div class="tile-body">
+          <div class="info-row">
+            <div class="info-label">Full Name</div>
+            <div class="info-value" id="residentName">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Primary Email</div>
+            <div class="info-value" id="residentEmail">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Phone Number</div>
+            <div class="info-value" id="residentPhone">
+              <span id="residentPhoneValue">—</span>
+              <a href="#" id="residentPhoneLink" onclick="event.preventDefault(); openEditPersonalModal(true);" style="margin-left: 8px; font-size: 12px; color: var(--jade); text-decoration: none; display: none;">Add phone</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="tile-card" style="animation-delay: 0.2s;">
+        <div class="tile-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="tile-icon">📞</div>
+            <div class="tile-title">Contact</div>
+          </div>
+          <button onclick="openEditContactModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; padding: 4px 8px;">✏️</button>
+        </div>
+        <div class="tile-body">
+          <div class="info-row">
+            <div class="info-label">Alt Email</div>
+            <div class="info-value" id="residentSecondaryEmail" class="placeholder">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Alt Phone</div>
+            <div class="info-value" id="residentSecondaryPhone" class="placeholder">—</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Telegram</div>
+            <div class="info-value" id="residentTelegram" class="placeholder">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vouch for Neighbour Section -->
+    <div style="background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px;">
+      <h4 style="color: var(--jade); margin: 0 0 8px 0; font-size: 15px; font-weight: 600;">👥 Know someone who needs help joining?</h4>
+      <p style="font-size: 13px; color: var(--muted); margin: 0 0 12px 0;">Help a senior citizen or neighbour get onboarded</p>
+      <button onclick="openVouchModal()" style="background: var(--jade); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;">
+        Vouch for a Neighbour →
+      </button>
+    </div>
+
+    </div><!-- end #tab-overview -->
+
+    <!-- Tab: Family -->
+    <div id="tab-family" class="profile-tab-content">
+
+    <!-- Family Members Section -->
+    <div class="full-width-section" style="animation-delay: 0.1s;">
+      <div class="section-header">
+        <div class="section-icon">👥</div>
+        <div class="section-title">Family Members</div>
+      </div>
+      <div id="familyMembersContainer">
+        <p style="color: var(--muted); font-size: 13px;">No family members yet.</p>
+      </div>
+      <button class="btn btn-primary" onclick="window.openFamilyRequestModal()" style="margin-top: 16px;">
+        + Add Family Member
+      </button>
+    </div>
+
+    <!-- My Tenants Section -->
+    <div class="full-width-section" id="myTenantsSection" style="display:none; animation-delay: 0.15s;">
+      <div class="section-header">
+        <div class="section-icon">👨‍💼</div>
+        <div class="section-title">My Tenants</div>
+      </div>
+      <div id="tenantsContainer">
+        <p style="color: var(--muted); font-size: 13px;">No tenants yet.</p>
+      </div>
+      <button class="btn btn-primary" onclick="window.openAddTenantModal()" style="margin-top: 16px;">
+        + Add Tenant
+      </button>
+    </div>
+
+    <!-- My Owner's Flat Section -->
+    <div class="full-width-section" id="myOwnersFlatSection" style="display:none; animation-delay: 0.2s;">
+      <div class="section-header">
+        <div class="section-icon">🏠</div>
+        <div class="section-title">My Owner's Flat</div>
+      </div>
+      <div id="ownersFlatContainer" style="color: var(--muted); font-size: 13px;">
+        Loading...
+      </div>
+    </div>
+
+    </div><!-- end #tab-family -->
+
+    <!-- Tab: Devices -->
+    <div id="tab-devices" class="profile-tab-content">
+
+    <div class="full-width-section" id="myDevicesSection" style="animation-delay: 0.1s;">
+      <div class="section-header">
+        <div class="section-icon">🔐</div>
+        <div class="section-title">My Devices</div>
+      </div>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">
+        Devices you've signed in from. Revoke access to a device if you don't recognize it.
+      </p>
+      <div class="device-list" id="devicesList">
+        <p style="color: var(--muted); font-size: 13px;">Loading devices...</p>
+      </div>
+    </div>
+
+    </div><!-- end #tab-devices -->
+
+    <!-- Tab: Privacy -->
+    <div id="tab-privacy" class="profile-tab-content">
+
+    <div class="full-width-section" id="privacySettingsSection" style="animation-delay: 0.1s;">
+      <div class="section-header">
+        <div class="section-icon">🔒</div>
+        <div class="section-title">Privacy Settings</div>
+      </div>
+
+      <div class="privacy-toggle">
+        <div>
+          <div class="toggle-label">Show flat number on posts</div>
+          <div class="toggle-desc">Display your flat number when you post in community features</div>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="privacyShowFlat">
+        </div>
+      </div>
+
+      <div class="privacy-toggle">
+        <div>
+          <div class="toggle-label">Allow residents to contact you</div>
+          <div class="toggle-desc">Let others send you messages through the platform</div>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="privacyAllowContact">
+        </div>
+      </div>
+
+      <div class="privacy-toggle">
+        <div>
+          <div class="toggle-label">Show name on recommendations</div>
+          <div class="toggle-desc">Display your name when recommending services</div>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="privacyShowNameOnRecs">
+        </div>
+      </div>
+
+      <div class="privacy-toggle">
+        <div>
+          <div class="toggle-label">Email notifications on messages</div>
+          <div class="toggle-desc">Receive email when someone contacts you</div>
+        </div>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="privacyEmailOnContact">
+        </div>
+      </div>
+
+      <div id="privacyMessage" class="message" style="margin-top: 16px;"></div>
+      <button class="btn btn-primary" onclick="window.savePrivacySettings()" style="margin-top: 16px;">
+        Save Privacy Settings
+      </button>
+
+      <h3 style="font-size: 14px; font-weight: 600; margin-top: 24px; margin-bottom: 12px;">Data Access History</h3>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
+        Admin data access from last 30 days (location city only):
+      </p>
+      <div class="access-log" id="accessLogContainer">
+        <p>No access events</p>
+      </div>
+    </div>
+
+    </div><!-- end #tab-privacy -->
+
+    <!-- Tab: Account -->
+    <div id="tab-account" class="profile-tab-content">
+
+    <!-- Contact Admin Section -->
+    <div class="full-width-section" style="animation-delay: 0.1s;">
+      <div class="section-header">
+        <div class="section-icon">💬</div>
+        <div class="section-title">Contact Admin & Feedback</div>
+      </div>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">
+        Have questions or feedback? Reach out to the admin directly.
+      </p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <a href="mailto:pushkalkishore@gmail.com" class="btn btn-secondary" style="text-decoration: none; text-align: center;">
+          📧 Email Admin
+        </a>
+        <a href="https://t.me/pushkalkishore" class="btn btn-secondary" style="text-decoration: none; text-align: center;">
+          🔵 Telegram
+        </a>
+      </div>
+    </div>
+
+    <!-- Moderation Record Section -->
+    <div class="full-width-section" style="animation-delay: 0.15s;">
+      <div class="section-header">
+        <div class="section-icon">⚖️</div>
+        <div class="section-title">My Moderation Record</div>
+      </div>
+      <div id="moderationContainer" style="color: var(--muted); font-size: 13px;">
+        <p>Loading moderation data...</p>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="full-width-section" style="border-color: var(--red); animation-delay: 0.2s;">
+      <div class="section-header" style="border-bottom-color: var(--red);">
+        <div class="section-icon" style="background: rgba(192,57,43,0.1); color: var(--red);">⚠️</div>
+        <div class="section-title" style="color: var(--red);">Danger Zone</div>
+      </div>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">
+        Permanently delete your account and all associated data. This action cannot be undone.
+      </p>
+      <button class="btn btn-danger" onclick="window.openDeleteAccountModal()">
+        🗑️ Delete My Account
+      </button>
+    </div>
+
+    </div><!-- end #tab-account -->
+
+  </div>
+
+  <!-- Family Request Modal -->
+  <div id="familyRequestModal" class="modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-content" style="background:white;border-radius:16px;padding:32px;width:90%;max-width:480px;position:relative;">
+      <button class="modal-close" onclick="window.closeFamilyRequestModal()">✕</button>
+      <div class="modal-header">
+        <h2>Invite Family Member</h2>
+      </div>
+      <div id="familyRequestError" class="message error"></div>
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="reqFamilyName" placeholder="Family member's name">
+      </div>
+      <div class="form-group">
+        <label>Relation to You *</label>
+        <select id="reqFamilyRelation">
+          <option value="">Select relation</option>
+          <option value="Spouse">Spouse</option>
+          <option value="Child">Child</option>
+          <option value="Parent">Parent</option>
+          <option value="Sibling">Sibling</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="reqFamilyEmail" placeholder="Family member's email address">
+      </div>
+      <div class="button-group">
+        <button class="btn btn-primary" id="submitFamilyReqBtn" onclick="window.submitFamilyRequest()">
+          Generate Invite
+        </button>
+        <button class="btn btn-secondary" onclick="window.closeFamilyRequestModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Modal -->
+  <div id="deleteAccountModal" class="modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-content" style="background:white;border-radius:16px;padding:32px;width:90%;max-width:480px;position:relative;">
+      <button class="modal-close" onclick="window.closeDeleteAccountModal()">✕</button>
+      <div class="modal-header">
+        <h2>Delete Account</h2>
+      </div>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">
+        This will permanently delete your account. All your data will be anonymized. This cannot be undone.
+      </p>
+      <div id="deleteMessage" class="message"></div>
+      <div class="form-group">
+        <label>Type "DELETE" to confirm *</label>
+        <input type="text" id="deleteConfirmation" placeholder="Type DELETE">
+      </div>
+      <div class="button-group">
+        <button class="btn btn-danger" onclick="window.confirmDeleteAccount()">
+          Delete My Account
+        </button>
+        <button class="btn btn-secondary" onclick="window.closeDeleteAccountModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Personal Info Modal -->
+  <div id="editPersonalModal" class="modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-content" style="background:white;border-radius:16px;padding:32px;width:90%;max-width:480px;position:relative;">
+      <button class="modal-close" onclick="closeEditPersonalModal()">✕</button>
+      <div class="modal-header">
+        <h2>Edit Personal Info</h2>
+      </div>
+      <div id="editPersonalMessage" class="message"></div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="editPersonalName" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="editPersonalPhone" placeholder="+91 98XXX XXXXX">
+      </div>
+      <div class="form-group">
+        <label>Primary Email</label>
+        <input type="email" id="editPersonalEmail" placeholder="Primary email" disabled style="background: var(--cream-dark); cursor: not-allowed;">
+        <small style="color: var(--muted);">Email cannot be changed</small>
+      </div>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="savePersonalInfo()">Save Changes</button>
+        <button class="btn btn-secondary" onclick="closeEditPersonalModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Contact Info Modal -->
+  <div id="editContactModal" class="modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-content" style="background:white;border-radius:16px;padding:32px;width:90%;max-width:480px;position:relative;">
+      <button class="modal-close" onclick="closeEditContactModal()">✕</button>
+      <div class="modal-header">
+        <h2>Edit Contact Info</h2>
+      </div>
+      <div id="editContactMessage" class="message"></div>
+      <div class="form-group">
+        <label>Alternative Email</label>
+        <input type="email" id="editContactAltEmail" placeholder="Secondary email (optional)">
+      </div>
+      <div class="form-group">
+        <label>Alternative Phone</label>
+        <input type="tel" id="editContactAltPhone" placeholder="Secondary phone (optional)">
+      </div>
+      <div class="form-group">
+        <label>Telegram Handle</label>
+        <input type="text" id="editContactTelegram" placeholder="@your_telegram_handle (optional)">
+      </div>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="saveContactInfo()">Save Changes</button>
+        <button class="btn btn-secondary" onclick="closeEditContactModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vouch for Neighbour Modal -->
+  <div id="vouchModal" class="modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-content" style="background:white;border-radius:16px;padding:32px;width:90%;max-width:480px;position:relative;">
+      <button class="modal-close" onclick="closeVouchModal()">✕</button>
+      <div class="modal-header">
+        <h2>Vouch for a Neighbour</h2>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 20px;">Your identity will be shared with admin as the voucher.</p>
+      <div id="vouchMessage" class="message"></div>
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="vouchName" placeholder="Neighbour's full name">
+      </div>
+      <div class="form-group">
+        <label>Flat Number *</label>
+        <input type="text" id="vouchFlat" placeholder="e.g., 15167">
+      </div>
+      <div class="form-group">
+        <label>Phone Number *</label>
+        <input type="tel" id="vouchPhone" placeholder="+91 98XXX XXXXX">
+      </div>
+      <div class="form-group">
+        <label>Relationship</label>
+        <select id="vouchRelation" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:6px;font-family:inherit;">
+          <option value="neighbour">Neighbour</option>
+          <option value="friend">Friend</option>
+          <option value="family">Family</option>
+          <option value="known">Known personally</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Note to Admin (optional)</label>
+        <textarea id="vouchNote" placeholder="e.g., Senior citizen, needs assistance" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:6px;font-family:inherit;height:80px;resize:vertical;"></textarea>
+      </div>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="submitVouch()">Submit Vouch</button>
+        <button class="btn btn-secondary" onclick="closeVouchModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
+    <div style="max-width:800px;margin:0 auto;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        PSOTS Society · society.psots.in
+      </p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
+        <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
+        <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
+        <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
+        <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;">
+        This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
+      </p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { db } from '../../js/core/firebase.js';
+    import { setupHybridAuth, onChange, signOutUser } from '../js/core/hybrid-auth.js';
+    import { collection, query, where, getDocs, getDoc, doc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { renderSocietyNav } from '../../js/components/shared/SocietyNav.js';
+
+    const auth = getAuth();
+    const WORKER_URL = 'https://telegram.psots.in';
+    let currentUserId = null;
+    let currentUserData = null;
+
+    function escapeHTML(str) {
+      if (str === undefined || str === null) return '';
+      return String(str).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function formatTime(timestamp) {
+      const diff = Date.now() - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      const days = Math.floor(hours / 24);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ── TAB SWITCHING ──────────────────────────────────
+    window.switchProfileTab = function(tabName) {
+      document.querySelectorAll('.profile-tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.profile-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      const panel = document.getElementById('tab-' + tabName);
+      if (panel) panel.classList.add('active');
+      const btn = document.querySelector(`.profile-tab-btn[onclick="switchProfileTab('${tabName}')"]`);
+      if (btn) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+      }
+      if (tabName === 'devices' && currentUserId) window.loadMyDevices();
+    };
+
+    // Setup hybrid auth (Firebase + Telegram session) and check immediately
+    const { user: authUser } = await setupHybridAuth();
+    if (!authUser) {
+      window.location.href = '/society/login.html';
+      throw new Error('Not authenticated');
+    }
+
+    await renderSocietyNav('societyNav', 'profile');
+
+    // ── INIT ──────────────────────────────────────────
+    onChange(async ({ user, resident }) => {
+      try {
+        if (!user) {
+          await signOutUser();
+          return;
+        }
+
+        currentUserId = user.uid;
+        currentUserData = resident;
+
+        // Display hero section with resident full name
+        if (resident) {
+          document.getElementById('greetingName').textContent = resident.name || 'My Profile';
+          const statusBadge = document.getElementById('profileStatus');
+
+          // Show status and flat/type info in hero
+          const statusMap = { 'pending': 'Pending Approval', 'approved': 'Approved', 'rejected': 'Rejected', 'deleted': 'Deleted' };
+          statusBadge.textContent = statusMap[resident.status] || resident.status || 'Pending Approval';
+
+          // Hide badge if approved
+          if (resident.status === 'approved') {
+            statusBadge.style.display = 'none';
+          } else {
+            statusBadge.style.display = 'block';
+          }
+
+          // Populate profile fields
+          document.getElementById('flatNumber').textContent = resident.flatNumber || '—';
+          document.getElementById('residentName').textContent = resident.name || '—';
+          document.getElementById('residentEmail').textContent = user.email || '—';
+          document.getElementById('residentType').textContent = (resident.residentType || 'owner').charAt(0).toUpperCase() + (resident.residentType || 'owner').slice(1);
+
+          // Display phone or "Add phone" link
+          if (resident.phone) {
+            document.getElementById('residentPhoneValue').textContent = resident.phone;
+            document.getElementById('residentPhoneLink').style.display = 'none';
+          } else {
+            document.getElementById('residentPhoneValue').textContent = '—';
+            document.getElementById('residentPhoneLink').style.display = 'inline';
+          }
+
+          // Populate contact info fields from resident data
+          document.getElementById('residentSecondaryEmail').textContent = resident.secondaryEmail || '—';
+          document.getElementById('residentSecondaryPhone').textContent = resident.secondaryPhone || '—';
+          document.getElementById('residentTelegram').textContent = resident.telegram || '—';
+
+          document.getElementById('profileAvatar').textContent = resident.flatNumber ? '🏘️' : '👤';
+
+          // Load family members via Worker API
+          loadFamilyMembers(resident.flatNumber, resident.residentType);
+
+          // Show tenants section if owner
+          if (resident.residentType === 'owner') {
+            document.getElementById('myTenantsSection').style.display = 'block';
+            loadTenants(user.uid);
+          }
+
+          // Load devices and privacy settings
+          if (typeof loadMyDevices === 'function') {
+            loadMyDevices();
+          }
+          loadPrivacySettings();
+        }
+      } catch (err) {
+        console.error('Load profile error:', err);
+      }
+    });
+
+    // ── FAMILY MEMBERS ────────────────────────────────
+    window.openFamilyRequestModal = function() {
+      const modal = document.getElementById('familyRequestModal');
+      modal.classList.add('show');
+      document.getElementById('familyRequestError').style.display = 'none';
+      ['reqFamilyName','reqFamilyEmail'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const rel = document.getElementById('reqFamilyRelation');
+      if (rel) rel.value = '';
+      const btn = document.getElementById('submitFamilyReqBtn');
+      if (btn) btn.disabled = false;
+    };
+
+    window.closeFamilyRequestModal = function() {
+      document.getElementById('familyRequestModal').classList.remove('show');
+    };
+
+    async function loadFamilyMembers(flatNumber, residentType) {
+      try {
+        const response = await fetch(`${WORKER_URL}/family/list?flatNumber=${encodeURIComponent(flatNumber)}`, {
+          headers: { 'Authorization': `Bearer ${await auth.currentUser.getIdToken()}` }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        const members = result.members || [];
+
+        let html = members.map(m => `
+          <div style="background: var(--cream); padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 600; color: var(--ink); font-size: 13px;">${escapeHTML(m.displayName || m.firstName || '')}</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${escapeHTML(m.relation || '')}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="font-size: 11px; color: var(--muted);">${m.status === 'pending' ? '⏳ Pending' : m.status === 'approved' ? '✓ Approved' : 'Rejected'}</div>
+              ${m.status === 'pending' && residentType === 'owner' ? `
+                <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="window.approveFamilyMember('${escapeHTML(m.uid)}')">Approve</button>
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="window.rejectFamilyMember('${escapeHTML(m.uid)}')">Reject</button>
+              ` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        if (members.length === 0) html = '<p style="color: var(--muted); font-size: 13px;">No family members yet.</p>';
+        document.getElementById('familyMembersContainer').innerHTML = html;
+      } catch (err) {
+        console.error('Failed to load family members:', err);
+        document.getElementById('familyMembersContainer').innerHTML = '<p style="color: var(--muted); font-size: 13px;">Failed to load family members.</p>';
+      }
+    }
+
+    window.approveFamilyMember = async function(memberUid) {
+      try {
+        const response = await fetch(`${WORKER_URL}/family/approve`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ memberUid })
+        });
+        if (!response.ok) throw new Error(await response.text());
+        showToast('Family member approved', 'success');
+        const resDoc = await getDoc(doc(db, 'residents', currentUserId));
+        if (resDoc.exists()) {
+          const d = resDoc.data();
+          loadFamilyMembers(d.flatNumber, d.residentType);
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    };
+
+    window.rejectFamilyMember = async function(memberUid) {
+      try {
+        const response = await fetch(`${WORKER_URL}/family/reject`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ memberUid, reason: 'Declined by flat owner' })
+        });
+        if (!response.ok) throw new Error(await response.text());
+        showToast('Family member rejected', 'success');
+        const resDoc = await getDoc(doc(db, 'residents', currentUserId));
+        if (resDoc.exists()) {
+          const d = resDoc.data();
+          loadFamilyMembers(d.flatNumber, d.residentType);
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    };
+
+    window.submitFamilyRequest = async function() {
+      const errEl = document.getElementById('familyRequestError');
+      errEl.style.display = 'none';
+      const familyName = document.getElementById('reqFamilyName').value.trim();
+      const familyRelation = document.getElementById('reqFamilyRelation').value;
+      const familyEmail = document.getElementById('reqFamilyEmail').value.trim();
+      if (!familyName || !familyRelation) {
+        errEl.textContent = 'Name and relation are required.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (!familyEmail) {
+        errEl.textContent = 'Email address is required to send an invite.';
+        errEl.style.display = 'block';
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(familyEmail)) {
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.style.display = 'block';
+        return;
+      }
+      const btn = document.getElementById('submitFamilyReqBtn');
+      btn.disabled = true;
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const resDoc = await getDoc(doc(db, 'residents', currentUserId));
+        const flatNumber = resDoc.exists() ? resDoc.data().flatNumber : null;
+
+        const inviteRes = await fetch(`${WORKER_URL}/invite/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ flatNumber, relation: familyRelation })
+        });
+        if (!inviteRes.ok) throw new Error(await inviteRes.text());
+        const inviteData = await inviteRes.json();
+        const inviteToken = inviteData.token;
+
+        const emailRes = await fetch(`${WORKER_URL}/invite/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ token: inviteToken, email: familyEmail, flatNumber, relation: familyRelation })
+        });
+        if (!emailRes.ok) console.error('Email send failed (non-critical):', await emailRes.text());
+
+        const inviteLink = `${window.location.origin}/society/join.html?token=${inviteToken}`;
+        errEl.style.display = 'none';
+        const modalContent = document.querySelector('#familyRequestModal .modal-content');
+        if (modalContent) {
+          modalContent.innerHTML = `
+            <div class="modal-header"><h2>Invite Created!</h2></div>
+            <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 12px;">An invitation has been sent to <strong>${escapeHTML(familyEmail)}</strong>. Share the link below if needed.</p>
+            <div class="form-group">
+              <label>Invite Link</label>
+              <input type="text" readonly value="${escapeHTML(inviteLink)}" style="width: 100%; padding: 8px; font-size: 12px;" onclick="this.select()">
+            </div>
+            <div class="button-group">
+              <button class="btn btn-primary" onclick="navigator.clipboard.writeText('${escapeHTML(inviteLink)}').then(() => showToast('Link copied!', 'success'))">Copy Link</button>
+              <button class="btn btn-secondary" onclick="window.closeFamilyRequestModal()">Done</button>
+            </div>
+          `;
+        }
+        showToast('Invite created successfully', 'success');
+      } catch (err) {
+        errEl.textContent = 'Error: ' + err.message;
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // ── TENANTS ───────────────────────────────────────
+    async function loadTenants(uid) {
+      try {
+        const q = query(collection(db, 'residents'), where('ownerId', '==', uid));
+        const snap = await getDocs(q);
+        const tenants = snap.docs.map(d => d.data());
+        if (tenants.length === 0) {
+          document.getElementById('tenantsContainer').innerHTML = '<p style="color: var(--muted); font-size: 13px;">No tenants yet.</p>';
+        } else {
+          document.getElementById('tenantsContainer').innerHTML = tenants.map(t => `
+            <div style="background: var(--cream); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+              <div style="font-weight: 600; color: var(--ink); font-size: 13px;">${escapeHTML(t.firstName)} ${escapeHTML(t.lastName)}</div>
+              <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Flat ${escapeHTML(t.flatNumber)}</div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('loadTenants error:', err);
+      }
+    }
+
+    // ── DEVICES ───────────────────────────────────────
+    function getDeviceIcon(label) {
+      if (!label) return '💻';
+      const l = label.toLowerCase();
+      if (l.includes('iphone') || l.includes('android') || l.includes('mobile')) return '📱';
+      if (l.includes('ipad') || l.includes('tablet')) return '📱';
+      return '💻';
+    }
+
+    window.loadMyDevices = async function() {
+      const container = document.getElementById('devicesList');
+      if (!currentUserId) return;
+      container.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Loading devices...</p>';
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const currentToken = localStorage.getItem('psots_device_token');
+        const res = await fetch(`${WORKER_URL}/device/list?uid=${currentUserId}&currentToken=${encodeURIComponent(currentToken || '')}`, {
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        if (!res.ok) throw new Error('Failed to load devices');
+        const data = await res.json();
+        if (!data.devices || data.devices.length === 0) {
+          container.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No devices found</p>';
+          return;
+        }
+        container.innerHTML = data.devices.map(d => `
+          <div class="device-item">
+            <div class="device-info">
+              <div class="device-label">${getDeviceIcon(d.deviceLabel)} ${escapeHTML(d.deviceLabel)}${d.isCurrentDevice ? ' <span style="color: var(--jade); font-size: 11px;">📍 This device</span>' : ''}</div>
+              <div class="device-meta">Last seen: ${formatTime(d.lastSeen)}${d.ipCity ? ' · ' + escapeHTML(d.ipCity) : ''}</div>
+              <div class="device-meta" style="margin-top: 2px;">${d.trusted ? '<span style="color: var(--jade);">✅ Active</span>' : '<span style="color: var(--muted);">⚠️ Revoked</span>'}</div>
+            </div>
+            ${!d.isCurrentDevice && d.trusted ? `<button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="window.revokeDevice('${escapeHTML(d.deviceToken)}')">Revoke</button>` : ''}
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<p style="color: var(--muted); font-size: 13px;">Failed to load devices. Please try again.</p>
+          <button onclick="window.loadMyDevices()" class="btn btn-secondary" style="margin-top: 8px; font-size: 12px;">Retry</button>`;
+      }
+    };
+
+    window.revokeDevice = async function(token) {
+      if (!confirm('Revoke this device? It will need to sign in again.')) return;
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_URL}/device/revoke`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deviceToken: token })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('Device revoked successfully', 'success');
+        await window.loadMyDevices();
+      } catch (err) {
+        showToast('Error revoking device: ' + err.message, 'error');
+      }
+    };
+
+    // ── PRIVACY SETTINGS ──────────────────────────────
+    async function loadPrivacySettings() {
+      try {
+        const residentDoc = await getDoc(doc(db, 'residents', currentUserId));
+        if (!residentDoc.exists()) return;
+        const data = residentDoc.data();
+        document.getElementById('privacyShowFlat').checked = data.privacyShowFlat !== false;
+        document.getElementById('privacyAllowContact').checked = data.privacyAllowContact !== false;
+        document.getElementById('privacyShowNameOnRecs').checked = data.privacyShowNameOnRecs !== false;
+        document.getElementById('privacyEmailOnContact').checked = data.privacyEmailOnContact !== false;
+        loadAccessLog();
+      } catch (err) {
+        console.error('loadPrivacySettings error:', err);
+      }
+    }
+
+    window.savePrivacySettings = async function() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_URL}/resident/privacy-settings`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            privacyShowFlat: document.getElementById('privacyShowFlat').checked,
+            privacyAllowContact: document.getElementById('privacyAllowContact').checked,
+            privacyShowNameOnRecs: document.getElementById('privacyShowNameOnRecs').checked,
+            privacyEmailOnContact: document.getElementById('privacyEmailOnContact').checked
+          })
+        });
+        const result = await res.json();
+        const msgEl = document.getElementById('privacyMessage');
+        if (result.ok) {
+          msgEl.className = 'message success show';
+          msgEl.textContent = '✓ Privacy settings saved';
+          setTimeout(() => msgEl.classList.remove('show'), 3000);
+        } else {
+          msgEl.className = 'message error show';
+          msgEl.textContent = '✗ Error saving settings';
+        }
+      } catch (err) {
+        const msgEl = document.getElementById('privacyMessage');
+        msgEl.className = 'message error show';
+        msgEl.textContent = '✗ ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Privacy Settings';
+      }
+    };
+
+    async function loadAccessLog() {
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_URL}/resident/my-access-log`, {
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const result = await res.json();
+        if (result.ok && result.events) {
+          const count = result.events.length;
+          if (count === 0) {
+            document.getElementById('accessLogContainer').innerHTML = '<p>No access events in the last 30 days</p>';
+          } else {
+            const html = result.events.slice(0, 5).map(e => {
+              const date = new Date(e.timestamp).toLocaleDateString();
+              const time = new Date(e.timestamp).toLocaleTimeString();
+              return `<p>Admin accessed your data on ${date} at ${time} from ${escapeHTML(e.city || '')}</p>`;
+            }).join('');
+            document.getElementById('accessLogContainer').innerHTML = html;
+          }
+        }
+      } catch (err) {
+        console.error('loadAccessLog error:', err);
+      }
+    }
+
+    // ── MODERATION RECORD ─────────────────────────────
+    async function loadModerationRecord(uid) {
+      try {
+        const q = query(collection(db, 'violations'), where('userId', '==', uid));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          document.getElementById('moderationContainer').innerHTML = '<p style="color: var(--muted); font-size: 13px;">✓ You have a clean record!</p>';
+        } else {
+          document.getElementById('moderationContainer').innerHTML = snap.docs.map(d => {
+            const v = d.data();
+            return `
+              <div style="background: var(--amber-bg); border: 1px solid var(--amber-border); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                <div style="font-weight: 600; color: var(--amber); font-size: 13px;">⚠️ ${escapeHTML(v.action || '')}</div>
+                <div style="font-size: 12px; color: var(--ink-soft); margin-top: 4px;">${escapeHTML(v.reason || 'No reason provided')}</div>
+                <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">${new Date(v.timestamp?.toDate?.() || v.timestamp).toLocaleDateString()}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.error('loadModerationRecord error:', err);
+      }
+    }
+
+    // ── DELETE ACCOUNT ────────────────────────────────
+    window.openDeleteAccountModal = function() {
+      document.getElementById('deleteAccountModal').classList.add('show');
+      document.getElementById('deleteConfirmation').value = '';
+      document.getElementById('deleteMessage').style.display = 'none';
+    };
+
+    window.closeDeleteAccountModal = function() {
+      document.getElementById('deleteAccountModal').classList.remove('show');
+    };
+
+    window.confirmDeleteAccount = async function() {
+      const confirmation = document.getElementById('deleteConfirmation').value.trim();
+      if (confirmation !== 'DELETE') {
+        const msgEl = document.getElementById('deleteMessage');
+        msgEl.className = 'message error';
+        msgEl.textContent = 'Please type DELETE exactly to confirm';
+        msgEl.classList.add('show');
+        return;
+      }
+      if (!confirm('This will permanently delete your account. Are you absolutely sure?')) return;
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_URL}/resident/delete-account`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirmation: 'DELETE' })
+        });
+        const result = await res.json();
+        if (result.ok) {
+          alert('Your account has been deleted. You will be signed out now.');
+          await signOut(auth);
+          window.location.href = '/residents.html';
+        } else {
+          const msgEl = document.getElementById('deleteMessage');
+          msgEl.className = 'message error';
+          msgEl.textContent = '✗ ' + (result.error || 'Error deleting account');
+          msgEl.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'Delete My Account';
+        }
+      } catch (err) {
+        const msgEl = document.getElementById('deleteMessage');
+        msgEl.className = 'message error';
+        msgEl.textContent = '✗ ' + err.message;
+        msgEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Delete My Account';
+      }
+    };
+
+    // ── EDIT PERSONAL INFO ─────────────────────────
+    window.openEditPersonalModal = function(focusPhone = false) {
+      const modal = document.getElementById('editPersonalModal');
+      document.getElementById('editPersonalName').value = (currentUserData?.name || '').trim();
+      document.getElementById('editPersonalPhone').value = (currentUserData?.phone || '').trim();
+      document.getElementById('editPersonalEmail').value = (currentUserData?.email || '').trim();
+      modal.classList.add('show');
+      if (focusPhone) {
+        setTimeout(() => document.getElementById('editPersonalPhone').focus(), 100);
+      }
+    };
+
+    window.closeEditPersonalModal = function() {
+      document.getElementById('editPersonalModal').classList.remove('show');
+    };
+
+    window.savePersonalInfo = async function() {
+      const name = document.getElementById('editPersonalName').value.trim();
+      const phone = document.getElementById('editPersonalPhone').value.trim();
+      const msgEl = document.getElementById('editPersonalMessage');
+      msgEl.className = '';
+      msgEl.textContent = '';
+
+      if (!name) {
+        msgEl.className = 'message error';
+        msgEl.textContent = '✗ Name cannot be empty';
+        msgEl.classList.add('show');
+        return;
+      }
+
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(`${WORKER_URL}/resident/update-profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ name, phone: phone || null })
+        });
+
+        const result = await response.json();
+        if (result.ok) {
+          msgEl.className = 'message success';
+          msgEl.textContent = '✓ Personal info updated';
+          msgEl.classList.add('show');
+          currentUserData.name = name;
+          currentUserData.phone = phone;
+          document.getElementById('residentName').textContent = name;
+          if (phone) {
+            document.getElementById('residentPhoneValue').textContent = phone;
+            document.getElementById('residentPhoneLink').style.display = 'none';
+          } else {
+            document.getElementById('residentPhoneValue').textContent = '—';
+            document.getElementById('residentPhoneLink').style.display = 'inline';
+          }
+          setTimeout(() => window.closeEditPersonalModal(), 1500);
+        } else {
+          msgEl.className = 'message error';
+          msgEl.textContent = '✗ ' + (result.error || 'Failed to update');
+          msgEl.classList.add('show');
+        }
+      } catch (err) {
+        msgEl.className = 'message error';
+        msgEl.textContent = '✗ ' + err.message;
+        msgEl.classList.add('show');
+      }
+    };
+
+    // ── EDIT CONTACT INFO ──────────────────────────
+    window.openEditContactModal = function() {
+      const modal = document.getElementById('editContactModal');
+      document.getElementById('editContactAltEmail').value = (currentUserData?.secondaryEmail || '').trim();
+      document.getElementById('editContactAltPhone').value = (currentUserData?.secondaryPhone || '').trim();
+      document.getElementById('editContactTelegram').value = (currentUserData?.telegram || '').trim();
+      modal.classList.add('show');
+    };
+
+    window.closeEditContactModal = function() {
+      document.getElementById('editContactModal').classList.remove('show');
+    };
+
+    window.saveContactInfo = async function() {
+      const altEmail = document.getElementById('editContactAltEmail').value.trim();
+      const altPhone = document.getElementById('editContactAltPhone').value.trim();
+      const telegram = document.getElementById('editContactTelegram').value.trim();
+      const msgEl = document.getElementById('editContactMessage');
+      msgEl.className = '';
+      msgEl.textContent = '';
+
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(`${WORKER_URL}/resident/update-profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            secondaryEmail: altEmail || null,
+            secondaryPhone: altPhone || null,
+            telegram: telegram || null
+          })
+        });
+
+        const result = await response.json();
+        if (result.ok) {
+          msgEl.className = 'message success';
+          msgEl.textContent = '✓ Contact info updated';
+          msgEl.classList.add('show');
+
+          currentUserData.secondaryEmail = altEmail;
+          currentUserData.secondaryPhone = altPhone;
+          currentUserData.telegram = telegram;
+
+          document.getElementById('residentSecondaryEmail').textContent = altEmail || '—';
+          document.getElementById('residentSecondaryPhone').textContent = altPhone || '—';
+          document.getElementById('residentTelegram').textContent = telegram || '—';
+
+          setTimeout(() => window.closeEditContactModal(), 1500);
+        } else {
+          msgEl.className = 'message error';
+          msgEl.textContent = '✗ ' + (result.error || 'Failed to update');
+          msgEl.classList.add('show');
+        }
+      } catch (err) {
+        msgEl.className = 'message error';
+        msgEl.textContent = '✗ ' + err.message;
+        msgEl.classList.add('show');
+      }
+    };
+
+    // ── VOUCH FOR NEIGHBOUR MODAL ────────────────────────────
+    window.openVouchModal = function() {
+      const modal = document.getElementById('vouchModal');
+      modal.style.display = 'flex';
+      document.getElementById('vouchName').value = '';
+      document.getElementById('vouchFlat').value = '';
+      document.getElementById('vouchPhone').value = '';
+      document.getElementById('vouchRelation').value = 'neighbour';
+      document.getElementById('vouchNote').value = '';
+      document.getElementById('vouchMessage').textContent = '';
+    };
+
+    window.closeVouchModal = function() {
+      document.getElementById('vouchModal').style.display = 'none';
+    };
+
+    window.submitVouch = async function() {
+      const name = document.getElementById('vouchName').value.trim();
+      const flatNumber = document.getElementById('vouchFlat').value.trim();
+      const phone = document.getElementById('vouchPhone').value.trim();
+      const relationship = document.getElementById('vouchRelation').value;
+      const note = document.getElementById('vouchNote').value.trim();
+      const msgEl = document.getElementById('vouchMessage');
+
+      if (!name || !flatNumber || !phone) {
+        msgEl.className = 'message error';
+        msgEl.textContent = '✗ Name, flat number, and phone are required';
+        return;
+      }
+
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch(`${WORKER_URL}/resident/vouch`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            neighbourName: name,
+            flatNumber,
+            phone,
+            relationship,
+            note
+          })
+        });
+
+        const result = await response.json();
+        if (result.ok) {
+          msgEl.className = 'message success';
+          msgEl.textContent = '✓ Vouch submitted! Admin will review within 24 hours';
+          setTimeout(() => {
+            closeVouchModal();
+          }, 2000);
+        } else {
+          msgEl.className = 'message error';
+          msgEl.textContent = '✗ ' + (result.error || 'Failed to submit vouch');
+        }
+      } catch (err) {
+        msgEl.className = 'message error';
+        msgEl.textContent = '✗ ' + err.message;
+      }
+    };
+
+    // ── ADD TENANT MODAL ────────────────────────────
+    window.closeAddTenantModal = function() {
+      document.getElementById('addTenantModal').style.display = 'none';
+      document.getElementById('addTenantForm').reset();
+      document.getElementById('tenantSuccess').style.display = 'none';
+    };
+
+    window.submitAddTenant = async function(event) {
+      event.preventDefault();
+      const name = document.getElementById('tenantName').value.trim();
+      const phone = document.getElementById('tenantPhone').value.trim();
+      const email = document.getElementById('tenantEmail').value.trim();
+      const leaseStart = document.getElementById('leaseStart').value;
+      const leaseEnd = document.getElementById('leaseEnd').value;
+      const idProofType = document.getElementById('idProofType').value;
+      const idProofLast4 = document.getElementById('idProofLast4').value.trim();
+
+      // Validation
+      let valid = true;
+      if (!name) { document.getElementById('tenantNameError').textContent = 'Name required'; document.getElementById('tenantNameError').style.display = 'block'; valid = false; }
+      if (!phone || phone.length !== 10) { document.getElementById('tenantPhoneError').textContent = 'Valid 10-digit phone required'; document.getElementById('tenantPhoneError').style.display = 'block'; valid = false; }
+      if (email && !email.includes('@')) { document.getElementById('tenantEmailError').textContent = 'Valid email required'; document.getElementById('tenantEmailError').style.display = 'block'; valid = false; }
+      if (!leaseStart) { document.getElementById('leaseStartError').textContent = 'Lease start date required'; document.getElementById('leaseStartError').style.display = 'block'; valid = false; }
+      if (!leaseEnd) { document.getElementById('leaseEndError').textContent = 'Lease end date required'; document.getElementById('leaseEndError').style.display = 'block'; valid = false; }
+      if (!idProofType) { document.getElementById('idProofTypeError').textContent = 'ID proof type required'; document.getElementById('idProofTypeError').style.display = 'block'; valid = false; }
+      if (!idProofLast4 || idProofLast4.length !== 4) { document.getElementById('idProofLast4Error').textContent = '4 digits required'; document.getElementById('idProofLast4Error').style.display = 'block'; valid = false; }
+      if (!valid) return;
+
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_URL}/tenant/add`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantName: name, tenantPhone: phone, tenantEmail: email, leaseStart, leaseEnd, idProofType, idProofLast4 })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+
+        const { token } = await res.json();
+        const inviteUrl = `https://society.psots.in/society/tenant-join?token=${token}`;
+        document.getElementById('tenantLink').value = inviteUrl;
+        document.getElementById('addTenantForm').style.display = 'none';
+        document.getElementById('tenantSuccess').style.display = 'block';
+
+        // Generate QR code
+        const qrCanvas = document.getElementById('tenantQr');
+        qrCanvas.innerHTML = '';
+        const qr = new QRCode(qrCanvas, { text: inviteUrl, width: 200, height: 200 });
+      } catch (err) {
+        alert('Error adding tenant: ' + err.message);
+      }
+    };
+
+    window.copyToClipboard = function(elementId) {
+      const input = document.getElementById(elementId);
+      input.select();
+      document.execCommand('copy');
+    };
+
+    // Load privacy settings on auth
+    setupHybridAuth().then(({ user }) => {
+      if (user && !currentUserId) {
+        currentUserId = user.uid;
+        loadPrivacySettings();
+      }
+    });
+  </script>
+  <script src="/society/js/pwa-init.js" defer></script>
+</body>
+</html>

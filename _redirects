@@ -1,0 +1,23 @@
+# Preserve query strings for these pages
+# society.psots.in — serve society/ folder as root
+https://society.psots.in/ /society/index.html 200
+https://society.psots.in/login /society/login.html 200
+https://society.psots.in/register /society/register.html 200
+https://society.psots.in/dashboard /society/index.html 200
+https://society.psots.in/profile /society/profile.html 200
+https://society.psots.in/marketplace /society/marketplace.html 200
+https://society.psots.in/guide /society/guide.html 200
+https://society.psots.in/lostandfound /society/lostandfound.html 200
+https://society.psots.in/carpooling /society/carpooling.html 200
+https://society.psots.in/admin /society/admin.html 200
+https://society.psots.in/join /society/join.html 200
+https://society.psots.in/society/join /society/join.html 200
+https://society.psots.in/society/join.html /society/join.html 200
+https://society.psots.in/recommendations /society/recommendations.html 200
+https://society.psots.in/jobs /society/jobs.html 200
+
+# Legacy redirects (psots.in)
+/residents       /society/register.html    301
+/profile         /society/profile.html     301
+/marketplace     /society/marketplace.html 301
+/guide           /society/guide.html       301

@@ -1,0 +1,320 @@
+/* ============================================================
+   PSOTS Profile — User profile page styles
+   ============================================================ */
+
+/* ── PROFILE CONTAINER ───────────────────────────────────– */
+.profile-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .profile-wrapper {
+    padding: 1.5rem;
+  }
+}
+
+/* ── PROFILE HEADER CARD ────────────────────────────────– */
+.profile-header {
+  background: linear-gradient(135deg, var(--jade-dark) 0%, var(--jade) 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: slideInLeft 0.4s var(--ease-smooth);
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 2.5rem;
+  position: relative;
+  z-index: 1;
+  border: 3px solid rgba(255,255,255,0.25);
+}
+
+.profile-name {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-flat {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-status-badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── PROFILE SECTION ────────────────────────────────────– */
+.profile-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.2rem;
+  animation: fadeUp 0.4s var(--ease-smooth);
+}
+
+.profile-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-section-icon {
+  font-size: 1.1rem;
+  color: var(--jade);
+}
+
+/* ── PROFILE FIELD ──────────────────────────────────────– */
+.profile-field {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.profile-field:last-child {
+  margin-bottom: 0;
+}
+
+.profile-field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.profile-field-value {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.profile-field-value.muted {
+  color: var(--muted);
+}
+
+/* ── PROFILE ACTIONS ────────────────────────────────────– */
+.profile-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 480px) {
+  .profile-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.action-btn {
+  padding: 0.9rem 1.2rem;
+  border: none;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  font-family: var(--font-sans);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.action-btn-primary {
+  background: var(--jade);
+  color: white;
+  box-shadow: 0 2px 8px rgba(26,74,58,0.2);
+}
+
+.action-btn-primary:hover {
+  background: var(--jade-light);
+  transform: translateY(-2px);
+}
+
+.action-btn-secondary {
+  background: var(--cream);
+  color: var(--jade);
+  border: 1.5px solid var(--jade);
+}
+
+.action-btn-secondary:hover {
+  background: var(--jade-pale);
+  transform: translateY(-2px);
+}
+
+/* ── VERIFICATION BADGE ─────────────────────────────────– */
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  background: var(--green-bg);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--jade);
+}
+
+/* ── EDIT MODE ──────────────────────────────────────────– */
+.profile-edit-form {
+  background: var(--cream-dark);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.edit-field {
+  margin-bottom: 1.2rem;
+}
+
+.edit-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.edit-field-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+
+.edit-field-input:focus {
+  border-color: var(--jade);
+  box-shadow: 0 0 0 3px rgba(26,74,58,0.1);
+  outline: none;
+}
+
+.edit-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+/* ── FAMILY MEMBERS ─────────────────────────────────────– */
+.family-member {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.member-role {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.member-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.member-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all var(--t-snap);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-action-btn:hover {
+  background: var(--jade-pale);
+  color: var(--jade);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────– */
+@media (max-width: 375px) {
+  .profile-header {
+    padding: 1.5rem 1rem;
+  }
+  .profile-section {
+    padding: 1.2rem;
+  }
+  .profile-field-label {
+    min-width: 80px;
+  }
+  .profile-actions {
+    grid-template-columns: 1fr;
+  }
+}

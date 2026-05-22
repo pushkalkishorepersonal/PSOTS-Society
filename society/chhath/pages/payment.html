@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contribute — PSOTS Chhath 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Playfair+Display:ital,wght@0,700;0,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+  .qr-box{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:1.4rem;background:linear-gradient(135deg,#fff5e8,#ffe8d0);border-radius:16px;border:2px solid rgba(232,92,0,.2);margin-bottom:1rem}
+  .qr-img-wrap{background:#fff;border-radius:12px;padding:12px;box-shadow:0 4px 18px rgba(26,8,0,.1);position:relative}
+  .qr-img-wrap img{display:block;width:180px;height:180px;border-radius:6px}
+  .qr-placeholder{width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;color:#b08060;font-size:.8rem;text-align:center;border:2px dashed #f0d5b8;border-radius:6px}
+  .qr-label{font-size:.78rem;color:#6b3a18;font-weight:600;text-align:center;line-height:1.5}
+  .upi-id-row{display:flex;align-items:center;gap:.6rem;background:#fff;border-radius:10px;padding:.7rem 1rem;border:1.5px solid rgba(232,92,0,.25);width:100%;box-sizing:border-box}
+  .upi-id-text{flex:1;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;color:var(--or)}
+  .copy-btn{background:linear-gradient(135deg,var(--or),#c93800);color:#fff;border:none;border-radius:8px;padding:.4rem .85rem;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:transform .15s}
+  .copy-btn:active{transform:scale(.96)}
+  .amt-wrap{display:flex;border-radius:14px;overflow:hidden;border:2px solid #f0d5b8;transition:border-color .2s;margin-bottom:1.5rem;background:var(--warm)}
+  .amt-wrap:focus-within{border-color:var(--or)}
+  .amt-pfx{background:linear-gradient(135deg,var(--or),#a03800);color:#fff;font-family:'DM Sans',sans-serif;font-weight:900;font-size:1.5rem;padding:.82rem 1.1rem;display:flex;align-items:center}
+  .amt-inp{flex:1;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:1.55rem;font-weight:700;color:var(--ink);padding:.82rem .9rem;background:transparent;-moz-appearance:textfield}
+  .amt-inp::-webkit-outer-spin-button,.amt-inp::-webkit-inner-spin-button{-webkit-appearance:none}
+  .amt-inp::placeholder{color:#d4b898;font-size:.95rem;font-family:'DM Sans',sans-serif;font-weight:300}
+  .or-l{display:flex;align-items:center;gap:.75rem;margin:.75rem 0;color:#7a5030;font-size:.76rem}
+  .or-l::before,.or-l::after{content:'';flex:1;height:1px;background:#f0d5b8}
+  .manual-row{background:var(--warm);border-radius:11px;padding:.85rem 1.05rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;border:1px solid #f0d5b8}
+  .mr-txt{font-size:.82rem;color:#7a5030}
+  .mr-txt strong{color:var(--or)}
+  .amt-ro{padding:.7rem .95rem;border:1.5px solid #f0d5b8;border-radius:10px;background:linear-gradient(135deg,#fff5e8,#ffe8cc);font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:700;color:var(--or);min-height:42px;display:flex;align-items:center}
+  #returnBanner{display:none;position:fixed;bottom:1rem;left:1rem;right:1rem;z-index:500;background:linear-gradient(135deg,#c94d00,#ff8c00);color:#fff;border-radius:16px;padding:.9rem 1.2rem;align-items:center;justify-content:space-between;box-shadow:0 8px 30px rgba(0,0,0,.3);gap:.8rem;animation:slu .4s ease both}
+  @keyframes slu{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .rb-msg{font-size:.86rem;font-weight:500;flex:1}
+  .rb-msg b{font-family:'DM Sans',sans-serif;display:block;font-size:.96rem}
+  .rb-fill{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:50px;padding:.42rem .95rem;font-weight:700;font-size:.76rem;cursor:pointer;white-space:nowrap}
+  .rb-x{cursor:pointer;opacity:.7;font-size:1.1rem;flex-shrink:0}
+  /* Guest vs logged-in */
+  .mode-bar{display:flex;background:#fff;border-radius:12px;padding:.3rem;border:1px solid #f0d5b8;margin-bottom:1.4rem;gap:.3rem}
+  .mode-btn{flex:1;padding:.6rem;border-radius:9px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'DM Sans',sans-serif}
+  .mode-btn.active{background:linear-gradient(135deg,var(--or),#c93800);color:#fff;box-shadow:0 3px 12px rgba(232,92,0,.3)}
+  .mode-btn:not(.active){background:none;color:var(--lbr)}
+  .mode-panel{display:none}
+  .mode-panel.active{display:block}
+  .user-prefill-card{background:linear-gradient(135deg,#fff5e8,#ffe8d0);border:1.5px solid rgba(232,92,0,.2);border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem}
+  .up-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:900;font-size:1rem;color:#fff;flex-shrink:0}
+  .up-info{flex:1}
+  .up-name{font-weight:600;font-size:.9rem;color:var(--ink)}
+  .up-flat{font-size:.76rem;color:#6b3a18}
+  .step-bar{display:flex;align-items:center;gap:.25rem;margin-bottom:1.8rem;overflow-x:auto;padding-bottom:.2rem}
+  .step-bar::-webkit-scrollbar{display:none}
+  .step-pill{padding:.42rem .85rem;border-radius:50px;font-size:.76rem;font-weight:600;border:1px solid #f0d5b8;color:#6b3a18;background:#fff;white-space:nowrap}
+  .step-pill.on{background:linear-gradient(135deg,var(--or),#c93800);color:#fff;border-color:transparent;box-shadow:0 3px 12px rgba(232,92,0,.28)}
+  .step-sep{width:20px;height:1px;background:#f0d5b8;flex-shrink:0}
+  .success-box{display:none;background:linear-gradient(135deg,#f0fff4,#e8faea);border:1px solid #a5d6a7;border-radius:16px;padding:2rem;text-align:center;margin-top:1.4rem}
+  .sb-icon{font-size:2.8rem;margin-bottom:.7rem}
+  .success-box h4{font-family:'Yatra One',serif;font-size:1.2rem;color:var(--green);margin-bottom:.45rem}
+  .success-box p{font-size:.86rem;color:#555;line-height:1.65;margin-bottom:1.1rem}
+  .err-box{display:none;background:#fff3f0;border:1px solid #ffb8a0;border-radius:9px;padding:.7rem .95rem;color:#c03000;font-size:.82rem;margin-top:.75rem}
+  </style>
+</head>
+<body>
+
+<div id="returnBanner">
+  <div class="rb-msg"><b>UPI ID copied! 🙏</b>Open your UPI app → Send Money → Paste</div>
+  <button class="rb-fill" onclick="document.getElementById('confirmCard').scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('returnBanner').style.display='none'">Confirm ↓</button>
+  <span class="rb-x" onclick="document.getElementById('returnBanner').style.display='none'">✕</span>
+</div>
+
+<nav class="page-nav">
+  <a class="page-nav-back" href="../index.html"><span class="page-nav-back-icon">←</span> Back</a>
+  <div class="page-nav-title">💰 Contribute</div>
+  <div class="page-nav-action"></div>
+</nav>
+
+<div class="page-hero">
+  <span class="ph-icon">💰</span>
+  <div class="ph-title">Make Your Contribution</div>
+  <div class="ph-sub">PSOTS Chhath Puja 2026 · पंच वर्ष महोत्सव · Deadline: Oct 25</div>
+</div>
+
+<div class="page-content">
+
+  <!-- Step bar -->
+  <div class="step-bar">
+    <div class="step-pill on">1 Enter Amount</div><div class="step-sep"></div>
+    <div class="step-pill">2 Scan QR / Copy ID</div><div class="step-sep"></div>
+    <div class="step-pill">3 Pay in UPI App</div><div class="step-sep"></div>
+    <div class="step-pill">4 Confirm Below</div>
+  </div>
+
+  <!-- Mode selector -->
+  <div class="card">
+    <div class="card-title">🪔 Pay via UPI — Scan &amp; Pay</div>
+    <div class="card-sub">Enter amount → scan the QR in any UPI app (GPay, PhonePe, Paytm, BHIM, iMobile) — or copy the UPI ID to pay manually.</div>
+
+    <!-- Guest / Signed-in toggle -->
+    <div class="mode-bar">
+      <button class="mode-btn" id="mb-guest" onclick="setMode('guest')">👤 Pay as Guest</button>
+      <button class="mode-btn active" id="mb-user"  onclick="setMode('user')">🔐 Signed In (Quick Pay)</button>
+    </div>
+
+    <!-- Signed-in mode: show prefill card -->
+    <div class="mode-panel active" id="mp-user">
+      <div class="user-prefill-card" id="upCard">
+        <div class="up-av" id="upAv">?</div>
+        <div class="up-info">
+          <div class="up-name" id="upName">Not signed in</div>
+          <div class="up-flat" id="upFlat"><a href="../portal.html" style="color:var(--or)">Sign in for quick pay →</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount input (shared) -->
+    <label style="font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:#6b3a18;margin-bottom:.55rem;display:block">Enter Amount to Contribute</label>
+    <div class="amt-wrap">
+      <div class="amt-pfx">₹</div>
+      <input class="amt-inp" type="number" id="payAmt" placeholder="Type amount…" min="1" inputmode="numeric" oninput="onAmtInput()"/>
+    </div>
+
+    <!-- QR Code Box -->
+    <div class="qr-box">
+      <div class="qr-img-wrap">
+        <div id="qrPlaceholder" class="qr-placeholder">
+          <span style="font-size:2rem">📱</span>
+          <span>Enter amount above<br/>to generate QR</span>
+        </div>
+        <img id="qrImg" style="display:none;width:180px;height:180px;border-radius:6px" alt="UPI QR Code"/>
+      </div>
+      <div class="qr-label">
+        <strong>Scan with any UPI app</strong><br/>
+        GPay · PhonePe · Paytm · BHIM · iMobile · Any UPI app
+      </div>
+      <div class="upi-id-row">
+        <span style="font-size:.76rem;color:#6b3a18;white-space:nowrap">UPI ID:</span>
+        <span class="upi-id-text">9482088904-3@ybl</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyUpiId()">📋 Copy</button>
+      </div>
+      <p id="amtDisplay" style="font-size:.78rem;color:#6b3a18;margin:0;text-align:center">Amount: enter above</p>
+    </div>
+
+    <div class="or-l">how to pay</div>
+    <div style="background:var(--warm);border-radius:11px;padding:.85rem 1.05rem;border:1px solid #f0d5b8;font-size:.82rem;color:#6b3a18;line-height:1.8">
+      <strong>Option A — Scan QR:</strong> Open any UPI app → Scan QR code above → Amount pre-filled → Pay<br/>
+      <strong>Option B — Copy UPI ID:</strong> Open UPI app → Send Money → Paste <strong>9482088904-3@ybl</strong> → Enter amount → Pay<br/>
+      <strong>Option C — Mobile:</strong> Open UPI app → Search by mobile → <strong>9482088904</strong> → Pay
+    </div>
+    <p style="font-size:.76rem;color:#6b3a18;margin-top:.6rem;text-align:center">💡 Desktop: open UPI app → Scan QR or enter UPI ID <strong>9482088904-3@ybl</strong></p>
+  </div>
+
+  <!-- Confirm form -->
+  <div class="card" id="confirmCard">
+    <div class="card-title">✅ Confirm Your Payment</div>
+    <div class="card-sub" id="confirmSub">After UPI payment, fill these details. Signed-in users only need to confirm the amount — name and flat are pre-filled automatically.</div>
+
+    <!-- Guest fields (shown only in guest mode) -->
+    <div id="guest-fields">
+      <div class="fg">
+        <div class="ff"><label>Name <span class="req">*</span></label><input type="text" id="f-name" placeholder="Your full name"/><div class="prefill-note" id="pn-name" style="display:none">✓ From your profile</div></div>
+        <div class="ff"><label>Flat No. <span class="req">*</span></label><input type="text" id="f-flat" placeholder="e.g. B-204"/><div class="prefill-note" id="pn-flat" style="display:none">✓ From your profile</div></div>
+      </div>
+      <div class="fg">
+        <div class="ff"><label>WhatsApp / UPI Mobile <span class="req">*</span></label><input type="tel" id="f-mobile" placeholder="10-digit number" maxlength="10" inputmode="numeric"/><div class="note">The number you paid from or your WhatsApp</div><div class="prefill-note" id="pn-mobile" style="display:none">✓ From your profile</div></div>
+        <div class="ff"><label>Amount Paid</label><div class="amt-ro" id="amtRo">← enter amount above</div></div>
+      </div>
+    </div>
+
+    <!-- Signed-in: only amount confirmation needed -->
+    <div id="user-confirm-only" style="display:none">
+      <div class="fg">
+        <div class="ff"><label>Amount Paid</label><div class="amt-ro" id="amtRoUser">← enter amount above</div></div>
+        <div class="ff"><label>Payment Date</label><input type="date" id="f-date-user"/></div>
+      </div>
+    </div>
+
+    <div class="fg" id="extra-fields">
+      <div class="ff"><label>UPI App Used</label>
+        <select id="f-method">
+          <option value="">Select app</option>
+          <option value="GPay">GPay</option><option value="PhonePe">PhonePe</option>
+          <option value="PayTM">PayTM</option><option value="Direct Transfer">Direct Transfer</option>
+          <option value="Cash">Cash</option><option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="ff"><label>Payment Date</label><input type="date" id="f-date"/></div>
+    </div>
+
+    <button class="btn-primary btn-block" id="submitBtn" onclick="submitForm()">Submit Confirmation 🙏</button>
+    <div class="err-box" id="errBox"></div>
+
+    <div class="success-box" id="successBox">
+      <div class="sb-icon">🎉</div>
+      <h4>जय छठ मइया!</h4>
+      <p id="successTxt">Your contribution has been recorded. The committee will verify and confirm within 24 hours.</p>
+      <button class="btn-wa btn-block" onclick="sendReceipt()">📲 Send Receipt to My WhatsApp</button>
+    </div>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+const C={upiId:'9482088904-3@ybl',payeeName:'ChhathPuja2026PSOTS',waOrg:'919482088904',scriptUrl:localStorage.getItem('psots_script_url')||''};
+let currentUser=null,userProfile={},lastSubmit={};
+
+// Init
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('f-date').valueAsDate=new Date();
+  const u=localStorage.getItem('psots_user');
+  if(u){currentUser=JSON.parse(u);const p=localStorage.getItem('psots_profile_'+currentUser.id);if(p)userProfile=JSON.parse(p);loadUserMode();}
+  else setMode('guest');
+});
+
+function loadUserMode(){
+  if(!currentUser){setMode('guest');return;}
+  setMode('user');
+  const initials=(userProfile.name||currentUser.name||'?').charAt(0).toUpperCase();
+  document.getElementById('upAv').textContent=initials;
+  document.getElementById('upName').textContent=userProfile.name||currentUser.name;
+  document.getElementById('upFlat').textContent=userProfile.flat?'Flat '+userProfile.flat:'Set flat in profile';
+  // Prefill guest fields too
+  if(userProfile.name){document.getElementById('f-name').value=userProfile.name;document.getElementById('pn-name').style.display='block'}
+  if(userProfile.flat){document.getElementById('f-flat').value=userProfile.flat;document.getElementById('pn-flat').style.display='block'}
+  if(userProfile.mobile){document.getElementById('f-mobile').value=userProfile.mobile;document.getElementById('pn-mobile').style.display='block'}
+}
+
+function setMode(m){
+  document.getElementById('mb-guest').classList.toggle('active',m==='guest');
+  document.getElementById('mb-user').classList.toggle('active',m==='user');
+  document.getElementById('mp-user').classList.toggle('active',m==='user');
+  // In user mode, guest fields still shown but prefilled; extra-fields shown
+  const isUser=m==='user'&&currentUser;
+  document.getElementById('guest-fields').style.display='block'; // always show
+  document.getElementById('user-confirm-only').style.display='none';
+  document.getElementById('extra-fields').style.display='grid';
+  if(isUser){
+    document.getElementById('confirmSub').textContent='Your details are pre-filled. Just confirm the amount — payment done!';
+  }else{
+    document.getElementById('confirmSub').textContent='After UPI payment, fill these 3 details. Quick and simple.';
+    if(!currentUser){document.getElementById('upName').textContent='Not signed in';document.getElementById('upFlat').innerHTML='<a href="../portal.html" style="color:var(--or)">Sign in for quick pay →</a>';}
+  }
+}
+
+function onAmtInput(){
+  const v=document.getElementById('payAmt').value;
+  const f=v?'₹ '+parseInt(v).toLocaleString('en-IN'):'← enter amount above';
+  document.getElementById('amtRo').textContent=f;
+  document.getElementById('amtRoUser').textContent=f;
+  // Update QR
+  const qrImg=document.getElementById('qrImg');
+  const qrPh=document.getElementById('qrPlaceholder');
+  const amtDisplay=document.getElementById('amtDisplay');
+  if(v&&parseInt(v)>=1){
+    const upiUri=`upi://pay?pa=${encodeURIComponent(C.upiId)}&pn=${encodeURIComponent(C.payeeName)}&am=${v}&cu=INR&tn=ChhathPuja2026`;
+    qrImg.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&qzone=2&data=${encodeURIComponent(upiUri)}`;
+    qrImg.style.display='block';
+    qrPh.style.display='none';
+    amtDisplay.textContent='Amount: ₹'+parseInt(v).toLocaleString('en-IN')+' — pre-filled in QR';
+    amtDisplay.style.color='var(--or)';
+    amtDisplay.style.fontWeight='700';
+  }else{
+    qrImg.style.display='none';
+    qrPh.style.display='flex';
+    amtDisplay.textContent='Amount: enter above';
+    amtDisplay.style.color='#6b3a18';
+    amtDisplay.style.fontWeight='400';
+  }
+}
+
+function copyUpiId(){
+  navigator.clipboard.writeText(C.upiId).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='✅ Copied!';
+    setTimeout(()=>btn.textContent='📋 Copy',2500);
+    const b=document.getElementById('returnBanner');
+    b.style.display='flex';
+    setTimeout(()=>{b.style.display='none'},15000);
+  });
+}
+
+async function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const flat=document.getElementById('f-flat').value.trim();
+  const mobile=document.getElementById('f-mobile').value.trim();
+  const amount=document.getElementById('payAmt').value;
+  const date=document.getElementById('f-date').value;
+  const method=document.getElementById('f-method').value;
+  document.getElementById('errBox').style.display='none';
+  if(!name)return showErr('Please enter your name.');
+  if(!flat)return showErr('Please enter your flat number.');
+  if(!/^\d{10}$/.test(mobile))return showErr('Please enter the 10-digit mobile used for payment.');
+  if(!amount||amount<1)return showErr('Please enter the contribution amount above.');
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Submitting…';
+  const dateStr=date?new Date(date).toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const ts=new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
+  const isPortalUser=!!currentUser;
+  lastSubmit={name,flat,mobile,amount,dateStr,method:method||'UPI'};
+  if(C.scriptUrl&&!C.scriptUrl.includes('YOUR_APPS')){
+    try{await fetch(C.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({timestamp:ts,name,flat,mobile,amount,date:dateStr,method:method||'UPI',status:'Pending Verification',accountType:isPortalUser?'Portal 🔐':'Guest 👤',userId:currentUser?.id||''})});}catch(e){}
+  }
+  // Save cookies for guest
+  if(!currentUser){['name','flat','mobile'].forEach(k=>{const d=new Date();d.setTime(d.getTime()+365*864e5);document.cookie=`cp_${k}=${encodeURIComponent(document.getElementById('f-'+k).value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;});}
+  btn.disabled=false;btn.textContent='✅ Submitted!';
+  document.getElementById('successBox').style.display='block';
+  document.getElementById('successTxt').textContent=`Your contribution of ₹${parseInt(amount).toLocaleString('en-IN')} has been recorded. The committee will verify and send you a WhatsApp confirmation within 24 hours. 🙏`;
+  document.getElementById('successBox').scrollIntoView({behavior:'smooth',block:'center'});
+  // Notify organiser
+  const waOrg=encodeURIComponent(`🪔 *Chhath 2026 — New Contribution*\n\n👤 ${name}  🏠 ${flat}\n📱 ${mobile}\n💰 ₹${parseInt(amount).toLocaleString('en-IN')}  📲 ${method||'UPI'}  📅 ${dateStr}\n🏷 ${isPortalUser?'Portal User 🔐':'Guest 👤'}`);
+  setTimeout(()=>window.open(`https://wa.me/${C.waOrg}?text=${waOrg}`,'_blank'),1500);
+}
+
+function sendReceipt(){
+  const{name,flat,mobile,amount,dateStr,method}=lastSubmit;
+  const msg=encodeURIComponent(`🪔 *जय छठ मइया!*\n\nनमस्ते ${name} जी 🙏\n\nYour contribution for *PSOTS Chhath Puja 2026* has been received!\n\n🏠 Flat: ${flat}\n💰 ₹${parseInt(amount).toLocaleString('en-IN')}\n📲 ${method}\n📅 ${dateStr}\n\nजय छठ मइया! 🪔\n— PSOTS Chhath Committee`);
+  window.open(`https://wa.me/91${mobile}?text=${msg}`,'_blank');
+}
+
+function showErr(m){const e=document.getElementById('errBox');e.textContent='⚠️ '+m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'});}
+function toast(m,t=''){const e=document.getElementById('toast');e.textContent=m;e.className=t?`show ${t}`:'show';setTimeout(()=>e.className='',3000);}
+</script>
+</body>
+</html>

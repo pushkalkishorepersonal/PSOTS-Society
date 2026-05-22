@@ -1,0 +1,128 @@
+[
+  {
+    "id": "25a9df8d-d4cc-4650-bd7a-b0c7ef19bda8",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "25a9df8d-d4cc-4650-bd7a-b0c7ef19bda8",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "fxktli",
+    "firstSeen": 1777491576223,
+    "lastSeen": 1777491576223,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "2f21c191-fe5d-4e5e-9742-fb01628da295",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "2f21c191-fe5d-4e5e-9742-fb01628da295",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777659242523,
+    "lastSeen": 1777659242523,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "3ff24a9a-2c48-4dd8-a035-d9ff4741e48a",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "3ff24a9a-2c48-4dd8-a035-d9ff4741e48a",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777733963662,
+    "lastSeen": 1777733963662,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "42e0a07a-f3f3-491b-a42b-10eecef9fadc",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "42e0a07a-f3f3-491b-a42b-10eecef9fadc",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777784063014,
+    "lastSeen": 1777784063014,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "45d98f07-c1cf-4c35-880a-80f656575400",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "45d98f07-c1cf-4c35-880a-80f656575400",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "om7odx",
+    "firstSeen": 1778262460815,
+    "lastSeen": 1778262460815,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "49659e6b-3416-4ca9-b333-ce06e6675495",
+    "uid": "QUDFceVWN9XVthSpdPM3s91fZwt1",
+    "flatNumber": "10021",
+    "deviceToken": "49659e6b-3416-4ca9-b333-ce06e6675495",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777529446464,
+    "lastSeen": 1777529446464,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "67d1d747-d1a1-4716-93b1-41ae7f6ffc40",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "67d1d747-d1a1-4716-93b1-41ae7f6ffc40",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777660284044,
+    "lastSeen": 1777660284044,
+    "lastLoginMethod": "google",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "82a1876b-7c11-4538-a226-9b868396030b",
+    "lastUsedAt": "2026-04-30T23:06:33.816Z"
+  },
+  {
+    "id": "8850870b-0adf-4450-8a3b-adcf3082a11a",
+    "uid": "eWHR4GR6d0fZhQ531D0nrWe2sVS2",
+    "flatNumber": "15167",
+    "deviceToken": "8850870b-0adf-4450-8a3b-adcf3082a11a",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777529730041,
+    "lastSeen": 1777529730041,
+    "lastLoginMethod": "email",
+    "trusted": true,
+    "ipHint": "158.95.50.88"
+  },
+  {
+    "id": "a469d6f3-e52e-4398-b0f6-5a8306d9b860",
+    "lastUsedAt": "2026-04-30T21:20:26.694Z"
+  },
+  {
+    "id": "undefined",
+    "uid": "QUDFceVWN9XVthSpdPM3s91fZwt1",
+    "flatNumber": "10021",
+    "deviceToken": "49659e6b-3416-4ca9-b333-ce06e6675495",
+    "deviceLabel": "Mac · Chrome",
+    "fingerprint": "e50uzq",
+    "firstSeen": 1777529446464,
+    "lastSeen": 1777529446464,
+    "lastLoginMethod": "google",
+    "trusted": false,
+    "ipHint": "158.95.50.88",
+    "revokedAt": 1777529492327
+  }
+]

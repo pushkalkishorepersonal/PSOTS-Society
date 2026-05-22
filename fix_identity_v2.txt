@@ -1,0 +1,72 @@
+// FIX v2: Create missing identity record with proper fields
+// Run this in the console on the carpooling page
+
+(async () => {
+  console.log('🔧 Creating missing identity record (v2)...');
+  
+  const { auth, db } = await import('/js/core/firebase.js');
+  const { doc, setDoc, collection, query, where, getDocs, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Not logged in');
+    return;
+  }
+  
+  console.log('User UID:', user.uid);
+  console.log('User email:', user.email);
+  
+  // Get resident document to find flat number
+  const q = query(collection(db, 'residents'), where('email', '==', user.email));
+  const snap = await getDocs(q);
+  
+  if (snap.empty) {
+    alert('No resident document found!');
+    return;
+  }
+  
+  const residentData = snap.docs[0].data();
+  const flatNumber = residentData.flatNumber;
+  
+  console.log('Flat number:', flatNumber);
+  
+  if (!flatNumber) {
+    alert('No flat number in resident document!');
+    return;
+  }
+  
+  try {
+    // Create identity record (with uid field to satisfy security rules)
+    console.log('Creating identities/' + user.uid);
+    await setDoc(doc(db, 'identities', user.uid), {
+      uid: user.uid,  // ← Required by security rule
+      flatNumber: flatNumber,
+      memberId: user.uid,
+      provider: 'google',
+      linkedAt: serverTimestamp(),
+      isPrimary: true
+    });
+    
+    console.log('✅ Identity created!');
+    
+    // Create linkedAccounts record
+    console.log('Creating linkedAccounts/' + user.uid);
+    await setDoc(doc(db, 'linkedAccounts', user.uid), {
+      uid: user.uid,
+      flatNumber: flatNumber,
+      memberId: user.uid,
+      provider: 'google',
+      linkedAt: serverTimestamp()
+    });
+    
+    console.log('✅ LinkedAccount created!');
+    console.log('✅ All identity records created!');
+    alert('✅ Identity fixed!\n\nFlat: ' + flatNumber + '\n\nReloading page...');
+    
+    setTimeout(() => location.reload(), 1000);
+    
+  } catch (err) {
+    console.error('❌ Error:', err);
+    alert('❌ Error: ' + err.message + '\n\nCheck console for details.');
+  }
+})();

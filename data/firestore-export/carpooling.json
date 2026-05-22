@@ -1,0 +1,18 @@
+[
+  {
+    "id": "Tba5qgFFKLYgOZG9QPK3Vuz3LfI3_1776704521154",
+    "type": "offering",
+    "from": "Tower 15, PSOTS",
+    "to": "Baghmane Solarium City Tech Park, Brookefield",
+    "date": "2026-04-20",
+    "time": "16:30",
+    "seats": 4,
+    "recurring": "weekdays",
+    "notes": null,
+    "posterUid": "Tba5qgFFKLYgOZG9QPK3Vuz3LfI3",
+    "posterFlat": "15167",
+    "posterTelegram": "PushkalKishore",
+    "status": "active",
+    "createdAt": "2026-04-20T17:02:03.802Z"
+  }
+]
