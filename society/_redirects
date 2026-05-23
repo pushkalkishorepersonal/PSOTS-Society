@@ -1,6 +1,6 @@
 /society              /society/index.html        200
 /society/login        /society/login.html         200
-/society/register     /society/register-simple.html      200
+/society/register     /society/register.html      200
 /society/dashboard    /society/index.html         200
 /society/marketplace  /society/marketplace.html   200
 /society/guide        /society/guide.html         200

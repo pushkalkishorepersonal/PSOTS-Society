@@ -3,40 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - PSOTS Society</title>
+  <title>Join PSOTS Society</title>
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
-      background: var(--cream);
-      font-family: system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
+      font-family: 'Nunito Sans', system-ui, sans-serif;
+      min-height: 100vh;
       padding: 40px 20px;
     }
-    .container {
-      max-width: 600px;
+
+    .page {
+      max-width: 580px;
       margin: 0 auto;
       background: white;
-      padding: 40px;
       border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 32px rgba(26,74,58,0.12);
+      padding: 48px 40px;
     }
-    h1 {
-      font-family: var(--font-serif);
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
       color: var(--jade);
       margin-bottom: 8px;
     }
-    .subtitle {
+
+    .header p {
       color: var(--muted);
+      font-size: 15px;
+    }
+
+    .section {
+      display: none;
       margin-bottom: 32px;
     }
+
+    .section.visible {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .form-group {
       margin-bottom: 24px;
     }
+
     label {
       display: block;
       margin-bottom: 8px;
@@ -44,109 +70,70 @@
       color: var(--ink);
       font-size: 14px;
     }
+
     input, select {
       width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 15px;
-    }
-    .radio-group {
-      display: flex;
-      gap: 16px;
-      margin-top: 8px;
-    }
-    .radio-group label {
-      font-weight: normal;
-    }
-    .doc-upload-section {
-      background: var(--cream);
-      padding: 20px;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
       border-radius: 8px;
-      margin: 24px 0;
+      font-size: 15px;
+      transition: all 0.2s;
     }
-    .upload-btn {
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--jade);
+      box-shadow: 0 0 0 3px rgba(26,74,58,0.1);
+    }
+
+    .button {
       width: 100%;
       padding: 14px;
-      background: var(--jade);
-      color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      margin-bottom: 12px;
+      transition: all 0.2s;
     }
-    .upload-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
+
+    .button-primary {
       background: var(--jade);
       color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 24px;
     }
-    .submit-btn:disabled {
+
+    .button-primary:hover {
+      background: var(--jade-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(26,74,58,0.2);
+    }
+
+    .button-primary:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
     }
-    .message {
-      padding: 12px;
-      border-radius: 6px;
-      margin: 16px 0;
-      display: none;
-    }
-    .message.error {
-      display: block;
-      background: #fee;
-      color: #c00;
-      border: 1px solid #fcc;
-    }
-    .message.success {
-      display: block;
-      background: #efe;
-      color: #0a0;
-      border: 1px solid #cfc;
-    }
-    .message.warning {
-      display: block;
-      background: #fffbeb;
-      color: #b45309;
-      border: 1px solid #fde68a;
-    }
-    .info-box {
-      background: #f0f9ff;
-      border-left: 4px solid #3b82f6;
-      padding: 12px;
-      margin: 16px 0;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .google-btn {
-      width: 100%;
-      padding: 14px;
+
+    .button-google {
       background: #4285f4;
       color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
+
+    .button-google:hover {
+      background: #357ae8;
+    }
+
     .divider {
       text-align: center;
-      margin: 24px 0;
+      margin: 20px 0;
       color: var(--muted);
       position: relative;
     }
+
     .divider::before,
     .divider::after {
       content: '';
@@ -156,84 +143,163 @@
       height: 1px;
       background: var(--border);
     }
+
     .divider::before { left: 0; }
     .divider::after { right: 0; }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .message.error {
+      background: #fee;
+      color: #c33;
+      border: 1px solid #fcc;
+    }
+
+    .message.success {
+      background: #efe;
+      color: #3a3;
+      border: 1px solid #cfc;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      background: var(--cream);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-area:hover {
+      border-color: var(--jade);
+      background: rgba(26,74,58,0.05);
+    }
+
+    .phone-input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .phone-prefix {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--cream-dark, #f0e8db);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      min-width: 85px;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>Join PSOTS Society</h1>
-  <p class="subtitle">Complete registration in one simple form</p>
 
-  <div id="message" class="message"></div>
-
-  <!-- Google Sign In -->
-  <button class="google-btn" onclick="signInWithGoogle()">🔵 Continue with Google</button>
-
-  <div class="divider">OR</div>
-
-  <!-- Email/Password Registration -->
-  <div class="form-group">
-    <label>Email Address *</label>
-    <input type="email" id="email" placeholder="your@email.com" required>
+<div class="page">
+  <div class="header">
+    <h1>Join PSOTS</h1>
+    <p>Verify your document, then create your account</p>
   </div>
 
-  <div class="form-group">
-    <label>Password *</label>
-    <input type="password" id="password" placeholder="At least 8 characters" required>
+  <div id="globalMessage"></div>
+
+  <!-- STEP 1: Flat Number -->
+  <div id="step1-flat" class="section visible">
+    <div class="form-group">
+      <label>Your Flat Number *</label>
+      <input id="flatNumber" type="text" placeholder="e.g., 15167" maxlength="5" />
+    </div>
+    <button class="button button-primary" onclick="validateFlat()">Continue</button>
   </div>
 
-  <div class="form-group">
-    <label>Full Name *</label>
-    <input type="text" id="name" placeholder="As per records" required>
-  </div>
+  <!-- STEP 2: Document Upload -->
+  <div id="step2-document" class="section">
+    <p style="margin-bottom: 20px; color: var(--muted); font-size: 14px;">
+      <strong>Flat ${flatNum}</strong> • Upload ownership proof to continue
+    </p>
 
-  <div class="form-group">
-    <label>Flat Number *</label>
-    <input type="text" id="flatNumber" placeholder="e.g., 15167" maxlength="5" required>
-  </div>
-
-  <div class="form-group">
-    <label>Phone Number *</label>
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <div style="display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: var(--cream-dark, #f0e8db); border: 1px solid var(--border, rgba(160,130,90,0.22)); border-radius: 8px; font-size: 15px; min-width: 70px;">
-        <span style="font-size: 20px;">🇮🇳</span>
-        <span style="font-weight: 500; color: var(--ink, #1a1208);">+91</span>
+    <div class="form-group">
+      <label>Upload Ownership Proof *</label>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">
+        <strong>Accepted:</strong> PSOTS Maintenance Invoice or MyGate Receipt<br>
+        <strong>Formats:</strong> PDF, JPG, PNG (max 5MB)<br>
+        <strong>Find it:</strong> MyGate app → Community → Society Dues
+      </p>
+      <input type="file" id="docInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDocument()" />
+      <div class="upload-area" onclick="document.getElementById('docInput').click()">
+        <div style="font-size: 48px; margin-bottom: 10px;">📄</div>
+        <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Choose Document</div>
+        <div style="font-size: 13px; color: var(--muted);">Click to upload or drag & drop</div>
       </div>
-      <input type="tel" id="phone" placeholder="98XXX XXXXX" maxlength="10" style="flex: 1;" inputmode="numeric">
     </div>
+
+    <div id="verificationStatus"></div>
   </div>
 
-  <div class="form-group">
-    <label>Resident Type *</label>
-    <div class="radio-group">
-      <label><input type="radio" name="residentType" value="owner" checked> Owner</label>
-      <label><input type="radio" name="residentType" value="tenant"> Tenant</label>
-      <label><input type="radio" name="residentType" value="family"> Family</label>
-    </div>
-  </div>
+  <!-- STEP 3: Account Creation -->
+  <div id="step3-account" class="section">
+    <p style="margin-bottom: 20px; color: var(--success, #3a3); font-weight: 600;">
+      ✓ Document verified! Create your account
+    </p>
 
-  <div class="doc-upload-section" id="docSection">
-    <h3 style="margin:0 0 12px; font-size:16px;">Upload Document *</h3>
-    <div class="info-box">
-      <strong>Required for Owners & Tenants:</strong><br>
-      • Owners: PSOTS Maintenance Invoice or MyGate Receipt<br>
-      • Tenants: Lease Agreement with dates<br>
-      • Max 5MB • PDF, JPG, PNG
-    </div>
-    <input type="file" id="docInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
-    <button class="upload-btn" id="uploadBtn" onclick="document.getElementById('docInput').click()">
-      📄 Choose Document
+    <button class="button button-google" onclick="signInWithGoogle()">
+      <span>🔵</span> Continue with Google
     </button>
-    <div id="verifyStatus"></div>
+
+    <div class="divider">OR</div>
+
+    <div class="form-group">
+      <label>Full Name *</label>
+      <input id="name" type="text" placeholder="As per records" />
+    </div>
+
+    <div class="form-group">
+      <label>Email Address *</label>
+      <input id="email" type="email" placeholder="your@email.com" />
+    </div>
+
+    <div class="form-group">
+      <label>Phone Number *</label>
+      <div class="phone-input-group">
+        <div class="phone-prefix">
+          <span style="font-size: 20px;">🇮🇳</span>
+          <span style="font-weight: 500;">+91</span>
+        </div>
+        <input id="phone" type="tel" placeholder="98XXX XXXXX" maxlength="10" inputmode="numeric" style="flex: 1;" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Password *</label>
+      <input id="password" type="password" placeholder="At least 8 characters" />
+    </div>
+
+    <button class="button button-primary" onclick="completeRegistration()">Complete Registration</button>
   </div>
 
-  <button class="submit-btn" id="submitBtn" onclick="submitRegistration()" disabled>
-    Upload document to continue
-  </button>
-
-  <p style="text-align:center; margin-top:20px; font-size:13px;">
-    <a href="/society/login.html" style="color:var(--jade)">Already registered? Sign in</a>
+  <p style="text-align: center; margin-top: 20px; font-size: 13px;">
+    <a href="/society/login.html" style="color: var(--jade); text-decoration: none;">Already registered? Sign in</a>
   </p>
 </div>
 
@@ -246,76 +312,122 @@
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   const WORKER_URL = 'https://telegram.psots.in';
-  let documentUploaded = false;
-  let verificationStatus = null;
-  let documentData = { base64: null, mimeType: null };
+  let currentFlat = null;
+  let verificationToken = null;
+  let googleUser = null;
 
-  // Pre-fill flat number from URL
-  const params = new URLSearchParams(window.location.search);
+  // Pre-fill flat from URL
+  const params = new URLSearchParams(window.location.location.search);
   if (params.get('flat')) {
     document.getElementById('flatNumber').value = params.get('flat');
   }
 
-  // Show/hide document section based on resident type
-  document.querySelectorAll('input[name="residentType"]').forEach(radio => {
-    radio.addEventListener('change', updateDocSection);
-  });
-
-  function updateDocSection() {
-    const type = document.querySelector('input[name="residentType"]:checked').value;
-    const docSection = document.getElementById('docSection');
-    if (type === 'family') {
-      docSection.style.display = 'none';
-      verificationStatus = 'not_required';
-      updateSubmitButton();
-    } else {
-      docSection.style.display = 'block';
-      verificationStatus = null;
-      updateSubmitButton();
-    }
-  }
-
-  function updateSubmitButton() {
-    const btn = document.getElementById('submitBtn');
-    const type = document.querySelector('input[name="residentType"]:checked').value;
-
-    if (type === 'family' || verificationStatus === 'verified' || verificationStatus === 'manual_review') {
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.textContent = verificationStatus === 'verified' ? '✅ Complete Registration' : 'Submit Registration';
-    } else {
-      btn.disabled = true;
-      btn.style.opacity = '0.5';
-      btn.textContent = 'Upload document to continue';
-    }
-  }
-
   function showMessage(text, type = 'error') {
-    const msg = document.getElementById('message');
-    msg.className = `message ${type}`;
+    const msg = document.getElementById('globalMessage');
     msg.textContent = text;
+    msg.className = `message ${type}`;
     msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  // Google Sign In (popup mode - stays on same page)
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.getElementById(id).classList.add('visible');
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // STEP 1: Validate Flat
+  window.validateFlat = async function() {
+    const flatNumber = document.getElementById('flatNumber').value.trim();
+    if (!flatNumber) return showMessage('Please enter your flat number');
+
+    try {
+      const res = await fetch(`${WORKER_URL}/resident/check-flat?flatNumber=${encodeURIComponent(flatNumber)}`);
+      const data = await res.json();
+
+      if (!data.ok) {
+        return showMessage('Flat not found. Please check the number.');
+      }
+
+      if (data.status === 'occupied') {
+        return showMessage(`Flat ${flatNumber} is already registered by ${data.ownerFirstName || 'another resident'}.`);
+      }
+
+      currentFlat = flatNumber;
+      showSection('step2-document');
+      document.getElementById('globalMessage').textContent = '';
+    } catch (err) {
+      showMessage('Error checking flat: ' + err.message);
+    }
+  };
+
+  // STEP 2: Upload Document (Worker handles PDF conversion!)
+  window.uploadDocument = async function() {
+    const file = document.getElementById('docInput').files[0];
+    if (!file) return;
+
+    const statusDiv = document.getElementById('verificationStatus');
+    statusDiv.innerHTML = '<div class="message">📤 Uploading document...</div>';
+
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new Error('File too large (max 5MB)');
+      if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) {
+        throw new Error('Invalid file type. Please upload PDF, JPG, or PNG.');
+      }
+
+      // Convert to base64 - NO frontend PDF conversion, Worker will handle it!
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      statusDiv.innerHTML = '<div class="message">🔍 Verifying document with AI...</div>';
+
+      // Send to Worker - it will convert PDF if needed
+      const response = await fetch(`${WORKER_URL}/resident/verify-document`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          base64Document: base64,
+          mimeType: file.type,
+          flatNumber: currentFlat,
+          residentType: 'owner'
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.result === 'verified') {
+        verificationToken = result.token;
+        statusDiv.innerHTML = '<div class="message success">✅ Document verified! Proceeding to account creation...</div>';
+        setTimeout(() => showSection('step3-account'), 1500);
+      } else if (result.result === 'manual_review') {
+        verificationToken = result.token;
+        statusDiv.innerHTML = '<div class="message success">📋 Document uploaded! Admin will review within 24 hours. You can continue registration.</div>';
+        setTimeout(() => showSection('step3-account'), 2000);
+      } else {
+        statusDiv.innerHTML = '<div class="message error">❌ Document verification failed. Please try again or contact support.</div>';
+      }
+    } catch (err) {
+      statusDiv.innerHTML = `<div class="message error">❌ ${err.message}</div>`;
+    }
+  };
+
+  // STEP 3: Google Sign-in
   window.signInWithGoogle = async function() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      googleUser = result.user;
 
-      // Auto-fill email and name from Google account
-      document.getElementById('email').value = result.user.email;
+      document.getElementById('name').value = googleUser.displayName || '';
+      document.getElementById('email').value = googleUser.email || '';
       document.getElementById('email').disabled = true;
-
-      if (result.user.displayName) {
-        document.getElementById('name').value = result.user.displayName;
-      }
-
-      // Disable password field (not needed for Google auth)
       document.getElementById('password').disabled = true;
       document.getElementById('password').placeholder = 'Not needed (Google Sign-In)';
 
-      showMessage('✅ Signed in with Google! Email and name auto-filled.', 'success');
+      showMessage('✅ Signed in with Google! Please complete your phone number.', 'success');
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
         showMessage('Google sign-in failed: ' + err.message);
@@ -323,205 +435,59 @@
     }
   };
 
-  // PDF to Image conversion helper
-  async function convertPdfToImage(file) {
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const page = await pdf.getPage(1);
-      const viewport = page.getViewport({ scale: 2.0 });
-      const canvas = document.createElement('canvas');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-      return {
-        base64: canvas.toDataURL('image/jpeg', 0.85).split(',')[1],
-        mimeType: 'image/jpeg'
-      };
-    } catch (err) {
-      console.error('PDF conversion error:', err);
-      throw new Error('Could not process PDF. Please try a different file or use JPG/PNG instead.');
+  // STEP 3: Complete Registration
+  window.completeRegistration = async function() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    let phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!name || !email || !phone) {
+      return showMessage('Please fill in all required fields');
     }
-  }
 
-  // Document upload
-  document.getElementById('docInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+      return showMessage('Please enter a valid 10-digit phone number');
+    }
 
-    const uploadBtn = document.getElementById('uploadBtn');
-    const verifyStatus = document.getElementById('verifyStatus');
+    // Add +91 prefix
+    phone = `+91${phone}`;
 
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = 'Uploading...';
-    verifyStatus.innerHTML = '';
+    if (!googleUser && (!password || password.length < 8)) {
+      return showMessage('Password must be at least 8 characters');
+    }
 
     try {
-      // Validate
-      if (file.size > 5 * 1024 * 1024) throw new Error('File too large (max 5MB)');
-      if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) {
-        throw new Error('Invalid file type (PDF/JPG/PNG only)');
-      }
+      showMessage('Creating your account...', 'success');
 
-      // Convert PDF to image if needed, otherwise just read as base64
-      let base64, mimeType;
-      if (file.type === 'application/pdf') {
-        uploadBtn.textContent = 'Converting PDF...';
-        try {
-          const converted = await convertPdfToImage(file);
-          base64 = converted.base64;
-          mimeType = converted.mimeType;
-          console.log('PDF converted on frontend successfully');
-        } catch (pdfError) {
-          console.warn('Frontend PDF conversion failed, sending raw PDF to Worker:', pdfError);
-          // Fallback: Send raw PDF directly to Worker
-          base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-          mimeType = file.type; // Keep as 'application/pdf'
-        }
-      } else {
-        base64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-        mimeType = file.type;
-      }
-
-      documentData = { base64, mimeType };
-      uploadBtn.textContent = 'Verifying...';
-
-      // Verify with Gemini
-      const response = await fetch(`${WORKER_URL}/resident/verify-document`, {
+      // Register on Worker
+      const response = await fetch(`${WORKER_URL}/resident/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          base64Document: base64,
-          mimeType: file.type,
-          residentName: document.getElementById('name').value,
-          flatNumber: document.getElementById('flatNumber').value,
-          residentType: document.querySelector('input[name="residentType"]:checked').value
+          flat_number: currentFlat,
+          name,
+          email,
+          phone,
+          residentType: 'owner',
+          verificationToken,
+          identifier: email,
+          verificationMethod: 'document'
         })
       });
 
       const result = await response.json();
 
-      if (result.result === 'verified') {
-        verificationStatus = 'verified';
-        verifyStatus.innerHTML = '<div class="message success">✅ Document verified!</div>';
-      } else if (result.result === 'manual_review') {
-        verificationStatus = 'manual_review';
-        verifyStatus.innerHTML = '<div class="message warning">⚠️ Document uploaded! Our team will review it within 24 hours.</div>';
+      if (result.ok) {
+        showMessage('✅ Registration successful! Redirecting to login...', 'success');
+        setTimeout(() => {
+          window.location.href = '/society/login.html';
+        }, 2000);
       } else {
-        // Instead of failing, send for manual review
-        verificationStatus = 'manual_review';
-        verifyStatus.innerHTML = '<div class="message warning">⚠️ Could not auto-verify. Document sent to admin for review.</div>';
+        showMessage(result.error || 'Registration failed. Please try again.');
       }
-
-      documentUploaded = true;
-      updateSubmitButton();
-
     } catch (err) {
-      // Always allow submission - send for manual review
-      verificationStatus = 'manual_review';
-      verifyStatus.innerHTML = `<div class="message warning">⚠️ Document uploaded! We'll verify it within 24 hours.</div>`;
-      documentUploaded = true;
-      updateSubmitButton();
-    } finally {
-      uploadBtn.disabled = false;
-      uploadBtn.textContent = '📄 Choose Document';
-      document.getElementById('docInput').value = '';
-    }
-  });
-
-  // Submit registration
-  window.submitRegistration = async function() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const flatNumber = document.getElementById('flatNumber').value.trim();
-    let phone = document.getElementById('phone').value.trim();
-    const residentType = document.querySelector('input[name="residentType"]:checked').value;
-
-    // Validation
-    if (!email || !password || !name || !flatNumber) {
-      showMessage('Please fill all required fields');
-      return;
-    }
-    if (!phone) {
-      showMessage('Phone number is required');
-      return;
-    }
-    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-      showMessage('Please enter a valid 10-digit phone number');
-      return;
-    }
-    if (password.length < 8) {
-      showMessage('Password must be at least 8 characters');
-      return;
-    }
-
-    // Normalize phone number to E.164 format (+91XXXXXXXXXX)
-    phone = `+91${phone}`;
-    if (residentType !== 'family' && !verificationStatus) {
-      showMessage('Please upload and verify your document first');
-      return;
-    }
-
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Creating account...';
-
-    try {
-      // Create Firebase account (only if not already signed in with Google)
-      if (!auth.currentUser) {
-        await createUserWithEmailAndPassword(auth, email, password);
-      }
-
-      submitBtn.textContent = 'Registering...';
-
-      // Register with worker
-      const status = verificationStatus === 'verified' ? 'approved' : 'pending';
-      const payload = {
-        type: auth.currentUser.providerData[0].providerId === 'google.com' ? 'google' : 'email',
-        identifier: email,
-        name,
-        flatNumber,
-        residentType,
-        phone: phone || null,
-        status
-      };
-
-      if (residentType !== 'family') {
-        payload.documentBase64 = documentData.base64;
-        payload.documentMimeType = documentData.mimeType;
-        payload.verificationMethod = 'document';
-      }
-
-      const res = await fetch(`${WORKER_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || 'Registration failed');
-
-      // Success!
-      showMessage('✅ Registration complete! Redirecting...', 'success');
-      setTimeout(() => {
-        window.location.href = status === 'approved' ? '/society/' : '/society/login.html';
-      }, 2000);
-
-    } catch (err) {
-      showMessage('Registration failed: ' + err.message);
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Registration';
+      showMessage('Error: ' + err.message);
     }
   };
 </script>

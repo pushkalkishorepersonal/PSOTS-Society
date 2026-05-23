@@ -1,20 +1,55 @@
-# PSOTS — Prestige Song of the South
+# PSOTS Society Platform
 
-  Community portal for the PSOTS apartment complex in Bangalore — 2300+ flats across 14 towers on 33 acres.
+Community platform for Prestige Song of the South (PSOTS), Bangalore — 2,100+ flats across 14 towers.
 
-  ## Features
-  - **Notice Board** — Official announcements from management
-  - **Events Calendar** — Community events at The Opera clubhouse and amphitheatre
-  - **Buy/Sell Marketplace** — Residents buying, selling, renting, and giving items
-  - **Emergency Contacts** — Quick access to helpdesk and emergency numbers
-  - **Community Guide** — Rules of Residency, amenity hours, and local area info
-  - **Telegram Bot** (@psots_telegram_bot) — Multi-group moderation with per-group rules
+## Live URLs
 
-  ## Tech Stack
-  - **Frontend**: React + Vite + TypeScript + Tailwind CSS + shadcn/ui
-  - **Backend**: Node.js + Express + Fastify + TypeScript
-  - **Database**: PostgreSQL + Drizzle ORM
-  - **Bot**: node-telegram-bot-api
+- **society.psots.in** — Main resident platform
+- **telegram.psots.in** — API + Telegram bot (Cloudflare Worker)
 
-  ## Domain: psots.in
-  
+## Stack
+
+- **Frontend:** Cloudflare Pages (HTML/CSS/JS, no build step)
+- **Backend:** Cloudflare Workers (src/index.js)
+- **Database:** Firebase Firestore
+- **Auth:** Firebase Auth (Google + Email/Password)
+- **Email:** Resend API
+- **Bot:** Telegram Bot API
+
+## Quick Start (Developer)
+
+See `docs/AJIT_ONBOARDING.md` for full developer guide.
+
+## Key Docs
+
+- `docs/AJIT_ONBOARDING.md` — Developer onboarding guide
+- `docs/IDENTITY_MODEL.md` — Identity and schema design
+- `docs/DECISIONS.md` — Architectural decisions log
+- `SPRINT_STATUS.md` — Current sprint progress
+- `ROADMAP.md` — Feature roadmap
+- `FEATURE_STATUS.md` — Per-feature status
+
+## Deploy
+
+**Worker:**
+```bash
+npx wrangler deploy
+```
+
+**Frontend:** Auto-deploys via GitHub Actions on push to main
+
+## Auth
+
+Two methods supported:
+
+- **Google OAuth** (primary)
+- **Email/Password** (secondary)
+- Telegram OTP preserved in `backup/telegram-email-otp` branch
+
+## Contact
+
+Pushkal Kishore — Telegram @pushkalkishore
+
+---
+
+**Last updated:** 2026-04-28

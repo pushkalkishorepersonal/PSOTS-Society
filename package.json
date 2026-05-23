@@ -1,20 +1,40 @@
 {
-  "name": "workspace",
-  "version": "0.0.0",
-  "license": "MIT",
+  "name": "psots-moderation-bot",
+  "version": "2.0.0",
+  "description": "Telegram moderation bot for PSOTS Owners Group (Cloudflare Workers)",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
-    "build:cf": "pnpm --filter @workspace/psots run build:cloudflare",
-    "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ js/ --max-warnings 300",
+    "check:arch": "node scripts/check-architecture.js",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "logs": "wrangler tail",
+    "migrate:export": "node scripts/export-firestore.js",
+    "migrate:import": "node scripts/import-to-d1.js",
+    "migrate:import:dry": "node scripts/import-to-d1.js --dry-run",
+    "test:d1": "node scripts/test-d1-adapter.js"
   },
-  "private": true,
+  "keywords": [
+    "telegram",
+    "bot",
+    "moderation",
+    "psots",
+    "cloudflare-workers"
+  ],
+  "author": "PSOTS",
+  "license": "MIT",
   "devDependencies": {
-    "prettier": "^3.8.1",
-    "typescript": "~5.9.2"
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "vitest": "^1.6.0",
+    "wrangler": "^4.81.1"
   },
   "dependencies": {
-    "@replit/connectors-sdk": "^0.3.0"
+    "firebase": "^12.12.0",
+    "firebase-admin": "^13.8.0"
   }
 }
