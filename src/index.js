@@ -956,9 +956,26 @@ export default {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       };
-      if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
-
       const pathname = url.pathname;
+
+      // Credentialed endpoints (cookie-based auth) need specific origin + credentials:true.
+      // Wildcard origin is rejected by browsers when credentials are sent.
+      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout';
+      if (request.method === 'OPTIONS') {
+        if (isCredentialedAuth) {
+          const origin = request.headers.get('Origin') || '';
+          const allowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(origin) ? origin : 'https://society.psots.in';
+          return new Response(null, {
+            headers: {
+              'Access-Control-Allow-Origin': allowOrigin,
+              'Access-Control-Allow-Credentials': 'true',
+              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+            }
+          });
+        }
+        return new Response(null, { headers: CORS });
+      }
 
       // ── RATE LIMITING ─────────────────────────────────────
       let sessionUidForRateLimit = null;
@@ -1705,6 +1722,211 @@ export default {
           widgetId: env.MSG91_WIDGET_ID || '',
           tokenAuth: env.MSG91_WIDGET_TOKEN || ''
         }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // Direct Google OAuth (no Firebase)
+      // ═══════════════════════════════════════════════════════════════
+      // Phase 1: parallel with Firebase Google. Issues Worker session cookie.
+      //   GET  /auth/google/start?next=/society/   → redirect to Google
+      //   GET  /auth/google/callback?code&state    → exchange, verify, set cookie
+      //   GET  /auth/me                            → who is the cookie holder
+      //   POST /auth/logout                        → clear cookie + KV session
+      // Required secrets: GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET
+      // Authorized redirect URI in Google Console: <worker-origin>/auth/google/callback
+
+      if (pathname === '/auth/google/start' && request.method === 'GET') {
+        if (!env.GOOGLE_OAUTH_CLIENT_ID) {
+          return new Response(JSON.stringify({ ok: false, error: 'oauth_not_configured' }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+        const rawNext = url.searchParams.get('next') || '/society/';
+        const next = rawNext.startsWith('/') ? rawNext : '/society/';
+
+        const randBytes = (n) => {
+          const a = new Uint8Array(n);
+          crypto.getRandomValues(a);
+          return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+        };
+        const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
+          .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const state = randBytes(16);
+        const verifier = randBytes(32);
+        const challengeBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+        const challenge = b64url(challengeBuf);
+
+        await env.CACHE_KV.put(`_oauth_state_${state}`,
+          JSON.stringify({ verifier, next }),
+          { expirationTtl: 600 });
+
+        const redirectUri = `${url.origin}/auth/google/callback`;
+        const params = new URLSearchParams({
+          client_id: env.GOOGLE_OAUTH_CLIENT_ID,
+          redirect_uri: redirectUri,
+          response_type: 'code',
+          scope: 'openid email profile',
+          state,
+          code_challenge: challenge,
+          code_challenge_method: 'S256',
+          access_type: 'online',
+          prompt: 'select_account'
+        });
+        return Response.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`, 302);
+      }
+
+      if (pathname === '/auth/google/callback' && request.method === 'GET') {
+        const FRONTEND_BASE = 'https://society.psots.in';
+        const code = url.searchParams.get('code');
+        const state = url.searchParams.get('state');
+        const errorParam = url.searchParams.get('error');
+
+        if (errorParam) {
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=${encodeURIComponent(errorParam)}`, 302);
+        }
+        if (!code || !state) {
+          return new Response('Missing code or state', { status: 400 });
+        }
+        const stateData = await env.CACHE_KV.get(`_oauth_state_${state}`, 'json');
+        if (!stateData) {
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=invalid_state`, 302);
+        }
+        await env.CACHE_KV.delete(`_oauth_state_${state}`);
+
+        // Exchange authorization code for tokens
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            code,
+            client_id: env.GOOGLE_OAUTH_CLIENT_ID,
+            client_secret: env.GOOGLE_OAUTH_CLIENT_SECRET,
+            redirect_uri: `${url.origin}/auth/google/callback`,
+            grant_type: 'authorization_code',
+            code_verifier: stateData.verifier
+          })
+        });
+        if (!tokenRes.ok) {
+          const errText = await tokenRes.text();
+          console.error('Google token exchange failed:', tokenRes.status, errText);
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=token_exchange_failed`, 302);
+        }
+        const tokens = await tokenRes.json();
+        if (!tokens.id_token) {
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=no_id_token`, 302);
+        }
+
+        // Verify ID token signature against Google JWKS
+        let payload;
+        try {
+          const [headerB64, payloadB64, sigB64] = tokens.id_token.split('.');
+          const fromB64Url = (s) => atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+          const header = JSON.parse(fromB64Url(headerB64));
+          payload = JSON.parse(fromB64Url(payloadB64));
+
+          if (payload.iss !== 'https://accounts.google.com' && payload.iss !== 'accounts.google.com') {
+            throw new Error('invalid_issuer');
+          }
+          if (payload.aud !== env.GOOGLE_OAUTH_CLIENT_ID) throw new Error('invalid_audience');
+          if (payload.exp < Math.floor(Date.now() / 1000)) throw new Error('token_expired');
+
+          const jwksRes = await fetch('https://www.googleapis.com/oauth2/v3/certs');
+          const jwks = await jwksRes.json();
+          const key = jwks.keys.find(k => k.kid === header.kid);
+          if (!key) throw new Error('signing_key_not_found');
+
+          const pubKey = await crypto.subtle.importKey(
+            'jwk', key,
+            { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+            false, ['verify']
+          );
+          const sigBytes = Uint8Array.from(fromB64Url(sigB64), c => c.charCodeAt(0));
+          const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
+          const ok = await crypto.subtle.verify({ name: 'RSASSA-PKCS1-v1_5' }, pubKey, sigBytes, data);
+          if (!ok) throw new Error('signature_invalid');
+        } catch (e) {
+          console.error('ID token verification failed:', e.message);
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=invalid_token`, 302);
+        }
+
+        const email = String(payload.email || '').toLowerCase();
+        const name = payload.name || '';
+        if (!email || !payload.email_verified) {
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=email_unverified`, 302);
+        }
+
+        // Look up resident by google credential (or email credential as fallback)
+        let credential = await db.getCredentialByTypeAndIdentifier('google', email, env);
+        if (!credential) credential = await db.getCredentialByTypeAndIdentifier('email', email, env);
+
+        if (!credential) {
+          const regParams = new URLSearchParams({ email, name, from: 'google' });
+          return Response.redirect(`${FRONTEND_BASE}/society/register.html?${regParams}`, 302);
+        }
+
+        const residentId = credential.resident_id || credential.residentId;
+        const resident = await db.getResidentV2(residentId, env);
+        if (!resident) {
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=resident_not_found`, 302);
+        }
+        const status = resident.status;
+        if (status !== 'approved' && status !== 'verified_owner') {
+          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=not_approved&status=${encodeURIComponent(status)}`, 302);
+        }
+
+        // Issue session cookie
+        const sessionId = crypto.randomUUID();
+        await env.SESSIONS_KV.put(sessionId, JSON.stringify({
+          uid: residentId,
+          email,
+          name,
+          flatNumber: resident.flat_number || resident.flatNumber,
+          authMethod: 'google_oauth',
+          createdAt: Date.now()
+        }), { expirationTtl: 30 * 24 * 60 * 60 });
+
+        try { await db.updateCredentialLastUsed(credential.credential_id || credential.credentialId, env); } catch (_e) { /* non-fatal */ }
+
+        const cookie = `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
+        return new Response(null, {
+          status: 302,
+          headers: {
+            'Location': `${FRONTEND_BASE}${stateData.next}`,
+            'Set-Cookie': cookie
+          }
+        });
+      }
+
+      if (pathname === '/auth/me' && request.method === 'GET') {
+        const origin = request.headers.get('Origin') || '';
+        const allowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(origin) ? origin : 'https://society.psots.in';
+        const corsHeaders = {
+          'Access-Control-Allow-Origin': allowOrigin,
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'application/json'
+        };
+        const cookieStr = request.headers.get('Cookie') || '';
+        const m = cookieStr.match(/psots_session=([^;]+)/);
+        if (!m) return new Response(JSON.stringify({ ok: false, error: 'no_session' }), { status: 401, headers: corsHeaders });
+        const { data } = await db.getSession(env, m[1]);
+        if (!data) return new Response(JSON.stringify({ ok: false, error: 'invalid_session' }), { status: 401, headers: corsHeaders });
+        return new Response(JSON.stringify({ ok: true, user: data }), { headers: corsHeaders });
+      }
+
+      if (pathname === '/auth/logout' && request.method === 'POST') {
+        const origin = request.headers.get('Origin') || '';
+        const allowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(origin) ? origin : 'https://society.psots.in';
+        const cookieStr = request.headers.get('Cookie') || '';
+        const m = cookieStr.match(/psots_session=([^;]+)/);
+        if (m) { try { await env.SESSIONS_KV.delete(m[1]); } catch (_e) { /* ignore */ } }
+        const clearCookie = 'psots_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in';
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: {
+            'Access-Control-Allow-Origin': allowOrigin,
+            'Access-Control-Allow-Credentials': 'true',
+            'Content-Type': 'application/json',
+            'Set-Cookie': clearCookie
+          }
+        });
       }
 
       // POST /auth/sms-login — MSG91 SMS OTP verification + login/signup intent.
