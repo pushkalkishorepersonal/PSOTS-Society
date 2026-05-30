@@ -195,6 +195,11 @@
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   const WORKER_URL = 'https://telegram.psots.in';
+  // Escape user/Worker-supplied strings before interpolating into innerHTML.
+  // OCR output and Firestore values are NOT trusted.
+  const escapeHTML = (s) => String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   let MSG91_WIDGET_ID = '';
   let MSG91_TOKEN_AUTH = '';
   (async () => {
@@ -258,10 +263,10 @@
       });
       const data = await res.json();
       if (data.status === 'occupied') {
-        return showMessage(`Flat ${flat} is already registered by ${data.ownerFirstName || 'another resident'}. <a href="/society/login.html?flat=${flat}">Sign in instead →</a>`);
+        return showMessage(`Flat ${escapeHTML(flat)} is already registered by ${escapeHTML(data.ownerFirstName || 'another resident')}. <a href="/society/login.html?flat=${encodeURIComponent(flat)}">Sign in instead →</a>`);
       }
       if (data.status === 'pending') {
-        return showMessage(`A registration for flat ${flat} is already pending admin review.`);
+        return showMessage(`A registration for flat ${escapeHTML(flat)} is already pending admin review.`);
       }
     } catch (e) {
       console.warn('flat check failed (non-fatal):', e);
@@ -334,13 +339,13 @@
       } else {
         const issues = [];
         if (!data.checks?.society) issues.push('society name not recognised');
-        if (!data.checks?.flatNumber) issues.push(`flat number mismatch (found "${data.extracted?.flatNumber || '?'}", you entered "${state.flatNumber}")`);
-        if (!data.checks?.ownerName) issues.push(`name mismatch (document shows "${data.extracted?.ownerName || '?'}" / paid by "${data.extracted?.paidByName || '?'}", you entered "${state.residentName}")`);
+        if (!data.checks?.flatNumber) issues.push(`flat number mismatch (found "${escapeHTML(data.extracted?.flatNumber || '?')}", you entered "${escapeHTML(state.flatNumber)}")`);
+        if (!data.checks?.ownerName) issues.push(`name mismatch (document shows "${escapeHTML(data.extracted?.ownerName || '?')}" / paid by "${escapeHTML(data.extracted?.paidByName || '?')}", you entered "${escapeHTML(state.residentName)}")`);
         statusDiv.innerHTML = `<div class="message error">❌ We couldn't verify this document.<br><br><strong>Issues:</strong> ${issues.join(', ') || 'document unreadable'}.<br><br>Please upload a recent PSOTS maintenance receipt, or contact admin if your name on records differs.</div>`;
         uploadArea.classList.remove('has-file');
       }
     } catch (err) {
-      statusDiv.innerHTML = `<div class="message error">Upload failed: ${err.message}</div>`;
+      statusDiv.innerHTML = `<div class="message error">Upload failed: ${escapeHTML(err.message)}</div>`;
       uploadArea.classList.remove('has-file');
     }
   };
@@ -356,8 +361,8 @@
     ];
     el.innerHTML = `
       <div class="extracted-card">
-        <div style="font-weight:600; margin-bottom:6px;">Extracted from document${matchedAs ? ` · matched as ${matchedAs}` : ''}</div>
-        ${rows.map(([k, v]) => `<div class="row"><span class="label">${k}</span><span class="value">${v}</span></div>`).join('')}
+        <div style="font-weight:600; margin-bottom:6px;">Extracted from document${matchedAs ? ` · matched as ${escapeHTML(matchedAs)}` : ''}</div>
+        ${rows.map(([k, v]) => `<div class="row"><span class="label">${escapeHTML(k)}</span><span class="value">${escapeHTML(v)}</span></div>`).join('')}
       </div>
     `;
   }
@@ -400,12 +405,12 @@
           showMessage('You already have an account! <a href="/society/">Go to dashboard →</a>', 'info');
           return;
         }
-        return showMessage(regData.message || regData.error || 'Registration failed');
+        return showMessage(escapeHTML(regData.message || regData.error || 'Registration failed'));
       }
       showMessage('✅ Welcome to PSOTS! Redirecting...', 'success');
       setTimeout(() => { window.location.href = '/society/'; }, 1500);
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') showMessage('Google sign-in failed: ' + err.message);
+      if (err.code !== 'auth/popup-closed-by-user') showMessage('Google sign-in failed: ' + escapeHTML(err.message));
     }
   };
 
@@ -461,7 +466,7 @@
               showMessage('You already have an account! <a href="/society/login.html">Sign in instead →</a>', 'info');
               return;
             }
-            return showMessage(regData.message || regData.error || 'Registration failed');
+            return showMessage(escapeHTML(regData.message || regData.error || 'Registration failed'));
           }
 
           // Auto-login: call /auth/sms-login to get a customToken + session
@@ -481,11 +486,11 @@
           showMessage('✅ Welcome to PSOTS! Redirecting...', 'success');
           setTimeout(() => { window.location.href = '/society/'; }, 1500);
         } catch (err) {
-          showMessage('Verification error: ' + err.message);
+          showMessage('Verification error: ' + escapeHTML(err.message));
         }
       },
       failure: (error) => {
-        showMessage('OTP failed: ' + (error?.message || 'try again'));
+        showMessage('OTP failed: ' + escapeHTML(error?.message || 'try again'));
       }
     };
     if (typeof initSendOTP !== 'function') {

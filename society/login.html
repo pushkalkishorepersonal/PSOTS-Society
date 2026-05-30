@@ -232,6 +232,10 @@
     } from '../../js/core/device.js';
 
     const WORKER_URL = 'https://telegram.psots.in';
+    // Escape Worker/Firestore-supplied strings before interpolating into innerHTML.
+    const escapeHTML = (s) => String(s ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     let MSG91_WIDGET_ID = '';
     let MSG91_TOKEN_AUTH = '';
     let deviceToken = null;
@@ -279,9 +283,9 @@
       const el = document.getElementById('step-quick-return');
       el.innerHTML = `
         <div class="quick-return-card">
-          <div class="quick-return-avatar">${initials}</div>
-          <div class="quick-return-name">Welcome back, ${data.name || 'Resident'}!</div>
-          <div class="quick-return-meta">Flat ${data.flatNumber || '—'} · ${data.deviceLabel || 'this device'}</div>
+          <div class="quick-return-avatar">${escapeHTML(initials)}</div>
+          <div class="quick-return-name">Welcome back, ${escapeHTML(data.name || 'Resident')}!</div>
+          <div class="quick-return-meta">Flat ${escapeHTML(data.flatNumber || '—')} · ${escapeHTML(data.deviceLabel || 'this device')}</div>
           <button class="btn btn-primary" onclick="quickContinue()">One-tap continue</button>
           <a href="#" class="back-link" onclick="switchAccount(); return false;">Not you? Switch account</a>
         </div>
@@ -353,11 +357,11 @@
           showMessage('No account found. Redirecting to register...', 'info');
           setTimeout(() => { window.location.href = '/society/register.html'; }, 1200);
         } else {
-          showMessage(data.message || data.error || 'Login failed');
+          showMessage(escapeHTML(data.message || data.error || 'Login failed'));
         }
       } catch (err) {
         if (err.code === 'auth/popup-closed-by-user') return;
-        showMessage('Google sign-in failed: ' + err.message);
+        showMessage('Google sign-in failed: ' + escapeHTML(err.message));
       }
     };
 
@@ -393,19 +397,19 @@
               showMessage('Welcome back!', 'success');
               setTimeout(() => { window.location.href = '/society/'; }, 800);
             } else if (loginData.error === 'not_registered') {
-              showMessage(`No account found for +91 ${phone}. <a href="/society/register.html">Register here →</a>`, 'info');
+              showMessage(`No account found for +91 ${escapeHTML(phone)}. <a href="/society/register.html">Register here →</a>`, 'info');
             } else if (loginData.error === 'not_approved') {
               showMessage('Your account is pending admin approval.', 'info');
             } else {
-              showMessage(loginData.message || loginData.detail || loginData.error || 'OTP login failed');
+              showMessage(escapeHTML(loginData.message || loginData.detail || loginData.error || 'OTP login failed'));
             }
           } catch (err) {
-            showMessage('Error: ' + err.message);
+            showMessage('Error: ' + escapeHTML(err.message));
           }
         },
         failure: (error) => {
           btn.disabled = false; btn.innerHTML = 'Send OTP →';
-          showMessage('OTP failed: ' + (error?.message || 'try again'));
+          showMessage('OTP failed: ' + escapeHTML(error?.message || 'try again'));
         }
       };
       if (typeof initSendOTP !== 'function') {
