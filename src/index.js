@@ -269,6 +269,42 @@ function pemToBuffer(pem) {
   return buffer.buffer;
 }
 
+// ── FIREBASE CUSTOM TOKEN (for SMS-OTP login → Firebase auth handoff) ──
+// Mints a signed Firebase Auth custom token so the browser can call
+// signInWithCustomToken() and pick up a normal Firebase session after we
+// verified the user's phone via MSG91.
+async function mintFirebaseCustomToken(uid, env, extraClaims = null) {
+  const email = env.FIREBASE_SA_EMAIL;
+  const rawKey = (env.FIREBASE_SA_KEY || '').replace(/\\n/g, '\n').replace(/\r/g, '');
+  if (!email || !rawKey || !uid) throw new Error('missing_sa_or_uid');
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: email,
+    sub: email,
+    aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+    iat: now,
+    exp: now + 3600,
+    uid: String(uid),
+  };
+  if (extraClaims) payload.claims = extraClaims;
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const b64url = obj => btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const signingInput = `${b64url(header)}.${b64url(payload)}`;
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    pemToBuffer(rawKey),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(signingInput));
+  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return `${signingInput}.${sigB64}`;
+}
+
 // ── EMAIL UTILITY FUNCTIONS ──────────────────────────────────
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -1061,7 +1097,7 @@ export default {
             return new Response(JSON.stringify({ ok: false, case: null, error: 'missing_fields' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          if (!['google', 'email', 'telegram'].includes(type)) {
+          if (!['google', 'email', 'telegram', 'sms'].includes(type)) {
             return new Response(JSON.stringify({ ok: false, case: null, error: 'invalid_type' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
@@ -1351,7 +1387,31 @@ export default {
       if (pathname === '/auth/register' && request.method === 'POST') {
         try {
           const body = await request.json().catch(() => ({}));
-          const { type, identifier, name, flatNumber, firebaseToken, phone, status, documentBase64, documentMimeType, verificationMethod, residentType, email, verificationResult, userConsent, userNote, mismatchDetails, verificationToken } = body;
+          const { type, identifier, name, flatNumber, firebaseToken, phone, status, documentBase64, documentMimeType, verificationMethod, residentType, email, verificationResult, userConsent, userNote, mismatchDetails, verificationToken, smsVerifyToken } = body;
+
+          // SMS-based registration: require a fresh smsVerifyToken (issued by /auth/sms-verify-only)
+          // that proves the user controls the phone they're registering with.
+          if (type === 'sms') {
+            if (!smsVerifyToken) {
+              return new Response(JSON.stringify({ ok: false, error: 'sms_not_verified', message: 'Verify your phone number via OTP first.' }),
+                { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+            }
+            const smsRecord = await env.CACHE_KV.get(smsVerifyToken);
+            if (!smsRecord) {
+              return new Response(JSON.stringify({ ok: false, error: 'sms_token_expired', message: 'Phone verification expired. Request OTP again.' }),
+                { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+            }
+            const parsed = JSON.parse(smsRecord);
+            const submittedPhone = String(phone || identifier).replace(/\D/g, '');
+            const tokenPhone = String(parsed.phone || '').replace(/\D/g, '');
+            const tail = s => s.slice(-10);
+            if (tail(submittedPhone) !== tail(tokenPhone)) {
+              return new Response(JSON.stringify({ ok: false, error: 'sms_token_phone_mismatch', message: 'Phone in OTP verification does not match.' }),
+                { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+            }
+            // Consume token (one-time use)
+            await env.CACHE_KV.delete(smsVerifyToken);
+          }
 
           // If verificationToken provided (pre-registration flow), validate and extract data
           let verificationData = null;
@@ -1382,7 +1442,7 @@ export default {
               message: 'Both email and phone number are required for registration. This allows you to login using either method.'
             }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          if (!['google', 'email', 'telegram'].includes(type)) {
+          if (!['google', 'email', 'telegram', 'sms'].includes(type)) {
             return new Response(JSON.stringify({ ok: false, error: 'invalid_type' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
@@ -1630,6 +1690,152 @@ export default {
           }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (e) {
           console.error('register error:', e);
+          return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // GET /auth/msg91-config — return MSG91 widget config so the browser can
+      // initialize the OTP widget. widgetId and tokenAuth are public-facing per
+      // MSG91 design (they only authorize widget calls, not API access). The
+      // master authkey stays on the Worker.
+      if (pathname === '/auth/msg91-config' && request.method === 'GET') {
+        return new Response(JSON.stringify({
+          ok: true,
+          widgetId: env.MSG91_WIDGET_ID || '',
+          tokenAuth: env.MSG91_WIDGET_TOKEN || ''
+        }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+      }
+
+      // POST /auth/sms-login — MSG91 SMS OTP verification + login/signup intent.
+      // Frontend uses MSG91 widget (initSendOTP) which returns an access-token after
+      // the user completes OTP entry. We verify it server-side, look up the resident
+      // by phone (sms credential), and return either a session+customToken (if they
+      // exist & approved) or a "not_registered" hint (so the UI can redirect to register).
+      //
+      // Body: { accessToken, phone }   phone in E.164 like "919XXXXXXXXX" or "+919XXX..."
+      if (pathname === '/auth/sms-login' && request.method === 'POST') {
+        try {
+          const body = await request.json().catch(() => ({}));
+          const { accessToken, phone } = body;
+          if (!accessToken || !phone) {
+            return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          // 1) Verify MSG91 widget access-token
+          const msgRes = await fetch('https://control.msg91.com/api/v5/widget/verifyAccessToken', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              'authkey': env.MSG91_AUTH_KEY,
+              'access-token': accessToken
+            })
+          });
+          const msgData = await msgRes.json().catch(() => ({}));
+          if (msgData.type !== 'success') {
+            console.log('MSG91 verify failed:', JSON.stringify(msgData));
+            return new Response(JSON.stringify({ ok: false, error: 'invalid_otp', detail: msgData.message || 'OTP verification failed' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          // 2) Normalize phone (E.164 without +)
+          const normalizedPhone = String(phone).replace(/\D/g, '').replace(/^0+/, '');
+          const phoneForLookup = normalizedPhone.startsWith('91') ? normalizedPhone : `91${normalizedPhone.slice(-10)}`;
+
+          // 3) Lookup sms credential
+          const credential = await db.getCredentialByTypeAndIdentifier('sms', phoneForLookup, env);
+          if (!credential || !credential.residentId) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_registered', phone: phoneForLookup }),
+              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          // 4) Lookup resident
+          let resident = await db.getResidentV2(credential.residentId, env);
+          if (resident?.fields) resident = parseFirestoreDoc(resident);
+          if (!resident) {
+            return new Response(JSON.stringify({ ok: false, error: 'resident_not_found' }),
+              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          if (resident.status !== 'approved') {
+            return new Response(JSON.stringify({ ok: false, error: 'not_approved', status: resident.status || 'pending' }),
+              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          // 5) Create session
+          const { ok: sok, sessionId, error: serr } = await db.createSession(env, credential.residentId, {
+            flatNumber: resident.flatNumber,
+            residentType: resident.residentType,
+          });
+          if (!sok) throw new Error(`Session creation failed: ${serr}`);
+          await db.updateCredentialLastUsed(credential.credentialId, env);
+
+          // 6) Mint Firebase custom token so frontend can signInWithCustomToken()
+          let customToken = null;
+          try {
+            customToken = await mintFirebaseCustomToken(credential.residentId, env);
+          } catch (ctErr) {
+            console.error('mintFirebaseCustomToken failed:', ctErr.message);
+          }
+
+          return new Response(JSON.stringify({
+            ok: true,
+            sessionId,
+            customToken,
+            resident: {
+              residentId: credential.residentId,
+              name: resident.name,
+              flatNumber: resident.flatNumber,
+              status: resident.status,
+              phone: resident.phone || phoneForLookup,
+              email: resident.email || null,
+              residentType: resident.residentType || null,
+              isAdmin: resident.isAdmin || false
+            }
+          }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/auth/sms-login error:', e);
+          return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /auth/sms-verify-only — verify MSG91 token + return normalized phone, no DB lookup.
+      // Used during REGISTRATION: frontend has already collected flat + doc, just needs to prove
+      // ownership of the phone before creating credentials. No session/custom-token issued.
+      if (pathname === '/auth/sms-verify-only' && request.method === 'POST') {
+        try {
+          const body = await request.json().catch(() => ({}));
+          const { accessToken, phone } = body;
+          if (!accessToken || !phone) {
+            return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const msgRes = await fetch('https://control.msg91.com/api/v5/widget/verifyAccessToken', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'authkey': env.MSG91_AUTH_KEY, 'access-token': accessToken })
+          });
+          const msgData = await msgRes.json().catch(() => ({}));
+          if (msgData.type !== 'success') {
+            return new Response(JSON.stringify({ ok: false, error: 'invalid_otp', detail: msgData.message || 'OTP verification failed' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const normalizedPhone = String(phone).replace(/\D/g, '').replace(/^0+/, '');
+          const phoneE164 = normalizedPhone.startsWith('91') ? normalizedPhone : `91${normalizedPhone.slice(-10)}`;
+
+          // Short-lived KV token so /auth/register can trust this phone was verified
+          const tokenId = crypto.randomUUID();
+          const smsVerifyToken = `_sms_verified_${tokenId}`;
+          await env.CACHE_KV.put(smsVerifyToken, JSON.stringify({
+            phone: phoneE164,
+            verifiedAt: new Date().toISOString(),
+          }), { expirationTtl: 900 });
+
+          return new Response(JSON.stringify({ ok: true, phone: phoneE164, smsVerifyToken }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/auth/sms-verify-only error:', e);
           return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
             { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
@@ -5704,11 +5910,12 @@ Original message: "${rec.description.substring(0, 300)}"`;
 
             const aiPrompt = `Extract from this document:
 1. Society name (look for "Prestige Song of the South" or "PSOTS")
-2. Owner/Tenant name
-3. Flat/House/Unit number
-4. Document type (invoice or receipt)
+2. Owner name (from "Owner :" label)
+3. Paid By name (from "Paid By :" label - can be same as owner or a family member)
+4. Flat/House/Unit number (digits only, e.g. "15167" from "Tower 15-15167")
+5. Document type (invoice or receipt)
 Reply in JSON only:
-{"ownerName":"...","flatNumber":"...","societyName":"...","confidence":"high/medium/low"}`;
+{"ownerName":"...","paidByName":"...","flatNumber":"...","societyName":"...","confidence":"high/medium/low"}`;
 
             const aiResponse = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', {
               image: Array.from(bytes),
@@ -5736,9 +5943,10 @@ Reply in JSON only:
                 }
               }
               if (matchCount >= Math.ceil(nameParts.length / 2)) {
-                extracted.ownerName = residentName;
+                // Mark as paidByName since OCR can't distinguish role; validation accepts either.
+                extracted.paidByName = residentName;
               }
-              extracted.confidence = extracted.societyName && extracted.flatNumber && extracted.ownerName ? 'high' : 'medium';
+              extracted.confidence = extracted.societyName && extracted.flatNumber && (extracted.ownerName || extracted.paidByName) ? 'high' : 'medium';
               extracted.extractionMethod = 'workers_ai';
               console.log('✅ Workers AI extracted:', JSON.stringify(extracted, null, 2));
             }
@@ -5761,14 +5969,15 @@ EXTRACT:
 4. LEASE DATES: Start and end dates
 Return JSON only:
 {"tenantName":"...","flatNumber":"...","societyName":"...","leaseStartDate":"DD/MM/YYYY","leaseEndDate":"DD/MM/YYYY","confidence":"high/medium/low"}` :
-              `Analyze this ownership document from a residential society.
+              `Analyze this ownership document from a residential society (MyGate maintenance invoice/receipt).
 EXTRACT:
 1. SOCIETY NAME: Look for "Prestige Song of the South" or "PSOTS" at top
-2. FLAT NUMBER: After "House:" or "Flat:" label
+2. FLAT NUMBER: After "House:" or "Flat:" label. Return DIGITS ONLY (e.g. "15167" not "Tower 15-15167")
 3. OWNER NAME: After "Owner:" label
-4. CONFIDENCE: high if found all 3, medium if 2, low if <2
+4. PAID BY NAME: After "Paid By:" label (the person who paid - can be a family member of the owner)
+5. CONFIDENCE: high if society + flat + at least one name found, medium if 2 of 3 categories
 Return JSON only:
-{"ownerName":"...","flatNumber":"...","societyName":"...","confidence":"high/medium/low"}`;
+{"ownerName":"...","paidByName":"...","flatNumber":"...","societyName":"...","confidence":"high/medium/low"}`;
 
               const geminiRes = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${env.GEMINI_API_KEY}`,
@@ -5827,10 +6036,15 @@ Return JSON only:
                    (original.includes('prestige') && original.includes('song'));
           }
 
+          // Strip "Tower N-" prefix from extracted flat number (Gemini sometimes returns "Tower 15-15167")
+          const cleanFlatNumber = String(extracted.flatNumber || '').replace(/^.*?(\d{5}).*$/, '$1').replace(/\D/g, '');
+          const ownerMatch = fuzzyNameMatch(extracted.ownerName || '', residentName);
+          const paidByMatch = fuzzyNameMatch(extracted.paidByName || '', residentName);
           const checks = {
             society: isSocietyNameValid(extracted.societyName),
-            flatNumber: (extracted.flatNumber || '').replace(/\D/g, '') === String(flatNumber).replace(/\D/g, ''),
-            ownerName: fuzzyNameMatch(extracted.ownerName || '', residentName)
+            flatNumber: cleanFlatNumber === String(flatNumber).replace(/\D/g, ''),
+            ownerName: ownerMatch || paidByMatch,  // accept either: owner themselves OR a family member who pays bills
+            matchedAs: ownerMatch ? 'owner' : (paidByMatch ? 'paidBy' : null)
           };
 
           // Determine result based on document type
@@ -5907,6 +6121,7 @@ Return JSON only:
             checks,
             extracted: {
               ownerName: extracted.ownerName || extracted.tenantName || null,
+              paidByName: extracted.paidByName || null,
               flatNumber: extracted.flatNumber || null,
               societyName: extracted.societyName || null,
               documentType: extracted.documentType || null,

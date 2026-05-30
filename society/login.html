@@ -10,1610 +10,436 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --jade:       #1a4a3a;
-      --jade-light: #2d6b54;
-      --jade-dark:  #102c22;
-      --jade-pale:  rgba(26,74,58,0.07);
-      --jade-glow:  rgba(26,74,58,0.14);
-      --gold:       #b8882a;
-      --gold-light: #d4a84b;
-      --gold-pale:  #f0d898;
-      --cream:      #f8f2e8;
-      --cream-dark: #ede5d5;
-      --surface:    #fffcf7;
-      --ink:        #1a1208;
-      --ink-soft:   #3d2f1e;
-      --muted:      #8a7a6a;
-      --border:     rgba(160,130,90,0.20);
-      --red:        #c0392b;
-      --terra:      #8b3a1a;
-      --font-serif: 'Playfair Display', Georgia, serif;
-      --font-sans:  'Nunito Sans', system-ui, sans-serif;
+      --jade:#1a4a3a; --jade-light:#2d6b54; --jade-dark:#102c22; --jade-pale:rgba(26,74,58,0.07);
+      --gold:#b8882a; --gold-light:#d4a84b; --cream:#f8f2e8; --cream-dark:#ede5d5;
+      --surface:#fffcf7; --ink:#1a1208; --ink-soft:#3d2f1e; --muted:#8a7a6a;
+      --border:rgba(160,130,90,0.20); --red:#c0392b;
+      --font-serif:'Playfair Display', Georgia, serif; --font-sans:'Nunito Sans', system-ui, sans-serif;
     }
-
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
+    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: var(--font-sans);
-      background: var(--cream);
-      color: var(--ink);
-      line-height: 1.65;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      /* warm paper grain */
+      font-family: var(--font-sans); background: var(--cream); color: var(--ink); line-height: 1.55;
+      min-height: 100vh; display: flex; flex-direction: column;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
     }
-
-    /* ── Nav (login has its own simple nav) ── */
     nav {
-      display: flex;
-      align-items: center;
-      padding: 0 28px;
-      height: 58px;
-      background: rgba(255,252,247,0.92);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+      display: flex; align-items: center; padding: 0 24px; height: 56px;
+      background: rgba(255,252,247,0.92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
+    .nav-brand { display:flex; align-items:center; gap:10px; text-decoration:none; color: var(--ink); }
+    .nav-logo { display:flex; align-items:center; justify-content:center; min-width:42px; min-height:42px; padding:6px; }
+    .nav-logo img { width:32px; height:32px; object-fit:contain; }
+    .nav-brand-name { font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: var(--jade); line-height: 1.2; }
+    .nav-brand-sub { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
 
-    .nav-brand {
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none; color: var(--ink);
+    .container {
+      flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0;
     }
+    @media (max-width: 880px) { .container { grid-template-columns: 1fr; } .left-panel { display: none; } }
 
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 44px;
-      min-height: 44px;
-      padding: 8px;
-    }
-    .nav-logo img { width: 34px; height: 34px; object-fit: contain; }
-
-    .nav-brand-name {
-      font-family: var(--font-serif);
-      font-size: 15px; font-weight: 600;
-      color: var(--jade); line-height: 1.2;
-    }
-    .nav-brand-sub { font-size: 9.5px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
-
-    /* ── Page layout ── */
-    .main-container {
-      flex: 1;
-      display: flex;
-      align-items: stretch;
-      justify-content: stretch;
-      padding: 0;
-      background: var(--cream);
-    }
-
-    /* Left Panel - Storytelling */
     .left-panel {
-      flex: 0 0 55%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 60px 40px;
-      background-image: url('https://raw.githubusercontent.com/pushkalkishorepersonal/psots/main/IMG_20260322_050757_190.jpg'),
-                        linear-gradient(135deg, #1a5a4a 0%, #2d7a6a 50%, #1a5a4a 100%);
-      background-size: cover, 300% 300%;
-      background-position: center, 0% 50%;
-      background-attachment: fixed, fixed;
-      position: relative;
-      gap: 24px;
-      color: white;
-      text-align: center;
-      overflow-y: auto;
-      overflow-x: hidden;
-      animation: leftPanelPulse 8s ease-in-out infinite;
+      padding: 60px 48px; display: flex; flex-direction: column; justify-content: center;
+      background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
+      color: var(--cream); position: relative; overflow: hidden;
     }
-
-
     .left-panel::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(10,36,25,0.92) 0%, rgba(26,74,58,0.75) 100%);
-      z-index: 1;
+      content: ''; position: absolute; top: 0; right: 0; width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(184,136,42,0.18), transparent 70%); border-radius: 50%;
     }
-
-    .left-panel-video {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.4;
-      z-index: 0;
+    .left-panel h1 {
+      font-family: var(--font-serif); font-size: 42px; line-height: 1.15; font-weight: 600;
+      margin-bottom: 12px; position: relative;
     }
-
-    .left-panel > * {
-      position: relative;
-      z-index: 2;
+    .left-panel .italic { font-style: italic; color: var(--gold-light); }
+    .left-panel p { font-size: 16px; opacity: 0.85; margin-bottom: 32px; max-width: 440px; position: relative; }
+    .feature-grid { display: grid; gap: 14px; max-width: 440px; position: relative; }
+    .feature {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: rgba(255,255,255,0.06); padding: 14px 16px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
-
-    /* Badge */
-    .left-badge {
-      display: inline-block;
-      border: 1px solid rgba(193,125,42,0.4);
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 12px;
-      color: #C17D2A;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      animation: fadeInUp 0.6s ease-out 0.1s both;
-    }
-
-    /* Hero text */
-    .left-hero {
-      animation: fadeInUp 0.6s ease-out 0.2s both;
-      line-height: 1.2;
-    }
-
-    .left-hero h1 {
-      font-family: var(--font-serif);
-      font-size: 52px;
-      font-weight: 400;
-      color: #FAF6EF;
-      margin: 0;
-    }
-
-    .left-hero .italic-line {
-      font-style: italic;
-      color: #C17D2A;
-      font-size: 52px;
-      font-weight: 400;
-      margin-top: 4px;
-    }
-
-    /* Subtitle */
-    .left-subtitle {
-      font-size: 14px;
-      color: rgba(255,255,255,0.5);
-      font-style: italic;
-      font-weight: 500;
-      margin: 12px 0 0;
-      animation: fadeInUp 0.6s ease-out 0.35s both;
-    }
-
-    /* Benefit cards container */
-    .left-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 280px;
-      margin: 12px 0;
-      animation: fadeInUp 0.6s ease-out 0.4s both;
-    }
-
-    .benefit-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 14px 18px;
-      text-align: left;
-      font-size: 13px;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.9);
-      animation: slideInFromLeft 0.5s ease-out both;
-    }
-
-    .benefit-card:nth-child(1) { animation-delay: 0.45s; }
-    .benefit-card:nth-child(2) { animation-delay: 0.55s; }
-    .benefit-card:nth-child(3) { animation-delay: 0.65s; }
-
-    .benefit-card-emoji {
-      display: inline-block;
-      margin-right: 8px;
-      font-size: 16px;
-    }
-
-    .benefit-card-title {
-      font-weight: 600;
-      display: inline;
-    }
-
-    .benefit-card-desc {
-      display: block;
-      color: rgba(255,255,255,0.7);
-      margin-top: 4px;
-      font-size: 12px;
-    }
-
-    /* Cycling features */
-    .left-features {
-      font-size: 14px;
-      color: #C17D2A;
-      font-weight: 500;
-      height: 20px;
-      overflow: hidden;
-      animation: fadeInUp 0.6s ease-out 0.7s both;
-      margin-top: auto;
-      margin-bottom: 12px;
-    }
-
-    .feature-line {
-      opacity: 0;
-      animation: cycle 16s linear infinite;
-      line-height: 1.4;
-    }
-
-    .feature-line:nth-child(1) { animation-delay: 0s; }
-    .feature-line:nth-child(2) { animation-delay: 4s; }
-    .feature-line:nth-child(3) { animation-delay: 8s; }
-    .feature-line:nth-child(4) { animation-delay: 12s; }
-
-    /* Bottom text */
+    .feature-icon { font-size: 22px; flex-shrink: 0; }
+    .feature-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .feature-desc { font-size: 13px; opacity: 0.78; line-height: 1.4; }
     .left-bottom {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: auto;
-      animation: fadeInUp 0.6s ease-out 0.8s both;
+      margin-top: 36px; font-size: 12px; opacity: 0.65; position: relative;
     }
 
-    /* Right Panel - Form */
-    .right-panel {
-      flex: 0 0 45%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 28px 20px;
-      background: linear-gradient(135deg, #FAF6EF 0%, #f0e8db 100%);
-    }
-
-    /* ── Card ── */
+    .right-panel { padding: 48px 32px; display: flex; align-items: center; justify-content: center; }
     .card {
-      width: 100%;
-      max-width: 440px;
-      background: var(--surface);
-      padding: 40px 40px 36px;
-      border-radius: 22px;
-      box-shadow: 0 8px 40px rgba(139,90,26,0.12), 0 2px 8px rgba(0,0,0,0.05);
-      border: 1px solid rgba(160,130,90,0.18);
-      animation: cardEnter 0.48s cubic-bezier(0.22,1,0.36,1) both;
+      width: 100%; max-width: 420px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px;
+      box-shadow: 0 8px 32px rgba(26,74,58,0.08);
     }
 
-    @keyframes cardEnter {
-      from { opacity: 0; transform: translateY(22px) scale(0.97); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    @keyframes slideInFromLeft {
-      from { opacity: 0; transform: translateX(-20px); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    @keyframes cycle {
-      0% { opacity: 0; transform: translateY(0); }
-      5% { opacity: 1; }
-      20% { opacity: 1; }
-      25% { opacity: 0; transform: translateY(-20px); }
-      100% { opacity: 0; transform: translateY(-20px); }
-    }
-
-    @keyframes leftPanelPulse {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    /* ── Steps ── */
     .step { display: none; }
-    .step.active {
-      display: block;
-      animation: stepIn 0.28s cubic-bezier(0.22,1,0.36,1) both;
+    .step.active { display: block; animation: fadeIn .25s ease-out; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
+
+    h2 {
+      font-family: var(--font-serif); font-size: 26px; color: var(--jade);
+      margin-bottom: 6px; font-weight: 600;
     }
+    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
 
-    @keyframes stepIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: none; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink-soft); }
+    input[type=text], input[type=tel], input[type=email] {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 15px; font-family: inherit; background: white;
+      transition: all .15s;
     }
+    input:focus { outline: none; border-color: var(--jade); box-shadow: 0 0 0 3px var(--jade-pale); }
 
-    /* ── Headings ── */
-    h1, h2 {
-      font-family: var(--font-serif);
-      font-size: 26px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: var(--ink);
-      line-height: 1.2;
-    }
-
-    /* Gold ornament before heading */
-    .step.active h1::before,
-    .step.active h2::before {
-      content: '';
-      display: block;
-      width: 28px; height: 2px;
-      background: linear-gradient(90deg, var(--gold), transparent);
-      margin-bottom: 12px;
-      border-radius: 2px;
-    }
-
-    p { font-size: 14.5px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
-
-    /* ── Form ── */
-    .form-group { margin-bottom: 18px; }
-
-    label {
-      display: block;
-      font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 6px; color: var(--muted);
-    }
-
-    input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 11px;
-      font-size: 15px;
-      font-family: inherit;
-      background: var(--surface);
-      color: var(--ink);
-      transition: border-color 0.18s, box-shadow 0.18s;
-    }
-    input:focus {
-      outline: none;
-      border-color: var(--jade);
-      box-shadow: 0 0 0 3px var(--jade-glow);
-    }
-    input:hover:not(:focus) { border-color: rgba(160,130,90,0.40); }
-
-    /* ── Buttons ── */
-    button {
-      width: 100%;
-      padding: 13px;
-      background: var(--jade);
-      color: var(--surface);
-      border: none;
-      border-radius: 11px;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.18s, transform 0.14s, box-shadow 0.18s;
+    .btn {
+      width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all .15s; font-family: inherit; border: none;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 2px 10px rgba(26,74,58,0.22);
-      letter-spacing: 0.01em;
     }
-    button:hover:not(:disabled) {
-      background: var(--jade-light);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(26,74,58,0.28);
-    }
-    button:active:not(:disabled) { transform: translateY(1px) scale(0.984); }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
-
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--jade);
-      border: 1.5px solid var(--jade);
-      box-shadow: none;
-      margin-top: 12px;
-    }
-    .btn-secondary:hover:not(:disabled) {
-      background: var(--jade-pale);
-      box-shadow: 0 2px 10px rgba(26,74,58,0.12);
-    }
-
+    .btn-primary { background: var(--jade); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--jade-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,74,58,0.18); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-outline {
-      background: var(--surface);
-      color: var(--ink-soft);
-      border: 1.5px solid var(--border);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-      font-weight: 600;
-      margin-bottom: 10px;
+      background: white; color: var(--ink); border: 1.5px solid var(--border);
     }
-    .btn-outline:hover:not(:disabled) {
-      border-color: rgba(184,136,42,0.50);
-      background: #fffdf4;
-      box-shadow: 0 3px 12px rgba(184,136,42,0.14);
+    .btn-outline:hover { border-color: var(--jade); background: var(--jade-pale); }
+    .btn + .btn { margin-top: 10px; }
+
+    .divider { text-align: center; margin: 18px 0; color: var(--muted); font-size: 13px; position: relative; }
+    .divider::before, .divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background: var(--border); }
+    .divider::before { left:0; } .divider::after { right:0; }
+
+    .phone-row { display: flex; gap: 8px; }
+    .phone-prefix {
+      display: flex; align-items: center; gap: 6px; padding: 11px 12px;
+      background: var(--cream-dark); border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 15px; min-width: 78px; font-weight: 500;
     }
 
-    /* ── Method selector ── */
-    .method-selector {
-      display: grid; grid-template-columns: 1fr;
-      gap: 10px; margin-top: 18px;
-    }
+    .message { padding: 11px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; line-height: 1.4; }
+    .message.error { background: #fee; color: #c33; border: 1px solid #fcc; }
+    .message.success { background: #efe; color: #2d7a4d; border: 1px solid #cfc; }
+    .message.info { background: #eef4ff; color: #335; border: 1px solid #ccd9f0; }
 
-    /* ── Messages ── */
-    .message {
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 13.5px;
-      margin-bottom: 18px;
-      display: none;
-      border-left: 3px solid;
-    }
-    .message.error   { background: #fff5f5; color: #c53030; border-left-color: #c0392b; display: block; }
-    .message.success { background: #f0fff4; color: #2f855a; border-left-color: var(--jade); display: block; }
-    .message.warn    { background: #fef9ec; color: var(--terra); border-left-color: var(--gold); display: block; }
-
-    /* ── Inline spinner ── */
-    .loader {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,0.30);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 0.75s linear infinite;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Back link ── */
-    .back-link {
-      display: block; text-align: center;
-      margin-top: 22px; font-size: 13.5px;
-      color: var(--muted); text-decoration: none;
-      font-weight: 600; transition: color 0.16s;
-    }
+    .footer-link { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .footer-link a { color: var(--jade); text-decoration: none; font-weight: 600; }
+    .back-link { display: inline-block; margin-top: 14px; color: var(--muted); text-decoration: none; font-size: 13px; }
     .back-link:hover { color: var(--jade); }
 
-    /* ── Occupied / info box ── */
-    .occupied-info {
-      background: linear-gradient(135deg, var(--jade-pale), rgba(26,74,58,0.04));
-      border: 1px solid rgba(26,74,58,0.12);
-      padding: 18px;
-      border-radius: 12px;
-      margin-bottom: 22px;
-      text-align: center;
+    .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+              border-radius: 50%; border-top-color: white; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .quick-return-card {
+      background: var(--jade-pale); border: 1px solid rgba(26,74,58,0.15);
+      border-radius: 12px; padding: 18px; margin-bottom: 16px; text-align: center;
     }
-    .occupied-info strong { color: var(--jade); font-size: 18px; font-family: var(--font-serif); }
-
-    /* ── Divider ── */
-    .divider-or {
-      display: flex; align-items: center; gap: 12px;
-      color: var(--muted); font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1px;
-      margin: 18px 0;
+    .quick-return-avatar {
+      width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 50%;
+      background: var(--jade); color: white; display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 600;
     }
-    .divider-or::before, .divider-or::after {
-      content: ''; flex: 1; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border));
-    }
-    .divider-or::after { background: linear-gradient(90deg, var(--border), transparent); }
-
-    /* ── Consent row ── */
-    .consent-row {
-      display: flex; gap: 10px; align-items: flex-start;
-      margin-top: 18px; margin-bottom: 6px;
-    }
-    .consent-row input[type="checkbox"] {
-      width: 17px; height: 17px; margin-top: 3px;
-      border-radius: 4px; flex-shrink: 0; cursor: pointer;
-      accent-color: var(--jade);
-    }
-    .consent-row label {
-      text-transform: none; letter-spacing: normal;
-      font-size: 12.5px; color: var(--muted);
-      cursor: pointer; font-weight: 500;
-    }
-    .consent-row a { color: var(--jade); font-weight: 700; text-decoration: none; }
-    .consent-row a:hover { text-decoration: underline; }
-
-    /* Mobile left panel (compact version) */
-    .mobile-left-panel {
-      display: none;
-      padding: 40px 20px;
-      background: linear-gradient(135deg, #1a5a4a 0%, #2d7a6a 50%, #1a5a4a 100%);
-      text-align: center;
-      color: white;
-      position: relative;
-    }
-
-    .mobile-left-panel::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(10,36,25,0.92) 0%, rgba(26,74,58,0.75) 100%);
-      z-index: 1;
-    }
-
-    .mobile-left-panel > * {
-      position: relative;
-      z-index: 2;
-    }
-
-    .mobile-badge {
-      display: inline-block;
-      border: 1px solid rgba(193,125,42,0.4);
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 12px;
-      color: #C17D2A;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      margin-bottom: 16px;
-      animation: fadeInUp 0.6s ease-out 0.1s both;
-    }
-
-    .mobile-hero {
-      margin-bottom: 20px;
-      animation: fadeInUp 0.6s ease-out 0.2s both;
-    }
-
-    .mobile-hero h1 {
-      font-family: var(--font-serif);
-      font-size: 32px;
-      font-weight: 400;
-      color: #FAF6EF;
-      margin: 0;
-      line-height: 1.2;
-    }
-
-    .mobile-hero .italic-line {
-      font-style: italic;
-      color: #C17D2A;
-      font-size: 32px;
-      font-weight: 400;
-      margin-top: 4px;
-    }
-
-    .mobile-benefit-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 16px;
-      animation: fadeInUp 0.6s ease-out 0.3s both;
-    }
-
-    .mobile-benefit-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 13px;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.9);
-      animation: slideInFromLeft 0.5s ease-out both;
-    }
-
-    .mobile-benefit-card:nth-child(1) { animation-delay: 0.4s; }
-    .mobile-benefit-card:nth-child(2) { animation-delay: 0.5s; }
-    .mobile-benefit-card:nth-child(3) { animation-delay: 0.6s; }
-
-    .mobile-benefit-card-emoji {
-      display: inline-block;
-      margin-right: 8px;
-      font-size: 16px;
-    }
-
-    .mobile-benefit-card-title {
-      font-weight: 600;
-      display: inline;
-    }
-
-    .mobile-benefit-card-desc {
-      display: block;
-      color: rgba(255,255,255,0.7);
-      margin-top: 4px;
-      font-size: 12px;
-    }
-
-    @media (max-width: 768px) {
-      .left-panel {
-        display: none;
-      }
-
-      .mobile-left-panel {
-        display: block;
-      }
-
-      .right-panel {
-        flex: 0 0 100%;
-        background: var(--cream);
-        padding: 20px;
-      }
-
-      .main-container {
-        flex-direction: column;
-      }
-
-      nav::before {
-        content: '🏘️ PSOTS Society · Bangalore';
-        display: block;
-        width: 100%;
-        padding: 8px 0;
-        font-size: 11px;
-        color: #C17D2A;
-        text-align: center;
-        background: rgba(193,125,42,0.08);
-        border-bottom: 1px solid rgba(193,125,42,0.2);
-        letter-spacing: 0.05em;
-        font-weight: 600;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 28px 24px; border-radius: 18px; }
-      h1, h2 { font-size: 23px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
-    }
+    .quick-return-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+    .quick-return-meta { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <nav>
-    <a class="nav-brand" href="/society/">
-      <div class="nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS"/></div>
-      <div>
+    <a class="nav-brand" href="/">
+      <span class="nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS"/></span>
+      <span>
         <div class="nav-brand-name">PSOTS Society</div>
-        <div class="nav-brand-sub">Prestige Song of the South</div>
-      </div>
+        <div class="nav-brand-sub">PRESTIGE SONG OF THE SOUTH</div>
+      </span>
     </a>
   </nav>
 
-  <div class="main-container">
-    <!-- Left Panel: Storytelling -->
+  <div class="container">
     <div class="left-panel">
-      <video autoplay muted loop playsinline class="left-panel-video">
-        <source src="/videos/login-animation.mp4" type="video/mp4">
-      </video>
-      <div class="left-badge">🏘️ PSOTS Society · Bangalore</div>
-
-      <div class="left-hero">
-        <h1>Your community,</h1>
-        <div class="italic-line">organised.</div>
+      <h1>Your community,<br><span class="italic">organised.</span></h1>
+      <p>One sign-in for marketplace, lost & found, carpooling, announcements — and your neighbours.</p>
+      <div class="feature-grid">
+        <div class="feature"><div class="feature-icon">🏠</div><div><div class="feature-title">Verified residents only</div><div class="feature-desc">Your flat is your identity. No randoms.</div></div></div>
+        <div class="feature"><div class="feature-icon">🔍</div><div><div class="feature-title">Find anything, fast</div><div class="feature-desc">Contacts, rules, services — searchable.</div></div></div>
+        <div class="feature"><div class="feature-icon">📱</div><div><div class="feature-title">No app needed</div><div class="feature-desc">Works on any phone, instantly.</div></div></div>
       </div>
-
-      <div class="left-subtitle">6 years of community pain points — solved</div>
-
-      <div class="left-cards">
-        <div class="benefit-card">
-          <span class="benefit-card-emoji">🔍</span><span class="benefit-card-title">Find anything instantly</span>
-          <span class="benefit-card-desc">Contacts, rules, announcements — searchable forever</span>
-        </div>
-        <div class="benefit-card">
-          <span class="benefit-card-emoji">🏠</span><span class="benefit-card-title">Verified residents only</span>
-          <span class="benefit-card-desc">Your flat number is your identity — safe and private</span>
-        </div>
-        <div class="benefit-card">
-          <span class="benefit-card-emoji">📱</span><span class="benefit-card-title">No app download needed</span>
-          <span class="benefit-card-desc">Works on any phone, any browser, right now</span>
-        </div>
-      </div>
-
-      <div class="left-features">
-        <div class="feature-line">Lost something? Post on Lost & Found →</div>
-        <div class="feature-line">Need a carpenter? Check Recommendations →</div>
-        <div class="feature-line">Selling furniture? List on Marketplace →</div>
-        <div class="feature-line">Going to airport? Find carpooling →</div>
-      </div>
-
       <div class="left-bottom">Trusted by residents across 14 towers</div>
     </div>
 
-    <!-- Mobile Left Panel: Compact storytelling (mobile only) -->
-    <div class="mobile-left-panel">
-      <div class="mobile-badge">🏘️ PSOTS Society · Bangalore</div>
-
-      <div class="mobile-hero">
-        <h1>Your community,</h1>
-        <div class="italic-line">organised.</div>
-      </div>
-
-      <div class="mobile-benefit-cards">
-        <div class="mobile-benefit-card">
-          <span class="mobile-benefit-card-emoji">🔍</span><span class="mobile-benefit-card-title">Find instantly</span>
-          <span class="mobile-benefit-card-desc">Contacts, rules, announcements — searchable forever</span>
-        </div>
-        <div class="mobile-benefit-card">
-          <span class="mobile-benefit-card-emoji">🏠</span><span class="mobile-benefit-card-title">Verified only</span>
-          <span class="mobile-benefit-card-desc">Your flat number is your identity — safe & private</span>
-        </div>
-        <div class="mobile-benefit-card">
-          <span class="mobile-benefit-card-emoji">📱</span><span class="mobile-benefit-card-title">No app needed</span>
-          <span class="mobile-benefit-card-desc">Works on any phone, any browser, right now</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Panel: Login Form -->
     <div class="right-panel">
       <div class="card">
-      <div id="global-message" class="message"></div>
+        <div id="globalMessage"></div>
 
-      <!-- Step 0: Quick Return (Device Trust) -->
-      <div id="step-quick-return" class="step"></div>
+        <!-- Step 0: Quick Return -->
+        <div id="step-quick-return" class="step"></div>
 
-      <!-- Step 1: Flat Entry -->
-      <div id="step-flat" class="step active">
-        <h1>Welcome</h1>
-        <p>Enter your flat number to get started</p>
-        <div class="form-group">
-          <label>Flat Number</label>
-          <input id="entryFlat" type="text" placeholder="Enter Valid Flat Number" maxlength="6" autofocus />
-        </div>
-        <button id="btn-check-flat" onclick="checkFlat()">Continue →</button>
-      </div>
+        <!-- Step 1: Method choice -->
+        <div id="step-choose" class="step active">
+          <h2>Welcome back</h2>
+          <p class="subtitle">Sign in to your PSOTS Society account</p>
 
-      <!-- Step 2: Occupied Handling -->
-      <div id="step-occupied" class="step">
-        <div class="occupied-info">
-          <p style="margin-bottom:8px;">Flat <span id="occ-flat"></span> is registered.</p>
-          <p>Owner: <strong id="occ-owner"></strong></p>
-        </div>
-        <p>Are you:</p>
-        <button onclick="handleOccupiedChoice('tenant')">🏠 A Tenant / Family Member</button>
-        <button class="btn-secondary" onclick="handleOccupiedChoice('signin')">👤 The Registered Resident (Sign In)</button>
-        <a href="#" class="back-link" onclick="showStep('step-flat')">← Use a different flat</a>
-      </div>
-
-      <!-- Step: Pending Registration -->
-      <div id="step-pending" class="step">
-        <h1>Registration Pending</h1>
-        <p>A registration for Flat <span id="pending-flat"></span> is already pending admin approval.</p>
-        <div class="occupied-info" style="text-align: left; font-size: 14px; color: var(--ink-soft);">
-          <p>If this is you, please wait for approval. You will receive an email once an admin reviews your request.</p>
-          <p style="margin-top:12px;">If you didn't register this flat, please contact the society admin.</p>
-        </div>
-        <button class="btn-secondary" onclick="showStep('step-flat')">← Back</button>
-      </div>
-
-      <!-- Step: Empty Flat Welcome -->
-      <div id="step-empty" class="step">
-        <div class="empty-flat-welcome">
-          <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
-          <h1>Be the First!</h1>
-          <p>Flat <span id="empty-flat-number"></span> hasn't been registered yet. Be the first from your flat to join PSOTS!</p>
-          <div class="welcome-info" style="background: rgba(184, 136, 42, 0.08); border-left: 4px solid var(--gold); padding: 12px; margin: 20px 0; text-align: left; font-size: 14px; color: var(--ink-soft); border-radius: 4px;">
-            <p>✨ It takes less than 2 minutes to complete your profile</p>
-            <p style="margin-top: 8px;">✨ You'll unlock access to marketplace, lost & found, and more</p>
-            <p style="margin-top: 8px;">✨ Invite your family members and add tenants anytime</p>
-          </div>
-          <button class="btn-primary" onclick="proceedToRegistration()" style="margin-top: 20px;">Let's Get Started →</button>
-          <a href="#" class="back-link" onclick="showStep('step-flat')">← Use a different flat</a>
-        </div>
-      </div>
-
-      <!-- Step 3: Registration -->
-      <div id="step-register" class="step">
-        <h2 id="reg-title">Register</h2>
-        <p>Complete your profile for Flat <span id="reg-flat-display"></span></p>
-
-        <div class="form-group">
-          <label>Full Name</label>
-          <input id="reg-name" placeholder="As per records" type="text"/>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: var(--cream-dark, #f0e8db); border: 1px solid var(--border, rgba(160,130,90,0.22)); border-radius: 8px; font-size: 15px; min-width: 70px;">
-              <span style="font-size: 20px;">🇮🇳</span>
-              <span style="font-weight: 500; color: var(--ink, #1a1208);">+91</span>
-            </div>
-            <input id="reg-phone" placeholder="98XXX XXXXX" type="tel" maxlength="10" style="flex: 1;" inputmode="numeric"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input id="reg-email" placeholder="email@example.com" type="email"/>
-        </div>
-
-        <div class="consent-row">
-          <input type="checkbox" id="reg-agree"/>
-          <label for="reg-agree">
-            I agree to the <a href="/society/terms.html" target="_blank">Terms of Use</a>
-            and <a href="/society/privacy.html" target="_blank">Privacy Policy</a>
-            of PSOTS Society
-          </label>
-        </div>
-
-        <label>Choose how you'll sign up</label>
-        <div class="method-selector">
-          <button class="btn-outline" id="btn-reg-google" onclick="registerWithGoogle()">
+          <button class="btn btn-outline" onclick="signInWithGoogle()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
             Continue with Google
           </button>
-        </div>
 
-        <div class="divider-or">or</div>
+          <div class="divider">OR</div>
 
-        <div class="form-group">
-          <label>Password</label>
-          <input id="reg-password" placeholder="Min 8 characters" type="password"/>
-          <small style="color: var(--muted);">Min 8 characters, with numbers and special characters recommended</small>
-        </div>
+          <button class="btn btn-outline" onclick="showStep('step-sms')">
+            📱 Sign in with Phone OTP
+          </button>
 
-        <div class="form-group">
-          <label>Confirm Password</label>
-          <input id="reg-password-confirm" placeholder="Confirm password" type="password"/>
-        </div>
-
-        <button class="btn-primary" onclick="window.location.href='/society/register.html?flat=' + encodeURIComponent(currentFlat)">Continue to Full Registration →</button>
-
-        <a href="#" class="back-link" onclick="showStep('step-flat')">← Back</a>
-      </div>
-
-      <!-- Step 4: Sign In -->
-      <div id="step-signin" class="step">
-        <h2>Welcome back</h2>
-        <p>Sign in to your PSOTS Society account</p>
-
-        <button class="btn-outline" onclick="signInWithGoogle()">Continue with Google</button>
-
-        <div class="divider-or">or</div>
-
-        <div class="form-group">
-          <label>Email Address</label>
-          <input id="signin-email" placeholder="Email address" type="email"/>
-        </div>
-
-        <div class="form-group">
-          <label>Password</label>
-          <input id="signin-password" placeholder="Password" type="password"/>
-        </div>
-
-        <button class="btn-primary" onclick="signInWithEmail()">Sign In →</button>
-
-        <p style="text-align: center; margin-top: 16px; font-size: 13px;">
-          <a href="#" onclick="openForgotPasswordModal(); return false;" style="color: var(--jade); text-decoration: none;">Forgot password?</a>
-        </p>
-
-        <p style="text-align: center; margin-top: 16px; font-size: 13px;">
-          Don't have an account? <a href="/society/register.html" style="color: var(--jade); text-decoration: none;">Register here</a>
-        </p>
-
-        <p style="text-align: center; margin-top: 20px; font-size: 13px;">
-          <a href="#" onclick="openHelpModal(); return false;" style="color: var(--muted); text-decoration: none;">Can't login? Get help →</a>
-        </p>
-      </div>
-
-      <!-- Forgot Password Modal -->
-      <div id="forgotPasswordModal" class="modal" style="display:none;">
-        <div class="modal-content">
-          <h2>Reset Password</h2>
-          <p>Enter your email address and we'll send you a password reset link.</p>
-          <div class="form-group">
-            <label>Email Address</label>
-            <input id="reset-email" type="email" placeholder="Your email address"/>
+          <div class="footer-link" style="margin-top: 22px;">
+            New to PSOTS? <a href="/society/register.html">Register here</a>
           </div>
-          <button class="btn-primary" onclick="sendPasswordReset()">Send Reset Link →</button>
-          <button class="btn-secondary" onclick="closeForgotPasswordModal()">Cancel</button>
-        </div>
-      </div>
-
-      <!-- Registration Success - Welcome Animation -->
-      <div id="step-registration-success" class="step">
-        <h1>Welcome to PSOTS! 🎉</h1>
-        <p style="margin-bottom: 24px;">Your registration is complete. Let's show you what you can do.</p>
-
-        <video autoplay muted loop playsinline style="width: 100%; max-width: 400px; border-radius: 14px; box-shadow: 0 4px 16px rgba(26,74,58,0.15); display: block; margin: 0 auto 24px; background: linear-gradient(135deg, #0d2b1f 0%, #1a4a3a 50%, #0d2b1f 100%);">
-          <source src="/videos/welcome-animation.mp4" type="video/mp4">
-        </video>
-
-        <div style="background: var(--jade-pale); border: 1px solid rgba(26,74,58,0.12); border-radius: 12px; padding: 16px; margin: 20px 0; font-size: 13px; color: var(--jade); text-align: left;">
-          <strong>You can now:</strong>
-          <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-            <li>✅ Buy & sell items on Marketplace</li>
-            <li>✅ Post & find lost items</li>
-            <li>✅ Share & find carpooling offers</li>
-            <li>✅ Access community resources</li>
-            <li>✅ Connect with neighbors</li>
-          </ul>
         </div>
 
-        <button onclick="proceedToMainDashboard()" style="margin-top: 24px;">Let's Explore PSOTS →</button>
+        <!-- Step 2: SMS OTP -->
+        <div id="step-sms" class="step">
+          <h2>Sign in with OTP</h2>
+          <p class="subtitle">We'll send a one-time code to your registered phone</p>
+
+          <div class="form-group">
+            <label>Phone Number</label>
+            <div class="phone-row">
+              <div class="phone-prefix"><span>🇮🇳</span><span>+91</span></div>
+              <input id="loginPhone" type="tel" placeholder="98XXX XXXXX" maxlength="10" inputmode="numeric" style="flex: 1;" />
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="startSmsLogin()" id="smsBtn">
+            Send OTP →
+          </button>
+
+          <a href="#" class="back-link" onclick="showStep('step-choose'); return false;">← Back to options</a>
+        </div>
       </div>
-    </div>
     </div>
   </div>
 
+  <!-- MSG91 OTP Widget -->
+  <script src="https://verify.msg91.com/otp-provider.js"></script>
+
   <script type="module">
-    import { auth, db } from '../../js/core/firebase.js';
-    import flatService from '../../js/services/flat.service.js';
-    import residentService from '../../js/services/resident.service.js';
-    import { getStoredDeviceToken, storeDeviceToken, getDeviceFingerprint, getDeviceLabel, getPreferredLoginMethod, storeLoginMethod } from '../../js/core/device.js';
+    import { auth } from '../../js/core/firebase.js';
     import {
       signInWithPopup, GoogleAuthProvider, signInWithCustomToken,
-      onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-      sendPasswordResetEmail, fetchSignInMethodsForEmail
+      onAuthStateChanged
     } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import {
+      getStoredDeviceToken, storeDeviceToken, getDeviceFingerprint, getDeviceLabel, storeLoginMethod
+    } from '../../js/core/device.js';
 
-
-    const workerUrl = 'https://telegram.psots.in';
-    let currentFlat = null;
-    let currentParsed = null;
-    let currentResidentType = 'owner';
+    const WORKER_URL = 'https://telegram.psots.in';
+    // Escape Worker/Firestore-supplied strings before interpolating into innerHTML.
+    const escapeHTML = (s) => String(s ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    let MSG91_WIDGET_ID = '';
+    let MSG91_TOKEN_AUTH = '';
     let deviceToken = null;
 
-    // Device Trust — Check for quick return on page load
-    async function checkQuickReturn() {
-      const storedToken = getStoredDeviceToken();
-      if (!storedToken) return;
-
+    // Fetch MSG91 widget config from Worker (kept server-side as secrets)
+    (async () => {
       try {
-        const res = await fetch(`${workerUrl}/auth/resume-device?token=${encodeURIComponent(storedToken)}`);
-        const data = await res.json();
+        const cfg = await fetch(`${WORKER_URL}/auth/msg91-config`).then(r => r.json());
+        if (cfg.ok) { MSG91_WIDGET_ID = cfg.widgetId; MSG91_TOKEN_AUTH = cfg.tokenAuth; }
+      } catch (e) { console.warn('msg91 config fetch failed:', e); }
+    })();
 
+    function showMessage(text, type = 'error') {
+      const el = document.getElementById('globalMessage');
+      el.innerHTML = `<div class="message ${type}">${text}</div>`;
+      if (type === 'success' || type === 'info') setTimeout(() => { el.innerHTML = ''; }, 4500);
+    }
+    function clearMessage() { document.getElementById('globalMessage').innerHTML = ''; }
+
+    function showStep(id) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      clearMessage();
+    }
+    window.showStep = showStep;
+
+    // ── Quick Return ──
+    async function checkQuickReturn() {
+      const stored = getStoredDeviceToken();
+      if (!stored) return;
+      try {
+        const res = await fetch(`${WORKER_URL}/auth/resume-device?token=${encodeURIComponent(stored)}`);
+        const data = await res.json();
         if (data.ok && data.uid) {
-          deviceToken = storedToken;
-          showQuickReturn(data.uid, data.flatNumber, data.deviceLabel, data.ipCity);
+          deviceToken = stored;
+          renderQuickReturn(data);
         } else {
           localStorage.removeItem('psots_device_token');
         }
-      } catch (e) {
-        console.error('Quick return check failed:', e);
-      }
+      } catch (e) { console.warn('quick-return failed:', e); }
     }
 
-    function showQuickReturn(uid, flatNumber, deviceLabel, ipCity) {
-      sessionStorage.setItem('currentDeviceLabel', deviceLabel);
-      sessionStorage.setItem('currentDeviceLocation', ipCity);
+    function renderQuickReturn(data) {
+      const initials = (data.name || 'R').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       const el = document.getElementById('step-quick-return');
-      if (!el) return;
-
-      const resident = JSON.parse(sessionStorage.getItem('resident') || '{}');
-      const deviceEmoji = getDeviceEmoji(deviceLabel);
       el.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">👤</div>
-          <h2 style="margin: 0 0 8px;">Welcome back, ${resident.firstName || 'Resident'}!</h2>
-          <p style="color: var(--muted); margin: 0 0 24px;">Flat ${flatNumber}</p>
-          <div style="background: rgba(26,74,58,0.06); border: 1px solid rgba(26,74,58,0.12); border-radius: 8px; padding: 12px 16px; margin: 0 0 24px; font-size: 14px;">
-            <div style="margin-bottom: 4px;">${deviceEmoji} ${deviceLabel}</div>
-            <div style="color: var(--muted); font-size: 12px;">Last active in ${ipCity || 'Unknown location'}</div>
-          </div>
-          <button onclick="quickReturnContinue()" style="padding: 12px 24px; background: var(--jade); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">
-            One tap to continue
-          </button>
-          <p style="margin-top: 16px;">
-            <a href="#" onclick="switchAccount(); return false;" style="color: var(--muted); text-decoration: none; font-size: 14px;">Not you? Switch account</a>
-          </p>
+        <div class="quick-return-card">
+          <div class="quick-return-avatar">${escapeHTML(initials)}</div>
+          <div class="quick-return-name">Welcome back, ${escapeHTML(data.name || 'Resident')}!</div>
+          <div class="quick-return-meta">Flat ${escapeHTML(data.flatNumber || '—')} · ${escapeHTML(data.deviceLabel || 'this device')}</div>
+          <button class="btn btn-primary" onclick="quickContinue()">One-tap continue</button>
+          <a href="#" class="back-link" onclick="switchAccount(); return false;">Not you? Switch account</a>
         </div>
       `;
       showStep('step-quick-return');
     }
 
-    function getDeviceEmoji(deviceLabel) {
-      if (!deviceLabel) return '📱';
-      if (deviceLabel.includes('iPhone') || deviceLabel.includes('iPad')) return '📱';
-      if (deviceLabel.includes('Android')) return '📱';
-      if (deviceLabel.includes('MacBook') || deviceLabel.includes('Mac')) return '💻';
-      if (deviceLabel.includes('Windows') || deviceLabel.includes('PC')) return '🖥️';
-      if (deviceLabel.includes('Linux')) return '🐧';
-      return '📱';
-    }
-
-    window.quickReturnContinue = async function() {
+    window.quickContinue = async function() {
       if (auth.currentUser) {
-        const deviceLabel = getDeviceLabel();
-        sessionStorage.setItem('currentDeviceLabel', deviceLabel);
-        const ipCity = sessionStorage.getItem('ipCity') || 'Unknown location';
-        sessionStorage.setItem('currentDeviceLocation', ipCity);
-        await registerDevice('silent');
-        window.location.href = '/society/dashboard.html';
+        window.location.href = '/society/';
       } else {
-        showMessage('Please sign in once more to continue', 'info');
-        showStep('step-signin');
+        // No live Firebase session — fall back to method choice
+        showStep('step-choose');
+        showMessage('Please sign in again to continue', 'info');
       }
     };
 
     window.switchAccount = function() {
       localStorage.removeItem('psots_device_token');
-      location.reload();
+      deviceToken = null;
+      document.getElementById('step-quick-return').innerHTML = '';
+      showStep('step-choose');
     };
 
-    async function registerDevice(loginMethod = 'google') {
+    // ── Device registration after successful login ──
+    async function registerDevice(loginMethod, residentInfo) {
       try {
-        deviceToken = deviceToken || crypto.randomUUID();
-        const res = await fetch(`${workerUrl}/device/register`, {
+        const token = crypto.randomUUID();
+        const body = {
+          deviceToken: token,
+          deviceLabel: getDeviceLabel(),
+          fingerprint: getDeviceFingerprint(),
+          loginMethod,
+          flatNumber: residentInfo?.flatNumber || null,
+          uid: residentInfo?.residentId || residentInfo?.uid || null,
+        };
+        await fetch(`${WORKER_URL}/device/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            deviceToken,
-            deviceLabel: getDeviceLabel(),
-            fingerprint: getDeviceFingerprint(),
-            uid: auth.currentUser.uid,
-            flatNumber: currentFlat || 'unknown',
-            loginMethod
-          })
+          body: JSON.stringify(body)
+        });
+        storeDeviceToken(token);
+        storeLoginMethod(loginMethod);
+      } catch (e) { console.warn('device register failed:', e); }
+    }
+
+    // ── Google Sign-In ──
+    window.signInWithGoogle = async function() {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await result.user.getIdToken();
+        showMessage('Signing you in...', 'info');
+
+        const res = await fetch(`${WORKER_URL}/auth/unified-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ type: 'google', identifier: result.user.email })
         });
         const data = await res.json();
-        if (data.ok) {
-          storeDeviceToken(deviceToken);
-          storeLoginMethod(loginMethod);
-        }
-      } catch (e) {
-        console.error('Device registration failed:', e);
-      }
-    }
 
-    // UI Helpers
-    window.showStep = function(stepId) {
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      document.getElementById(stepId).classList.add('active');
-      hideMessage();
-    };
-
-    function showMessage(msg, type = 'error') {
-      const el = document.getElementById('global-message');
-      el.textContent = msg;
-      el.className = `message ${type}`;
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function hideMessage() {
-      document.getElementById('global-message').style.display = 'none';
-    }
-
-    function setLoader(btnId, loading) {
-      const btn = typeof btnId === 'string' ? document.getElementById(btnId) : btnId;
-      if (loading) {
-        btn.disabled = true;
-        btn.dataset.originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="loader"></span>';
-      } else {
-        btn.disabled = false;
-        btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
-      }
-    }
-
-    // Step 1: Check Flat
-    window.checkFlat = async function() {
-      const flatInput = document.getElementById('entryFlat').value.trim();
-      if (!flatInput) return showMessage('Please enter a flat number');
-
-      const btn = document.getElementById('btn-check-flat');
-      setLoader(btn, true);
-
-      try {
-        const parsed = flatService.parseFlatNumber(flatInput);
-        if (!parsed) {
-          showMessage('Invalid flat number. Try again');
-          setLoader(btn, false);
-          return;
-        }
-
-        const validation = flatService.validate(parsed.tower, parsed.floor, parsed.unit);
-        if (!validation.valid) {
-          showMessage(validation.error);
-          setLoader(btn, false);
-          return;
-        }
-
-        const flatNumber = flatService.buildFlatNumber(parsed.tower, parsed.floor, parsed.unit);
-        currentFlat = flatNumber;
-        currentParsed = parsed;
-
-        // Check flat status via Worker (no direct Firestore access needed)
-        const flatRes = await fetch(`${workerUrl}/flat/check`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ flatNumber })
-        });
-        const flatData = await flatRes.json();
-
-        if (flatData.status === 'pending') {
-          document.getElementById('pending-flat').textContent = flatNumber;
-          showStep('step-pending');
-          return;
-        } else if (flatData.status === 'occupied') {
-          showFlatOccupied(flatNumber, flatData.ownerFirstName);
-        } else {
-          // Flat not registered - redirect to main registration page
-          window.location.href = `/society/register.html?flat=${encodeURIComponent(flatNumber)}`;
-          return;
-        }
-      } catch (err) {
-        showMessage('Error checking flat: ' + err.message);
-      } finally {
-        setLoader(btn, false);
-      }
-    };
-
-    // Step 2: Occupied Handling
-    function showFlatOccupied(flatNumber, ownerName) {
-      document.getElementById('occ-flat').textContent = flatNumber;
-      // Show first name only
-      document.getElementById('occ-owner').textContent = ownerName.split(' ')[0];
-      showStep('step-occupied');
-    }
-
-    window.handleOccupiedChoice = function(choice) {
-      if (choice === 'tenant') {
-        showRegistrationForm(currentFlat, currentParsed, 'tenant');
-      } else {
-        showStep('step-signin');
-      }
-    };
-
-    // Step 2b: Empty Flat Welcome
-    function showEmptyFlatWelcome(flatNumber, parsed) {
-      document.getElementById('empty-flat-number').textContent = flatNumber;
-      showStep('step-empty');
-    }
-
-    window.proceedToRegistration = function() {
-      // Redirect to proper registration page with flat number pre-filled
-      window.location.href = `/society/register.html?flat=${encodeURIComponent(currentFlat)}`;
-    };
-
-    // Step 3: Registration
-    function showRegistrationForm(flatNumber, parsed, residentType) {
-      currentFlat = flatNumber;
-      currentParsed = parsed;
-      currentResidentType = residentType;
-      document.getElementById('reg-flat-display').textContent = flatNumber;
-      document.getElementById('reg-title').textContent = residentType === 'owner' ? 'Register Flat' : 'Resident Registration';
-      
-      // Pre-fill email/name if already logged in via Google but not registered
-      if (auth.currentUser) {
-        document.getElementById('reg-email').value = auth.currentUser.email || '';
-        document.getElementById('reg-name').value = auth.currentUser.displayName || '';
-      }
-      
-      showStep('step-register');
-    }
-
-    window.registerWithGoogle = async function() {
-      const name = document.getElementById('reg-name').value.trim();
-      let phone = document.getElementById('reg-phone').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const agree = document.getElementById('reg-agree').checked;
-
-      if (!name || !phone) return showMessage('Name and Phone are required');
-      if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-        return showMessage('Please enter a valid 10-digit phone number');
-      }
-      if (!agree) return showMessage('Please agree to the Terms and Privacy Policy');
-
-      // Normalize phone number to E.164 format (+91XXXXXXXXXX)
-      phone = `+91${phone}`;
-
-      const btn = document.getElementById('btn-reg-google');
-      setLoader(btn, true);
-
-      try {
-        // First, sign in with Google to get Firebase token
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const firebaseToken = result.user.uid;
-
-        // Then create resident via Worker endpoint
-        const regRes = await fetch(`${workerUrl}/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'google',
-            identifier: email || result.user.email,
-            name,
-            flatNumber: currentFlat,
-            phone,
-            email: email || result.user.email,
-            firebaseToken,
-            residentType: 'owner',
-            verificationMethod: 'admin_bypass',  // Will auto-approve for admin email
-          }),
-        });
-        const regData = await regRes.json();
-        if (!regRes.ok) {
-          const errors = {
-            'invalid_flat_number': 'Invalid flat number format',
-            'flat_occupied': 'This flat is already registered',
-            'credential_exists': 'This Google account is already registered',
-            'rate_limit': 'Too many registrations from this email. Try again in 24 hours.',
-            'document_required': 'Document verification required',
-            'server_error': regData.details || 'Registration failed'
-          };
-          throw new Error(errors[regData.error] || regData.error || 'Registration failed');
-        }
-
-        // Register device after successful auth
-        await registerDevice('google');
-
-        // Admin email gets auto-approved
-        if (email === 'pushkalkishore@gmail.com' || result.user.email === 'pushkalkishore@gmail.com') {
-          showMessage('Registration complete! Redirecting to dashboard...', 'success');
-        } else {
-          showMessage('Registration submitted! Admin will review within 24-48 hours.', 'success');
-        }
-        setTimeout(() => window.location.href = '/society/', 2000);
-      } catch (err) {
-        showMessage(err.message);
-        setLoader(btn, false);
-      }
-    };
-
-    // Sign In with Email/Password
-    window.signInWithEmail = async function() {
-      const email = document.getElementById('signin-email').value.trim();
-      const password = document.getElementById('signin-password').value.trim();
-
-      if (!email || !password) return showMessage('Please enter email and password');
-
-      const btn = event.target;
-      setLoader(btn, true);
-
-      try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-
-        // Call Worker API to check if resident exists (V2 schema)
-        const idToken = await result.user.getIdToken();
-        const loginRes = await fetch('https://telegram.psots.in/auth/unified-login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-          },
-          body: JSON.stringify({
-            type: 'email',
-            identifier: email
-          })
-        });
-
-        const loginData = await loginRes.json();
-
-        if (loginData.ok && loginData.resident) {
-          // Resident found and approved - redirect to dashboard
-          await registerDevice('email');
+        if (data.ok && data.resident) {
+          await registerDevice('google', data.resident);
           showMessage('Welcome back!', 'success');
-          setTimeout(() => window.location.href = '/society/', 1000);
-        } else if (loginData.error === 'not_approved') {
-          // Registered but pending approval
-          showMessage('Your registration is pending admin approval.', 'info');
-          setLoader(btn, false);
-        } else if (loginData.error === 'not_registered') {
-          // Not registered - show registration form
-          showMessage('No account found. Please register.', 'info');
-          showRegistrationForm(null, null, 'owner');
-          setLoader(btn, false);
+          setTimeout(() => { window.location.href = '/society/'; }, 800);
+        } else if (data.error === 'not_approved') {
+          showMessage('Your account is pending admin approval. You\'ll get an email once approved.', 'info');
+        } else if (data.error === 'not_registered') {
+          showMessage('No account found. Redirecting to register...', 'info');
+          setTimeout(() => { window.location.href = '/society/register.html'; }, 1200);
         } else {
-          showMessage('Login failed. Please try again.');
-          setLoader(btn, false);
+          showMessage(escapeHTML(data.message || data.error || 'Login failed'));
         }
       } catch (err) {
-        let errorMsg = '';
-        if (err.code === 'auth/account-exists-with-different-credential') {
+        if (err.code === 'auth/popup-closed-by-user') return;
+        showMessage('Google sign-in failed: ' + escapeHTML(err.message));
+      }
+    };
+
+    // ── SMS OTP Sign-In (MSG91 widget) ──
+    window.startSmsLogin = function() {
+      let phone = document.getElementById('loginPhone').value.trim();
+      if (!phone || !/^\d{10}$/.test(phone)) return showMessage('Enter a valid 10-digit phone number');
+      if (!MSG91_WIDGET_ID || !MSG91_TOKEN_AUTH) return showMessage('OTP service not configured. Contact admin.');
+      const phoneE164 = `91${phone}`;
+      const btn = document.getElementById('smsBtn');
+      btn.disabled = true; btn.innerHTML = '<span class="loader"></span> Sending...';
+
+      const widgetConfig = {
+        widgetId: MSG91_WIDGET_ID,
+        tokenAuth: MSG91_TOKEN_AUTH,
+        identifier: phoneE164,
+        exposeMethods: false,
+        success: async (data) => {
+          btn.disabled = false; btn.innerHTML = 'Send OTP →';
+          showMessage('Verifying...', 'info');
           try {
-            const methods = await fetchSignInMethodsForEmail(auth, email);
-            if (methods.includes('google.com')) {
-              errorMsg = 'This email is registered with Google. Please use "Continue with Google" to sign in.';
+            const res = await fetch(`${WORKER_URL}/auth/sms-login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ accessToken: data.message, phone: phoneE164 })
+            });
+            const loginData = await res.json();
+
+            if (loginData.ok && loginData.resident) {
+              if (loginData.customToken) await signInWithCustomToken(auth, loginData.customToken);
+              if (loginData.sessionId) try { localStorage.setItem('psots_session', loginData.sessionId); } catch (_) {}
+              await registerDevice('sms', loginData.resident);
+              showMessage('Welcome back!', 'success');
+              setTimeout(() => { window.location.href = '/society/'; }, 800);
+            } else if (loginData.error === 'not_registered') {
+              showMessage(`No account found for +91 ${escapeHTML(phone)}. <a href="/society/register.html">Register here →</a>`, 'info');
+            } else if (loginData.error === 'not_approved') {
+              showMessage('Your account is pending admin approval.', 'info');
             } else {
-              errorMsg = 'This email is registered with a different method. Please try another login option.';
+              showMessage(escapeHTML(loginData.message || loginData.detail || loginData.error || 'OTP login failed'));
             }
-          } catch (_) {
-            errorMsg = 'This email is linked to another account. Try signing in with Google.';
+          } catch (err) {
+            showMessage('Error: ' + escapeHTML(err.message));
           }
-        } else {
-          const errors = {
-            'auth/user-not-found': 'Email not registered. Please sign up first.',
-            'auth/wrong-password': 'Incorrect password. Please try again.',
-            'auth/too-many-requests': 'Too many login attempts. Please try again later.',
-            'auth/invalid-email': 'Invalid email format.'
-          };
-          errorMsg = errors[err.code] || err.message;
+        },
+        failure: (error) => {
+          btn.disabled = false; btn.innerHTML = 'Send OTP →';
+          showMessage('OTP failed: ' + escapeHTML(error?.message || 'try again'));
         }
-        showMessage(errorMsg);
-        setLoader(btn, false);
+      };
+      if (typeof initSendOTP !== 'function') {
+        btn.disabled = false; btn.innerHTML = 'Send OTP →';
+        return showMessage('OTP service not loaded. Refresh the page.');
       }
+      initSendOTP(widgetConfig);
     };
 
-    // Register with Email/Password
-    window.registerWithEmail = async function() {
-      const name = document.getElementById('reg-name').value.trim();
-      let phone = document.getElementById('reg-phone').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const password = document.getElementById('reg-password').value.trim();
-      const passwordConfirm = document.getElementById('reg-password-confirm').value.trim();
-      const agree = document.getElementById('reg-agree').checked;
-
-      if (!name || !phone) return showMessage('Name and Phone are required');
-      if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-        return showMessage('Please enter a valid 10-digit phone number');
-      }
-      if (!agree) return showMessage('Please agree to the Terms and Privacy Policy');
-      if (!password || password.length < 8) return showMessage('Password must be at least 8 characters');
-      if (password !== passwordConfirm) return showMessage('Passwords do not match');
-
-      // Normalize phone number to E.164 format (+91XXXXXXXXXX)
-      phone = `+91${phone}`;
-
-      const btn = event.target;
-      setLoader(btn, true);
-
-      try {
-        // Create Firebase auth account
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-
-        // Create resident record via Worker
-        const regRes = await fetch(`${workerUrl}/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'email',
-            identifier: email,
-            name,
-            flatNumber: currentFlat,
-          }),
-        });
-
-        const regData = await regRes.json();
-        if (!regRes.ok) {
-          const errors = {
-            'invalid_flat_number': 'Invalid flat number format',
-            'flat_occupied': 'This flat is already registered',
-            'credential_exists': 'This email is already registered',
-            'rate_limit': 'Too many registrations. Try again in 24 hours.',
-            'server_error': regData.details || 'Registration failed'
-          };
-          throw new Error(errors[regData.error] || regData.error || 'Registration failed');
-        }
-
-        // Register device
-        await registerDevice('email');
-        showMessage('Registration submitted! Admin will review within 24-48 hours.', 'success');
-        setTimeout(() => window.location.href = '/society/', 2000);
-      } catch (err) {
-        const errors = {
-          'auth/email-already-in-use': 'This email is already registered',
-          'auth/invalid-email': 'Invalid email format',
-          'auth/weak-password': 'Password is too weak',
-        };
-        showMessage(errors[err.code] || err.message);
-        setLoader(btn, false);
-      }
-    };
-
-    // Forgot Password
-    window.openForgotPasswordModal = function() {
-      document.getElementById('forgotPasswordModal').style.display = 'flex';
-      hideMessage();
-    };
-
-    window.closeForgotPasswordModal = function() {
-      document.getElementById('forgotPasswordModal').style.display = 'none';
-      document.getElementById('reset-email').value = '';
-    };
-
-    window.sendPasswordReset = async function() {
-      const email = document.getElementById('reset-email').value.trim();
-      if (!email) return showMessage('Please enter your email address');
-
-      const btn = event.target;
-      setLoader(btn, true);
-
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showMessage('Password reset email sent! Check your inbox.', 'success');
-        setTimeout(() => closeForgotPasswordModal(), 2000);
-      } catch (err) {
-        const errors = {
-          'auth/user-not-found': 'Email not found',
-          'auth/invalid-email': 'Invalid email format'
-        };
-        showMessage(errors[err.code] || err.message);
-        setLoader(btn, false);
-      }
-    };
-
-    // Sign In with Google
-    window.signInWithGoogle = async function() {
-      const btn = event.target;
-      setLoader(btn, true);
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-
-        // Call Worker API to check if resident exists (V2 schema)
-        const idToken = await result.user.getIdToken();
-        const loginRes = await fetch('https://telegram.psots.in/auth/unified-login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-          },
-          body: JSON.stringify({
-            type: 'google',
-            identifier: result.user.email
-          })
-        });
-
-        const loginData = await loginRes.json();
-
-        if (loginData.ok && loginData.resident) {
-          // Resident found and approved - redirect to dashboard
-          await registerDevice('google');
-          showMessage('Welcome back!', 'success');
-          setTimeout(() => window.location.href = '/society/', 1000);
-        } else if (loginData.error === 'not_approved') {
-          // Registered but pending approval
-          showMessage('Your registration is pending admin approval. You will be notified via email once approved.', 'info');
-          setLoader(btn, false);
-        } else if (loginData.error === 'not_registered') {
-          // Not registered - redirect to proper registration page
-          showMessage('No account found. Redirecting to registration...', 'info');
-          setTimeout(() => {
-            window.location.href = '/society/register.html';
-          }, 1500);
-        } else {
-          showMessage('Login failed. Please try again.');
-          setLoader(btn, false);
-        }
-      } catch (err) {
-        showMessage(err.message);
-        setLoader(btn, false);
-      }
-    };
-
-    // NOTE: onAuthSuccess removed - Google/Email login now uses Worker API directly
-
-    // Helper function to navigate to main dashboard
-    window.proceedToMainDashboard = function() {
-      window.location.href = '/society/';
-    };
-
-    // Check for quick return device on page load
+    // ── Boot ──
     checkQuickReturn();
 
-    // Auth state check on load - redirect if already logged in
+    // Pre-fill phone from URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('phone')) document.getElementById('loginPhone').value = params.get('phone');
+
+    // If user is already authed (e.g. arrived from another tab), bounce to dashboard
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // Check via Worker API if resident exists and is approved
-        try {
-          const idToken = await user.getIdToken();
-          const loginRes = await fetch('https://telegram.psots.in/auth/unified-login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify({
-              type: 'google',
-              identifier: user.email
-            })
-          });
-          const loginData = await loginRes.json();
-          if (loginData.ok && loginData.resident) {
-            // Already logged in and approved - redirect to dashboard
-            window.location.href = '/society/';
-          }
-        } catch (err) {
-          console.error('Auth check error:', err);
-        }
-      }
-    });
-
-    // Help Modal Functions
-    window.openHelpModal = function() {
-      document.getElementById('helpModal').style.display = 'flex';
-      document.getElementById('helpMessage').textContent = '';
-    };
-
-    window.closeHelpModal = function() {
-      document.getElementById('helpModal').style.display = 'none';
-      document.getElementById('helpName').value = '';
-      document.getElementById('helpFlat').value = '';
-      document.getElementById('helpPhone').value = '';
-      document.getElementById('helpIssue').value = '';
-      document.getElementById('helpDesc').value = '';
-      document.getElementById('helpMessage').textContent = '';
-    };
-
-    window.submitHelpRequest = async function() {
-      const name = document.getElementById('helpName').value.trim();
-      const flatNumber = document.getElementById('helpFlat').value.trim();
-      const phone = document.getElementById('helpPhone').value.trim();
-      const issueType = document.getElementById('helpIssue').value.trim();
-      const description = document.getElementById('helpDesc').value.trim();
-      const msgEl = document.getElementById('helpMessage');
-
-      if (!name || !flatNumber || !phone || !issueType) {
-        msgEl.className = 'message error';
-        msgEl.textContent = '✗ Please fill all required fields';
-        return;
-      }
-
+      if (!user) return;
       try {
-        const res = await fetch(`${WORKER_URL}/support/help-request`, {
+        const idToken = await user.getIdToken();
+        const res = await fetch(`${WORKER_URL}/auth/unified-login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name,
-            flatNumber,
-            phone,
-            issueType,
-            description: description || null
-          })
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({ type: 'google', identifier: user.email })
         });
-
-        const result = await res.json();
-        if (result.ok) {
-          msgEl.className = 'message success';
-          msgEl.textContent = `✓ Request sent! An admin will contact you on ${phone} within 24 hours.`;
-          setTimeout(() => closeHelpModal(), 2000);
-        } else {
-          msgEl.className = 'message error';
-          msgEl.textContent = '✗ ' + (result.error || 'Failed to send request');
-        }
-      } catch (err) {
-        msgEl.className = 'message error';
-        msgEl.textContent = '✗ ' + err.message;
-      }
-    };
+        const data = await res.json();
+        if (data.ok) window.location.href = '/society/';
+      } catch (_) {}
+    });
   </script>
-<footer style="background:var(--cream-dark);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:40px;">
-  <div style="max-width:800px;margin:0 auto;">
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
-      PSOTS Society · society.psots.in
-    </p>
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:13px;">
-      <a href="/society/about.html" style="color:var(--jade);text-decoration:none;">About</a>
-      <a href="/society/faq.html" style="color:var(--jade);text-decoration:none;">FAQ</a>
-      <a href="/society/privacy.html" style="color:var(--jade);text-decoration:none;">Privacy Policy</a>
-      <a href="/society/terms.html" style="color:var(--jade);text-decoration:none;">Terms of Use</a>
-    </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:12px;">
-      This is a resident initiative — not affiliated with PSOTSAOA, Prestige Estates or PPMS.
-    </p>
-  </div>
-</footer>
-
-    <!-- Help Modal -->
-    <div id="helpModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
-      <div style="background: white; border-radius: 12px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
-        <h3 style="font-size: 20px; margin: 0 0 12px 0; color: var(--ink);">Need Help?</h3>
-        <p style="font-size: 13px; color: var(--muted); margin: 0 0 20px 0; line-height: 1.6;">
-          Fill this form and an admin will contact you within 24 hours.
-        </p>
-
-        <div class="form-group">
-          <label>Name *</label>
-          <input id="helpName" type="text" placeholder="Your full name"/>
-        </div>
-
-        <div class="form-group">
-          <label>Flat Number *</label>
-          <input id="helpFlat" type="text" placeholder="e.g. 15167"/>
-        </div>
-
-        <div class="form-group">
-          <label>Phone Number *</label>
-          <input id="helpPhone" type="tel" placeholder="+91 98XXX XXXXX"/>
-        </div>
-
-        <div class="form-group">
-          <label>Issue Type *</label>
-          <select id="helpIssue" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px;">
-            <option value="">Select an issue...</option>
-            <option>Cannot upload document</option>
-            <option>Document not getting verified</option>
-            <option>Cannot login</option>
-            <option>Registration stuck</option>
-            <option>Don't have a document</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Description (optional)</label>
-          <textarea id="helpDesc" placeholder="Describe your issue..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
-        </div>
-
-        <div id="helpMessage" class="message" style="margin-bottom: 16px;"></div>
-
-        <div style="display: flex; gap: 12px;">
-          <button onclick="submitHelpRequest()" style="flex: 1; padding: 12px; background: var(--jade); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">Send Request</button>
-          <button onclick="closeHelpModal()" style="flex: 1; padding: 12px; background: var(--cream); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">Cancel</button>
-        </div>
-      </div>
-    </div>
-
 </body>
 </html>
