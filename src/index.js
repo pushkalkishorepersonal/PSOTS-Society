@@ -18,8 +18,33 @@ import {
   fetchChatMember, moderateWithGemini, analyzeWithGemini, handleVerifyCommand, verifyOTP
 } from './telegram.js';
 import * as db from './db/adapter-d1.js';  // D1-only (Firestore removed)
+import { firestoreSet, firestoreQuery, firestoreGet } from './db/adapter-d1.js';
+import { getServiceAccountToken } from './db/firebase-init.js';
+import { checkAndRecord } from './security/rate-limiter.js';
 import { applyRateLimit } from './middleware/ratelimit.middleware.js';
 import { maskEmail, maskPhone, maskName, sanitizeForAdmin, sanitizeForResident, sanitizeForPublic } from './db/pii.js';
+
+// ── sendEmail helper (Resend API wrapper) ──
+// Centralizes the Resend API call pattern used throughout this file so the
+// notification call sites (new-device alert, lease reminder) actually work.
+// Returns true on success, false on any error (never throws — email is fire-and-forget).
+async function sendEmail(to, subject, html, env) {
+  if (!env.RESEND_API_KEY || !to) return false;
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PSOTS Society <noreply@society.psots.in>',
+        to: [to], subject, html
+      })
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('sendEmail failed:', e.message);
+    return false;
+  }
+}
 
 const ADMIN_ID = 989358143;
 const ADMIN_GROUP_ID = -1001328126394;
@@ -8269,6 +8294,10 @@ Return JSON only:
         }
 
         // High confidence — take action
+        // Fallback path: neither moderation branch above hit (engine not 'gemini'/'both' and
+        // not !modConfig.enabled). The original code referenced an out-of-scope geminiResult
+        // here — provide a defensive default so the code is callable instead of throwing.
+        const geminiResult = { reason: 'policy violation detected' };
         await updateStats(env.VIOLATIONS, chatId);
         await deleteTelegramMessage(chatId, message.message_id, botToken);
 

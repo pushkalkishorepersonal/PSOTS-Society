@@ -8,7 +8,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/ js/ --max-warnings 320",
+    "lint": "eslint src/ js/ --max-warnings 200",
     "check:arch": "node scripts/check-architecture.js",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
