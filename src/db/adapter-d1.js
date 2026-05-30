@@ -1,6 +1,7 @@
+/* eslint-disable no-case-declarations */
 /**
  * src/db/adapter-d1.js - D1 Database Adapter
- * 
+ *
  * Drop-in replacement for src/db/adapter.js (Firestore version).
  * Provides the same function signatures using D1 instead of Firestore.
  * 
