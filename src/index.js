@@ -1759,7 +1759,7 @@ export default {
           JSON.stringify({ verifier, next }),
           { expirationTtl: 600 });
 
-        const redirectUri = `${url.origin}/auth/google/callback`;
+        const redirectUri = 'https://login.society.psots.in/auth/google/callback';
         const params = new URLSearchParams({
           client_id: env.GOOGLE_OAUTH_CLIENT_ID,
           redirect_uri: redirectUri,
@@ -1800,7 +1800,7 @@ export default {
             code,
             client_id: env.GOOGLE_OAUTH_CLIENT_ID,
             client_secret: env.GOOGLE_OAUTH_CLIENT_SECRET,
-            redirect_uri: `${url.origin}/auth/google/callback`,
+            redirect_uri: 'https://login.society.psots.in/auth/google/callback',
             grant_type: 'authorization_code',
             code_verifier: stateData.verifier
           })
