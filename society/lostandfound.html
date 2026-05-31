@@ -147,19 +147,14 @@
 
 <script type="module">
 import session from '/js/core/auth.js';
-import { db }  from '/js/core/firebase.js';
 import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
-import {
-  collection, query, where, orderBy, getDocs,
-  doc, setDoc, updateDoc, serverTimestamp, Timestamp
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const WORKER_URL = 'https://telegram.psots.in';
 
 // Render shared nav
-// Load data immediately before nav
 await renderSocietyNav('societyNav', 'lostandfound');
 
-const app      = document.getElementById('app');
-const COLL     = 'lost_found';
+const app = document.getElementById('app');
 
 const CATEGORY_ICONS = {
   Keys:'🔑', Pet:'🐾', Wallet:'👛', Electronics:'📱',
@@ -178,7 +173,7 @@ function escHtml(str) {
 
 function fmtDate(ts) {
   if (!ts) return '—';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const d = typeof ts === 'string' ? new Date(ts) : (ts.toDate ? ts.toDate() : new Date(ts));
   return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 }
 
@@ -267,22 +262,17 @@ function buildPage(user, resident) {
     const container = document.getElementById('listingsContainer');
     container.innerHTML = '<div class="loader-ring"></div>';
     try {
-      const now = Timestamp.now();
-      const q = query(
-        collection(db, COLL),
-        where('type',   '==', type),
-        where('status', '==', 'active'),
-        where('expiresAt', '>', now),
-        orderBy('expiresAt', 'desc'),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(q);
-      if (snap.empty) {
+      const res = await fetch(`${WORKER_URL}/society/lost-found?type=${type}`, {
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const posts = data.posts || [];
+      if (!posts.length) {
         container.innerHTML = `<div class="empty-state"><div class="empty-icon">${type==='lost'?'🔍':'📦'}</div><p class="empty-text">No ${type} items posted yet.</p></div>`;
         return;
       }
-      const cards = snap.docs.map(d => {
-        const p = { id: d.id, ...d.data() };
+      const cards = posts.map(p => {
         const icon = CATEGORY_ICONS[p.category] || '📦';
         const isOwn = p.posterUid === user.uid;
         return `
@@ -332,7 +322,13 @@ function buildPage(user, resident) {
     btn.disabled = true;
     btn.textContent = 'Resolving…';
     try {
-      await updateDoc(doc(db, COLL, id), { status: 'resolved', updatedAt: serverTimestamp() });
+      const res = await fetch(`${WORKER_URL}/society/lost-found/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: 'resolved' })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast('Marked as resolved.');
       loadListings(_activeTab);
     } catch (err) {
@@ -363,34 +359,28 @@ function buildPage(user, resident) {
       btn.disabled = true;
       btn.textContent = 'Posting…';
 
-      const now       = serverTimestamp();
-      const expiresAt = Timestamp.fromDate(new Date(Date.now() + 30*24*60*60*1000));
-      const postId    = `${user.uid}_${Date.now()}`;
-
       try {
-        await setDoc(doc(db, COLL, postId), {
-          id:             postId,
-          type,
-          category,
-          itemName,
-          description:    desc,
-          location,
-          date,
-          posterUid:      user.uid,
-          posterFlat:     resident?.flatNumber || null,
-          posterTelegram: tgUsername || null,
-          status:         'active',
-          createdAt:      now,
-          expiresAt,
+        const res = await fetch(`${WORKER_URL}/society/lost-found`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            type,
+            category,
+            itemName,
+            description: desc,
+            location,
+            date,
+            posterFlat: resident?.flatNumber || null,
+          })
         });
-        // Reset form
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         document.getElementById('lfItemName').value  = '';
         document.getElementById('lfCategory').value  = '';
         document.getElementById('lfDesc').value      = '';
         document.getElementById('lfLocation').value  = '';
         document.getElementById('lfDate').value      = new Date().toISOString().split('T')[0];
         toast('Item posted successfully!');
-        // Switch to the tab matching what was posted
         document.querySelector(`[data-tab="${type}"]`)?.click();
       } catch (err) {
         alert.innerHTML = '<div class="info-box warn">Failed to post. Please try again.</div>';

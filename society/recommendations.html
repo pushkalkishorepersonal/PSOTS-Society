@@ -378,15 +378,10 @@
 
 <script type="module">
 import session from '/js/core/auth.js';
-import { db } from '/js/core/firebase.js';
 import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
-import {
-  collection, query, where, orderBy, getDocs,
-  doc, setDoc, serverTimestamp, Timestamp
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
+const WORKER_URL = 'https://telegram.psots.in';
 const app = document.getElementById('app');
-const COLL = 'recommendations';
 
 const CATEGORIES = {
   doctors: { name: 'Doctors', icon: '🏥' },
@@ -461,12 +456,12 @@ async function loadAndRender() {
   content.innerHTML = '<div class="loader-ring"></div>';
 
   try {
-    const q = query(
-      collection(db, COLL),
-      where('status', '==', 'approved'),
-      where('category', '==', currentCategory)
-    );
-    recommendations = (await getDocs(q)).docs.map(d => ({ id: d.id, ...d.data() }));
+    const res = await fetch(`${WORKER_URL}/society/recommendations?category=${currentCategory}`, {
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    recommendations = data.recommendations || [];
 
     const search = document.getElementById('searchBox')?.value.toLowerCase() || '';
     let filtered = recommendations;
@@ -547,19 +542,21 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
   }
 
   try {
-    await setDoc(doc(collection(db, COLL), `${Date.now()}_${currentUser.uid}`), {
-      name,
-      category,
-      phone,
-      rating: parseInt(rating),
-      description,
-      recommendedBy: currentResident.flatNumber,
-      status: 'pending',
-      createdAt: serverTimestamp(),
-      approvedBy: null
+    const res = await fetch(`${WORKER_URL}/society/recommendations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        name,
+        category,
+        phone,
+        rating: parseInt(rating),
+        description,
+      })
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     toast('✅ Recommendation submitted for approval!');
-    closeModal();
+    window.closeModal();
   } catch (err) {
     toast('Error submitting recommendation', false);
   }
