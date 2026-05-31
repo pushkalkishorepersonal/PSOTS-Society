@@ -323,6 +323,21 @@
       });
       const data = await res.json();
 
+      // Helper: build a list of which checks failed, with the extracted vs. entered values
+      const buildMismatchList = () => {
+        const issues = [];
+        if (!data.checks?.society) {
+          issues.push(`Society name not recognised (document shows "<strong>${escapeHTML(data.extracted?.societyName || '—')}</strong>", we expect a PSOTS receipt)`);
+        }
+        if (!data.checks?.flatNumber) {
+          issues.push(`Flat number mismatch (document shows "<strong>${escapeHTML(data.extracted?.flatNumber || '—')}</strong>", you entered "<strong>${escapeHTML(state.flatNumber)}</strong>")`);
+        }
+        if (!data.checks?.ownerName) {
+          issues.push(`Name not found on document (document Owner "<strong>${escapeHTML(data.extracted?.ownerName || '—')}</strong>", Paid By "<strong>${escapeHTML(data.extracted?.paidByName || '—')}</strong>", you entered "<strong>${escapeHTML(state.residentName)}</strong>")`);
+        }
+        return issues;
+      };
+
       if (data.result === 'verified') {
         state.verificationToken = data.token;
         state.extracted = data.extracted;
@@ -333,15 +348,19 @@
       } else if (data.result === 'manual_review') {
         state.verificationToken = data.token;
         state.extracted = data.extracted;
-        statusDiv.innerHTML = '<div class="message info">📋 Partial match — we\'ll continue but an admin may review your registration.</div>';
+        const issues = buildMismatchList();
+        const issuesHtml = issues.length
+          ? `<br><br><strong>What didn't match:</strong><ul style="margin:8px 0 0 18px; padding:0;">${issues.map(i => `<li style="margin-bottom:4px;">${i}</li>`).join('')}</ul>`
+          : '';
+        statusDiv.innerHTML = `<div class="message info">📋 Partial match — we'll continue but an admin will review your registration before approval.${issuesHtml}</div>`;
         renderExtractedSummary(data.extracted, null);
-        setTimeout(() => showStep('step-auth'), 1800);
+        setTimeout(() => showStep('step-auth'), 2800);
       } else {
-        const issues = [];
-        if (!data.checks?.society) issues.push('society name not recognised');
-        if (!data.checks?.flatNumber) issues.push(`flat number mismatch (found "${escapeHTML(data.extracted?.flatNumber || '?')}", you entered "${escapeHTML(state.flatNumber)}")`);
-        if (!data.checks?.ownerName) issues.push(`name mismatch (document shows "${escapeHTML(data.extracted?.ownerName || '?')}" / paid by "${escapeHTML(data.extracted?.paidByName || '?')}", you entered "${escapeHTML(state.residentName)}")`);
-        statusDiv.innerHTML = `<div class="message error">❌ We couldn't verify this document.<br><br><strong>Issues:</strong> ${issues.join(', ') || 'document unreadable'}.<br><br>Please upload a recent PSOTS maintenance receipt, or contact admin if your name on records differs.</div>`;
+        const issues = buildMismatchList();
+        const issuesHtml = issues.length
+          ? `<ul style="margin:8px 0 0 18px; padding:0;">${issues.map(i => `<li style="margin-bottom:4px;">${i}</li>`).join('')}</ul>`
+          : '<p style="margin:6px 0 0 0;">Document unreadable.</p>';
+        statusDiv.innerHTML = `<div class="message error">❌ We couldn't verify this document.<br><br><strong>What didn't match:</strong>${issuesHtml}<br>Please upload a recent PSOTS maintenance receipt, or contact admin if your name on records differs.</div>`;
         uploadArea.classList.remove('has-file');
       }
     } catch (err) {
