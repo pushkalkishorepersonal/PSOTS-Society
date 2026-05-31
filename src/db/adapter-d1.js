@@ -55,6 +55,9 @@ export const createLostFoundPost = d1.createLostFoundPost;
 
 // Carpooling operations
 export const listCarpoolingPosts = d1.listCarpoolingPosts;
+export const createCarpoolingPost = d1.createCarpoolingPost;
+export const updateCarpoolingPost = d1.updateCarpoolingPost;
+export const deleteCarpoolingPost = d1.deleteCarpoolingPost;
 
 // Settings operations
 export const getSetting = d1.getSetting;

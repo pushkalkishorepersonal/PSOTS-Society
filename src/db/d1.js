@@ -397,6 +397,42 @@ export async function listCarpoolingPosts(filters = {}, env) {
   return result.results.map(parseD1Row);
 }
 
+export async function createCarpoolingPost(data, env) {
+  const snake = toSnakeCase(data);
+  const columns = Object.keys(snake).join(', ');
+  const placeholders = Object.keys(snake).map(() => '?').join(', ');
+  const values = Object.values(snake);
+
+  const result = await env.PSOTS_DB
+    .prepare(`INSERT INTO carpooling (${columns}) VALUES (${placeholders})`)
+    .bind(...values)
+    .run();
+
+  return { id: result.meta.last_row_id };
+}
+
+export async function updateCarpoolingPost(postId, updates, env) {
+  const snake = toSnakeCase(updates);
+  const setClauses = Object.keys(snake).map(k => `${k} = ?`).join(', ');
+  const values = [...Object.values(snake), postId];
+
+  const result = await env.PSOTS_DB
+    .prepare(`UPDATE carpooling SET ${setClauses} WHERE id = ?`)
+    .bind(...values)
+    .run();
+
+  return { success: result.success };
+}
+
+export async function deleteCarpoolingPost(postId, env) {
+  const result = await env.PSOTS_DB
+    .prepare('DELETE FROM carpooling WHERE id = ?')
+    .bind(postId)
+    .run();
+
+  return { success: result.success };
+}
+
 // ══════════════════════════════════════════════════════════════
 // SETTINGS OPERATIONS
 // ══════════════════════════════════════════════════════════════

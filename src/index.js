@@ -58,6 +58,54 @@ function escapeHTML(str) {
   }[c]));
 }
 
+// resolveAuth — extract identity from cookie OR Firebase Bearer token
+// Returns: { uid, residentId, email, name, flatNumber, isAdmin, authMethod: 'cookie'|'firebase' } or null
+async function resolveAuth(request, env) {
+  try {
+    // Try cookie first (OAuth users, direct Google login)
+    const cookieStr = request.headers.get('Cookie') || '';
+    const m = cookieStr.match(/psots_session=([^;]+)/);
+    if (m) {
+      const { data } = await db.getSession(env, m[1]);
+      if (data) {
+        const isAdmin = data.isAdmin || (await db.isAdmin(data.uid, env));
+        return {
+          uid: data.uid,
+          residentId: data.uid,
+          email: data.email,
+          name: data.name,
+          flatNumber: data.flatNumber,
+          isAdmin,
+          authMethod: 'cookie'
+        };
+      }
+    }
+
+    // Fall back to Firebase Bearer token (transition period)
+    const authHeader = request.headers.get('Authorization') || '';
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const resident = await db.getResident(token, env);
+      if (resident) {
+        const isAdmin = resident.isAdmin || (await db.isAdmin(token, env));
+        return {
+          uid: token,
+          residentId: token,
+          email: resident.email,
+          name: resident.name,
+          flatNumber: resident.flatNumber,
+          isAdmin,
+          authMethod: 'firebase'
+        };
+      }
+    }
+
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 // Verify Telegram login widget hash using HMAC-SHA256
 async function verifyTelegramHash(data, botToken) {
   const dataCheckString = Object.keys(data)
@@ -985,7 +1033,7 @@ export default {
 
       // Credentialed endpoints (cookie-based auth) need specific origin + credentials:true.
       // Wildcard origin is rejected by browsers when credentials are sent.
-      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout';
+      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout' || pathname.startsWith('/society/');
       if (request.method === 'OPTIONS') {
         if (isCredentialedAuth) {
           const origin = request.headers.get('Origin') || '';
@@ -2341,6 +2389,213 @@ export default {
             'Set-Cookie': clearCookie
           }
         });
+      }
+
+      // ══════════════════════════════════════════════════════════════════════════════════
+      // /SOCIETY/* ENDPOINTS — Credentialed, D1-backed society features
+      // ══════════════════════════════════════════════════════════════════════════════════
+
+      // GET /society/announcements — list announcements (no auth required)
+      if (pathname === '/society/announcements' && request.method === 'GET') {
+        try {
+          const announcements = await db.listAnnouncements(env);
+          return new Response(JSON.stringify({ ok: true, announcements }), {
+            headers: { 'Content-Type': 'application/json', ...CORS }
+          });
+        } catch (e) {
+          console.error('/society/announcements error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /society/announcements — create announcement (admin only)
+      if (pathname === '/society/announcements' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth?.isAdmin) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const { title, body } = await request.json();
+          const result = await db.createAnnouncement({ title, body, createdBy: auth.uid }, env);
+          return new Response(JSON.stringify({ ok: true, id: result.id }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('POST /society/announcements error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // GET /society/marketplace — list marketplace listings
+      if (pathname === '/society/marketplace' && request.method === 'GET') {
+        try {
+          const category = url.searchParams.get('category');
+          const filters = category ? { category } : {};
+          const listings = await db.listMarketplaceListings(filters, env);
+          return new Response(JSON.stringify({ ok: true, listings }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /society/marketplace — create listing (auth required)
+      if (pathname === '/society/marketplace' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const body = await request.json();
+          const listing = await db.createMarketplaceListing({
+            ...body,
+            createdBy: auth.uid,
+            posterFlat: auth.flatNumber
+          }, env);
+          return new Response(JSON.stringify({ ok: true, id: listing.id }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('POST /society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // PUT /society/marketplace/:id — update listing (owner only)
+      if (pathname.match(/^\/society\/marketplace\/[^/]+$/) && request.method === 'PUT') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const id = pathname.split('/').pop();
+          const body = await request.json();
+          await db.updateMarketplaceListing(id, body, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('PUT /society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // DELETE /society/marketplace/:id — delete listing (owner only)
+      if (pathname.match(/^\/society\/marketplace\/[^/]+$/) && request.method === 'DELETE') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const id = pathname.split('/').pop();
+          await db.deleteMarketplaceListing(id, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('DELETE /society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // GET /society/carpooling — list carpooling posts
+      if (pathname === '/society/carpooling' && request.method === 'GET') {
+        try {
+          const type = url.searchParams.get('type');
+          const filters = type ? { type } : {};
+          const posts = await db.listCarpoolingPosts(filters, env);
+          return new Response(JSON.stringify({ ok: true, posts }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/society/carpooling error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /society/carpooling — create carpooling post (auth required)
+      if (pathname === '/society/carpooling' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const body = await request.json();
+          const post = await db.createCarpoolingPost({
+            ...body,
+            createdBy: auth.uid,
+            posterFlat: auth.flatNumber
+          }, env);
+          return new Response(JSON.stringify({ ok: true, id: post.id }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('POST /society/carpooling error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // GET /society/lost-found — list lost & found posts
+      if (pathname === '/society/lost-found' && request.method === 'GET') {
+        try {
+          const type = url.searchParams.get('type');
+          const filters = type ? { type } : {};
+          const posts = await db.listLostFoundPosts(filters, env);
+          return new Response(JSON.stringify({ ok: true, posts }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/society/lost-found error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /society/lost-found — create lost & found post (auth required)
+      if (pathname === '/society/lost-found' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const body = await request.json();
+          const post = await db.createLostFoundPost({
+            ...body,
+            createdBy: auth.uid,
+            posterFlat: auth.flatNumber
+          }, env);
+          return new Response(JSON.stringify({ ok: true, id: post.id }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('POST /society/lost-found error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // GET /society/recommendations — list recommendations
+      if (pathname === '/society/recommendations' && request.method === 'GET') {
+        try {
+          const category = url.searchParams.get('category');
+          const query = category ? `SELECT * FROM recommendations WHERE category = ? LIMIT 1000` : 'SELECT * FROM recommendations LIMIT 1000';
+          const params = category ? [category] : [];
+          const { results } = await env.PSOTS_DB.prepare(query).bind(...params).all();
+          const recommendations = results.map(parseD1Row);
+          return new Response(JSON.stringify({ ok: true, recommendations }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/society/recommendations error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
       }
 
       // POST /resident/feedback { type, message, flatNumber, residentName, residentEmail }
