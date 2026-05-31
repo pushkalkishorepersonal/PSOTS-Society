@@ -52,12 +52,17 @@ export const deleteMarketplaceListing = d1.deleteMarketplaceListing;
 // Lost & Found operations
 export const listLostFoundPosts = d1.listLostFoundPosts;
 export const createLostFoundPost = d1.createLostFoundPost;
+export const updateLostFoundPost = d1.updateLostFoundPost;
 
 // Carpooling operations
 export const listCarpoolingPosts = d1.listCarpoolingPosts;
 export const createCarpoolingPost = d1.createCarpoolingPost;
 export const updateCarpoolingPost = d1.updateCarpoolingPost;
 export const deleteCarpoolingPost = d1.deleteCarpoolingPost;
+
+// Recommendations operations
+export const listRecommendations = d1.listRecommendations;
+export const createRecommendation = d1.createRecommendation;
 
 // Settings operations
 export const getSetting = d1.getSetting;

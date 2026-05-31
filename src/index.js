@@ -2550,6 +2550,26 @@ export default {
         }
       }
 
+      // PUT /society/carpooling/:id — update carpooling post status (auth required)
+      if (pathname.match(/^\/society\/carpooling\/[^/]+$/) && request.method === 'PUT') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const id = pathname.split('/').pop();
+          const body = await request.json();
+          await db.updateCarpoolingPost(id, body, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('PUT /society/carpooling error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
       // GET /society/lost-found — list lost & found posts
       if (pathname === '/society/lost-found' && request.method === 'GET') {
         try {
@@ -2588,18 +2608,59 @@ export default {
         }
       }
 
+      // PUT /society/lost-found/:id — update lost & found post status (auth required)
+      if (pathname.match(/^\/society\/lost-found\/[^/]+$/) && request.method === 'PUT') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const id = pathname.split('/').pop();
+          const body = await request.json();
+          await db.updateLostFoundPost(id, body, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('PUT /society/lost-found error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
       // GET /society/recommendations — list recommendations
       if (pathname === '/society/recommendations' && request.method === 'GET') {
         try {
           const category = url.searchParams.get('category');
-          const query = category ? `SELECT * FROM recommendations WHERE category = ? LIMIT 1000` : 'SELECT * FROM recommendations LIMIT 1000';
-          const params = category ? [category] : [];
-          const { results } = await env.PSOTS_DB.prepare(query).bind(...params).all();
-          const recommendations = results.map(parseD1Row);
+          const filters = category ? { category } : {};
+          const recommendations = await db.listRecommendations(filters, env);
           return new Response(JSON.stringify({ ok: true, recommendations }),
             { headers: credentialedCORS });
         } catch (e) {
           console.error('/society/recommendations error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // POST /society/recommendations — create recommendation (auth required)
+      if (pathname === '/society/recommendations' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const body = await request.json();
+          await db.createRecommendation({
+            ...body,
+            createdBy: auth.uid,
+            status: 'pending'
+          }, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('POST /society/recommendations error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
             { status: 500, headers: credentialedCORS });
         }

@@ -405,6 +405,13 @@ function toast(msg, ok = true) {
   setTimeout(() => t.innerHTML = '', 3000);
 }
 
+function escHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function renderStarRating(rating) {
   return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
 }
@@ -495,11 +502,11 @@ function renderCard(rec) {
       <div class="card-header">
         <div class="card-icon">${CATEGORIES[rec.category]?.icon || '💼'}</div>
         <div style="flex: 1;">
-          <div class="card-title">${name}</div>
-          <div class="card-subtitle">${subcategory}</div>
+          <div class="card-title">${escHtml(name)}</div>
+          <div class="card-subtitle">${escHtml(subcategory)}</div>
         </div>
       </div>
-      ${desc ? `<div class="card-description">${desc}</div>` : ''}
+      ${desc ? `<div class="card-description">${escHtml(desc)}</div>` : ''}
       <div class="card-actions">
         ${phone ? `<a href="tel:+91${phone}" class="btn-sm btn-call">📞 Call</a>` : ''}
         ${phone ? `<a href="https://wa.me/91${phone}" class="btn-sm btn-whatsapp" target="_blank">💬 WhatsApp</a>` : ''}
