@@ -1543,7 +1543,7 @@ export default {
           // - Tenant: lease agreement required
           // - Family: no document needed, pending approval
           const isAdminEmail = identifier === 'pushkalkishore@gmail.com';
-          const hasDocument = documentBase64 && verificationMethod === 'document';
+          const hasDocument = (documentBase64 && verificationMethod === 'document') || !!verificationToken;
           const isOwner = residentType === 'owner';
           const isTenant = residentType === 'tenant';
 

@@ -1,446 +1,457 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome · PSOTS Society</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSOTS Society — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
     :root {
-      --jade:#1a4a3a; --jade-light:#2d6b54; --jade-dark:#102c22; --jade-pale:rgba(26,74,58,0.07);
-      --gold:#b8882a; --gold-light:#d4a84b; --cream:#f8f2e8; --cream-dark:#ede5d5;
-      --surface:#fffcf7; --ink:#1a1208; --ink-soft:#3d2f1e; --muted:#8a7a6a;
-      --border:rgba(160,130,90,0.20); --red:#c0392b;
-      --font-serif:'Playfair Display', Georgia, serif; --font-sans:'Nunito Sans', system-ui, sans-serif;
+      --jade: #1a4a3a;
+      --jade-light: #2d6b57;
+      --jade-dark: #102c22;
+      --gold: #b8882a;
+      --gold-light: #d4a84b;
+      --cream: #faf6f0;
+      --cream-dark: #f0e8db;
+      --surface: #fffcf7;
+      --ink: #1a1208;
+      --muted: #8a7a6a;
+      --border: rgba(160, 130, 90, 0.22);
+      --red: #c0392b;
+      --green: #16a34a;
     }
-    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height: 100% }
     body {
-      font-family: var(--font-sans); background: var(--cream); color: var(--ink); line-height: 1.55;
-      min-height: 100vh; display: flex; flex-direction: column;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+      font-family: 'Nunito Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.2rem;
     }
-    nav {
-      display: flex; align-items: center; padding: 0 24px; height: 56px;
-      background: rgba(255,252,247,0.92); backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border); flex-shrink: 0;
-    }
-    .nav-brand { display:flex; align-items:center; gap:10px; text-decoration:none; color: var(--ink); }
-    .nav-logo { display:flex; align-items:center; justify-content:center; min-width:42px; min-height:42px; padding:6px; }
-    .nav-logo img { width:32px; height:32px; object-fit:contain; }
-    .nav-brand-name { font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: var(--jade); line-height: 1.2; }
-    .nav-brand-sub { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
-
-    .container {
-      flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-    }
-    @media (max-width: 880px) { .container { grid-template-columns: 1fr; } .left-panel { display: none; } }
-
-    .left-panel {
-      padding: 60px 48px; display: flex; flex-direction: column; justify-content: center;
-      background: linear-gradient(135deg, var(--jade) 0%, var(--jade-dark) 100%);
-      color: var(--cream); position: relative; overflow: hidden;
-    }
-    .left-panel::before {
-      content: ''; position: absolute; top: 0; right: 0; width: 280px; height: 280px;
-      background: radial-gradient(circle, rgba(184,136,42,0.18), transparent 70%); border-radius: 50%;
-    }
-    .left-panel h1 {
-      font-family: var(--font-serif); font-size: 42px; line-height: 1.15; font-weight: 600;
-      margin-bottom: 12px; position: relative;
-    }
-    .left-panel .italic { font-style: italic; color: var(--gold-light); }
-    .left-panel p { font-size: 16px; opacity: 0.85; margin-bottom: 32px; max-width: 440px; position: relative; }
-    .feature-grid { display: grid; gap: 14px; max-width: 440px; position: relative; }
-    .feature {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: rgba(255,255,255,0.06); padding: 14px 16px; border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .feature-icon { font-size: 22px; flex-shrink: 0; }
-    .feature-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
-    .feature-desc { font-size: 13px; opacity: 0.78; line-height: 1.4; }
-    .left-bottom {
-      margin-top: 36px; font-size: 12px; opacity: 0.65; position: relative;
-    }
-
-    .right-panel { padding: 48px 32px; display: flex; align-items: center; justify-content: center; }
     .card {
-      width: 100%; max-width: 420px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px;
-      box-shadow: 0 8px 32px rgba(26,74,58,0.08);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.8rem 2.4rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 40px rgba(26, 74, 58, 0.08);
     }
-
-    .step { display: none; }
-    .step.active { display: block; animation: fadeIn .25s ease-out; }
-    @keyframes fadeIn { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
-
-    h2 {
-      font-family: var(--font-serif); font-size: 26px; color: var(--jade);
-      margin-bottom: 6px; font-weight: 600;
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
     }
-    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink-soft); }
-    input[type=text], input[type=tel], input[type=email] {
-      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
-      border-radius: 8px; font-size: 15px; font-family: inherit; background: white;
-      transition: all .15s;
+    .logo-circle {
+      width: 44px;
+      height: 44px;
+      background: var(--jade);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    input:focus { outline: none; border-color: var(--jade); box-shadow: 0 0 0 3px var(--jade-pale); }
-
+    .logo-circle img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      filter: brightness(10);
+    }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 500; color: var(--ink) }
+    .logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+    .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 1.8rem; line-height: 1.5 }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px }
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      background: var(--cream);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    input[type="text"]:focus, input[type="tel"]:focus {
+      border-color: var(--jade);
+      background: white;
+    }
+    input.error { border-color: var(--red) }
     .btn {
-      width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: all .15s; font-family: inherit; border: none;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .btn-primary { background: var(--jade); color: white; }
-    .btn-primary:hover:not(:disabled) { background: var(--jade-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,74,58,0.18); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-jade {
+      background: var(--jade);
+      color: white;
+      margin-top: 1.2rem;
+    }
+    .btn-jade:hover { background: var(--jade-light) }
+    .btn-jade:disabled { opacity: 0.6; cursor: not-allowed }
     .btn-outline {
-      background: white; color: var(--ink); border: 1.5px solid var(--border);
+      background: white;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      margin-top: 0.8rem;
     }
-    .btn-outline:hover { border-color: var(--jade); background: var(--jade-pale); }
-    .btn + .btn { margin-top: 10px; }
-
-    .divider { text-align: center; margin: 18px 0; color: var(--muted); font-size: 13px; position: relative; }
-    .divider::before, .divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background: var(--border); }
-    .divider::before { left:0; } .divider::after { right:0; }
-
-    .phone-row { display: flex; gap: 8px; }
-    .phone-prefix {
-      display: flex; align-items: center; gap: 6px; padding: 11px 12px;
-      background: var(--cream-dark); border: 1.5px solid var(--border); border-radius: 8px;
-      font-size: 15px; min-width: 78px; font-weight: 500;
+    .btn-outline:hover { border-color: var(--jade); color: var(--jade) }
+    .btn-google {
+      background: white;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      margin-top: 1.2rem;
     }
-
-    .message { padding: 11px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; line-height: 1.4; }
-    .message.error { background: #fee; color: #c33; border: 1px solid #fcc; }
-    .message.success { background: #efe; color: #2d7a4d; border: 1px solid #cfc; }
-    .message.info { background: #eef4ff; color: #335; border: 1px solid #ccd9f0; }
-
-    .footer-link { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); }
-    .footer-link a { color: var(--jade); text-decoration: none; font-weight: 600; }
-    .back-link { display: inline-block; margin-top: 14px; color: var(--muted); text-decoration: none; font-size: 13px; }
-    .back-link:hover { color: var(--jade); }
-
-    .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
-              border-radius: 50%; border-top-color: white; animation: spin .8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .quick-return-card {
-      background: var(--jade-pale); border: 1px solid rgba(26,74,58,0.15);
-      border-radius: 12px; padding: 18px; margin-bottom: 16px; text-align: center;
+    .btn-google:hover { border-color: #4285f4; box-shadow: 0 0 0 3px rgba(66,133,244,0.12) }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 1.4rem 0;
+      color: var(--muted);
+      font-size: 12px;
     }
-    .quick-return-avatar {
-      width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 50%;
-      background: var(--jade); color: white; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; font-weight: 600;
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
     }
-    .quick-return-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
-    .quick-return-meta { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    .info-box {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 1rem;
+    }
+    .info-box.warn { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e }
+    .info-box.error { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b }
+    .info-box.success { background: #f0fdf4; border: 1px solid #86efac; color: #166534 }
+    .info-box.info { background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .spinner-jade {
+      border-color: rgba(26,74,58,0.25);
+      border-top-color: var(--jade);
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .step { display: none }
+    .step.active { display: block }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      margin-bottom: 1.2rem;
+      background: none;
+      border: none;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+    .back-link:hover { color: var(--jade) }
+    .flat-badge {
+      display: inline-block;
+      background: var(--jade);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .register-link {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 1.4rem;
+    }
+    .register-link a {
+      color: var(--jade);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .register-link a:hover { text-decoration: underline }
+    #msg91WidgetContainer { margin-top: 1rem }
+    #msg91WidgetContainer button { width: 100% }
+    .pending-card {
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .pending-icon { font-size: 3rem; margin-bottom: 1rem }
+    .pending-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .pending-sub { font-size: 14px; color: var(--muted); line-height: 1.6 }
   </style>
 </head>
 <body>
-  <nav>
-    <a class="nav-brand" href="/">
-      <span class="nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS"/></span>
-      <span>
-        <div class="nav-brand-name">PSOTS Society</div>
-        <div class="nav-brand-sub">PRESTIGE SONG OF THE SOUTH</div>
-      </span>
-    </a>
-  </nav>
-
-  <div class="container">
-    <div class="left-panel">
-      <h1>Your community,<br><span class="italic">organised.</span></h1>
-      <p>One sign-in for marketplace, lost & found, carpooling, announcements — and your neighbours.</p>
-      <div class="feature-grid">
-        <div class="feature"><div class="feature-icon">🏠</div><div><div class="feature-title">Verified residents only</div><div class="feature-desc">Your flat is your identity. No randoms.</div></div></div>
-        <div class="feature"><div class="feature-icon">🔍</div><div><div class="feature-title">Find anything, fast</div><div class="feature-desc">Contacts, rules, services — searchable.</div></div></div>
-        <div class="feature"><div class="feature-icon">📱</div><div><div class="feature-title">No app needed</div><div class="feature-desc">Works on any phone, instantly.</div></div></div>
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-circle">
+        <img src="/assets/psots-logo.png" alt="PSOTS" onerror="this.parentElement.innerHTML='🏢'">
       </div>
-      <div class="left-bottom">Trusted by residents across 14 towers</div>
+      <div>
+        <div class="logo-text">PSOTS Society</div>
+        <div class="logo-sub">Prestige Song of the South</div>
+      </div>
     </div>
 
-    <div class="right-panel">
-      <div class="card">
-        <div id="globalMessage"></div>
-
-        <!-- Step 0: Quick Return -->
-        <div id="step-quick-return" class="step"></div>
-
-        <!-- Step 1: Method choice -->
-        <div id="step-choose" class="step active">
-          <h2>Welcome back</h2>
-          <p class="subtitle">Sign in to your PSOTS Society account</p>
-
-          <button class="btn btn-outline" onclick="signInWithGoogle()">
-            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-            Continue with Google
-          </button>
-          <div id="oauthErrorBanner" style="display:none; margin-top:10px;"></div>
-
-          <div class="divider">OR</div>
-
-          <button class="btn btn-outline" onclick="showStep('step-sms')">
-            📱 Sign in with Phone OTP
-          </button>
-
-          <div class="footer-link" style="margin-top: 22px;">
-            New to PSOTS? <a href="/society/register.html">Register here</a>
-          </div>
-        </div>
-
-        <!-- Step 2: SMS OTP -->
-        <div id="step-sms" class="step">
-          <h2>Sign in with OTP</h2>
-          <p class="subtitle">We'll send a one-time code to your registered phone</p>
-
-          <div class="form-group">
-            <label>Phone Number</label>
-            <div class="phone-row">
-              <div class="phone-prefix"><span>🇮🇳</span><span>+91</span></div>
-              <input id="loginPhone" type="tel" placeholder="98XXX XXXXX" maxlength="10" inputmode="numeric" style="flex: 1;" />
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="startSmsLogin()" id="smsBtn">
-            Send OTP →
-          </button>
-
-          <a href="#" class="back-link" onclick="showStep('step-choose'); return false;">← Back to options</a>
-        </div>
+    <!-- STEP 1: Enter flat number -->
+    <div class="step active" id="stepFlat">
+      <h1>Welcome back</h1>
+      <p class="subtitle">Enter your flat number to continue.</p>
+      <div>
+        <label for="flatInput">Flat Number</label>
+        <input type="tel" id="flatInput" placeholder="e.g. 15167" maxlength="8" autocomplete="off" inputmode="numeric" />
       </div>
+      <div id="flatError"></div>
+      <button class="btn btn-jade" id="btnCheckFlat">
+        Continue
+      </button>
+      <div class="register-link">
+        New resident? <a href="/society/register.html">Register here</a>
+      </div>
+    </div>
+
+    <!-- STEP 2a: Choose login method (for approved residents) -->
+    <div class="step" id="stepLogin">
+      <button class="back-link" id="btnBackToFlat">← Back</button>
+      <div class="flat-badge" id="loginFlatBadge"></div>
+      <h1>Sign in</h1>
+      <p class="subtitle">Choose how you'd like to sign in to your account.</p>
+
+      <button class="btn btn-google" id="btnLoginGoogle">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem">Sign in with your registered phone number</p>
+      <div id="msg91WidgetContainer"></div>
+      <div id="loginMsg91Error"></div>
+
+      <div id="loginAlert"></div>
+    </div>
+
+    <!-- STEP 2b: Pending approval screen -->
+    <div class="step" id="stepPending">
+      <div class="pending-card">
+        <div class="pending-icon">⏳</div>
+        <div class="pending-title">Awaiting Approval</div>
+        <p class="pending-sub" id="pendingText">Your registration is being reviewed by the admin team. You'll receive an email once approved.</p>
+      </div>
+      <button class="back-link" style="margin-top:1.5rem;justify-content:center;width:100%;" id="btnBackFromPending">← Use a different flat number</button>
     </div>
   </div>
 
-  <!-- MSG91 OTP Widget -->
-  <script src="https://verify.msg91.com/otp-provider.js"></script>
-
-  <script type="module">
-    import { auth } from '../../js/core/firebase.js';
-    import {
-      signInWithPopup, GoogleAuthProvider, signInWithCustomToken,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import {
-      getStoredDeviceToken, storeDeviceToken, getDeviceFingerprint, getDeviceLabel, storeLoginMethod
-    } from '../../js/core/device.js';
-
-    const WORKER_URL = 'https://telegram.psots.in';
-    // Escape Worker/Firestore-supplied strings before interpolating into innerHTML.
-    const escapeHTML = (s) => String(s ?? '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    let MSG91_WIDGET_ID = '';
-    let MSG91_TOKEN_AUTH = '';
-    let deviceToken = null;
-
-    // Fetch MSG91 widget config from Worker (kept server-side as secrets)
-    (async () => {
-      try {
-        const cfg = await fetch(`${WORKER_URL}/auth/msg91-config`).then(r => r.json());
-        if (cfg.ok) { MSG91_WIDGET_ID = cfg.widgetId; MSG91_TOKEN_AUTH = cfg.tokenAuth; }
-      } catch (e) { console.warn('msg91 config fetch failed:', e); }
-    })();
-
-    function showMessage(text, type = 'error') {
-      const el = document.getElementById('globalMessage');
-      el.innerHTML = `<div class="message ${type}">${text}</div>`;
-      if (type === 'success' || type === 'info') setTimeout(() => { el.innerHTML = ''; }, 4500);
-    }
-    function clearMessage() { document.getElementById('globalMessage').innerHTML = ''; }
+  <script>
+    const WORKER = 'https://telegram.psots.in';
+    let _flatNumber = '';
+    let _msg91Loaded = false;
 
     function showStep(id) {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
-      clearMessage();
-    }
-    window.showStep = showStep;
-
-    // ── Quick Return ──
-    async function checkQuickReturn() {
-      const stored = getStoredDeviceToken();
-      if (!stored) return;
-      try {
-        const res = await fetch(`${WORKER_URL}/auth/resume-device?token=${encodeURIComponent(stored)}`);
-        const data = await res.json();
-        if (data.ok && data.uid) {
-          deviceToken = stored;
-          renderQuickReturn(data);
-        } else {
-          localStorage.removeItem('psots_device_token');
-        }
-      } catch (e) { console.warn('quick-return failed:', e); }
     }
 
-    function renderQuickReturn(data) {
-      const initials = (data.name || 'R').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-      const el = document.getElementById('step-quick-return');
-      el.innerHTML = `
-        <div class="quick-return-card">
-          <div class="quick-return-avatar">${escapeHTML(initials)}</div>
-          <div class="quick-return-name">Welcome back, ${escapeHTML(data.name || 'Resident')}!</div>
-          <div class="quick-return-meta">Flat ${escapeHTML(data.flatNumber || '—')} · ${escapeHTML(data.deviceLabel || 'this device')}</div>
-          <button class="btn btn-primary" onclick="quickContinue()">One-tap continue</button>
-          <a href="#" class="back-link" onclick="switchAccount(); return false;">Not you? Switch account</a>
-        </div>
-      `;
-      showStep('step-quick-return');
+    function setError(el, msg) {
+      el.innerHTML = msg ? `<div class="info-box error">${msg}</div>` : '';
     }
 
-    window.quickContinue = async function() {
-      if (auth.currentUser) {
-        window.location.href = '/society/';
-      } else {
-        // No live Firebase session — fall back to method choice
-        showStep('step-choose');
-        showMessage('Please sign in again to continue', 'info');
+    // ── Step 1: flat number lookup ──
+    const flatInput = document.getElementById('flatInput');
+    const btnCheckFlat = document.getElementById('btnCheckFlat');
+    const flatError = document.getElementById('flatError');
+
+    flatInput.addEventListener('keydown', e => { if (e.key === 'Enter') btnCheckFlat.click() });
+    flatInput.addEventListener('input', () => { flatInput.classList.remove('error'); setError(flatError, '') });
+
+    btnCheckFlat.addEventListener('click', async () => {
+      const flat = flatInput.value.trim().replace(/\D/g, '');
+      if (!flat || flat.length < 4) {
+        flatInput.classList.add('error');
+        setError(flatError, 'Please enter a valid flat number (e.g. 15167).');
+        return;
       }
-    };
+      btnCheckFlat.disabled = true;
+      btnCheckFlat.innerHTML = '<span class="spinner"></span> Checking…';
 
-    window.switchAccount = function() {
-      localStorage.removeItem('psots_device_token');
-      deviceToken = null;
-      document.getElementById('step-quick-return').innerHTML = '';
-      showStep('step-choose');
-    };
-
-    // ── Device registration after successful login ──
-    async function registerDevice(loginMethod, residentInfo) {
       try {
-        const token = crypto.randomUUID();
-        const body = {
-          deviceToken: token,
-          deviceLabel: getDeviceLabel(),
-          fingerprint: getDeviceFingerprint(),
-          loginMethod,
-          flatNumber: residentInfo?.flatNumber || null,
-          uid: residentInfo?.residentId || residentInfo?.uid || null,
-        };
-        await fetch(`${WORKER_URL}/device/register`, {
+        const res = await fetch(`${WORKER}/flat/check`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        storeDeviceToken(token);
-        storeLoginMethod(loginMethod);
-      } catch (e) { console.warn('device register failed:', e); }
-    }
-
-    // ── Google Sign-In (Direct OAuth via Worker, no Firebase) ──
-    // Flow: browser → Worker /auth/google/start → Google → Worker /auth/google/callback
-    //       → callback sets HttpOnly cookie on .psots.in domain → redirects to /society/
-    window.signInWithGoogle = function() {
-      const next = encodeURIComponent('/society/');
-      window.location.href = `${WORKER_URL}/auth/google/start?next=${next}`;
-    };
-
-    // Surface errors from the OAuth callback redirect (?oauth_error=...)
-    (function showOAuthErrorIfAny() {
-      const params = new URLSearchParams(window.location.search);
-      const err = params.get('oauth_error');
-      if (!err) return;
-      const status = params.get('status') || '';
-      const messages = {
-        'invalid_state': 'Sign-in session expired. Please try again.',
-        'token_exchange_failed': 'Google rejected the sign-in. Please try again.',
-        'invalid_token': 'Could not verify Google identity. Please try again.',
-        'email_unverified': 'Your Google email is not verified. Please verify it with Google first.',
-        'no_id_token': 'Google did not return an identity token.',
-        'resident_not_found': 'Account record missing. Contact admin.',
-        'not_approved': `Your account is ${status || 'pending'} — admin approval needed before sign-in.`,
-        'access_denied': 'You denied access. Sign-in cancelled.'
-      };
-      const banner = document.getElementById('oauthErrorBanner');
-      if (banner) {
-        banner.style.display = 'block';
-        banner.innerHTML = `<div class="message error">${escapeHTML(messages[err] || `Sign-in failed: ${err}`)}</div>`;
-      }
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, '', cleanUrl);
-    })();
-
-    // ── SMS OTP Sign-In (MSG91 widget) ──
-    window.startSmsLogin = function() {
-      let phone = document.getElementById('loginPhone').value.trim();
-      if (!phone || !/^\d{10}$/.test(phone)) return showMessage('Enter a valid 10-digit phone number');
-      if (!MSG91_WIDGET_ID || !MSG91_TOKEN_AUTH) return showMessage('OTP service not configured. Contact admin.');
-      const phoneE164 = `91${phone}`;
-      const btn = document.getElementById('smsBtn');
-      btn.disabled = true; btn.innerHTML = '<span class="loader"></span> Sending...';
-
-      const widgetConfig = {
-        widgetId: MSG91_WIDGET_ID,
-        tokenAuth: MSG91_TOKEN_AUTH,
-        identifier: phoneE164,
-        exposeMethods: false,
-        success: async (data) => {
-          btn.disabled = false; btn.innerHTML = 'Send OTP →';
-          showMessage('Verifying...', 'info');
-          try {
-            const res = await fetch(`${WORKER_URL}/auth/sms-login`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ accessToken: data.message, phone: phoneE164 })
-            });
-            const loginData = await res.json();
-
-            if (loginData.ok && loginData.resident) {
-              if (loginData.customToken) await signInWithCustomToken(auth, loginData.customToken);
-              if (loginData.sessionId) try { localStorage.setItem('psots_session', loginData.sessionId); } catch (_) {}
-              await registerDevice('sms', loginData.resident);
-              showMessage('Welcome back!', 'success');
-              setTimeout(() => { window.location.href = '/society/'; }, 800);
-            } else if (loginData.error === 'not_registered') {
-              showMessage(`No account found for +91 ${escapeHTML(phone)}. <a href="/society/register.html">Register here →</a>`, 'info');
-            } else if (loginData.error === 'not_approved') {
-              showMessage('Your account is pending admin approval.', 'info');
-            } else {
-              showMessage(escapeHTML(loginData.message || loginData.detail || loginData.error || 'OTP login failed'));
-            }
-          } catch (err) {
-            showMessage('Error: ' + escapeHTML(err.message));
-          }
-        },
-        failure: (error) => {
-          btn.disabled = false; btn.innerHTML = 'Send OTP →';
-          showMessage('OTP failed: ' + escapeHTML(error?.message || 'try again'));
-        }
-      };
-      if (typeof initSendOTP !== 'function') {
-        btn.disabled = false; btn.innerHTML = 'Send OTP →';
-        return showMessage('OTP service not loaded. Refresh the page.');
-      }
-      initSendOTP(widgetConfig);
-    };
-
-    // ── Boot ──
-    checkQuickReturn();
-
-    // Pre-fill phone from URL
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('phone')) document.getElementById('loginPhone').value = params.get('phone');
-
-    // If user is already authed (e.g. arrived from another tab), bounce to dashboard
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const idToken = await user.getIdToken();
-        const res = await fetch(`${WORKER_URL}/auth/unified-login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-          body: JSON.stringify({ type: 'google', identifier: user.email })
+          body: JSON.stringify({ flatNumber: flat })
         });
         const data = await res.json();
-        if (data.ok) window.location.href = '/society/';
-      } catch (_) {}
+
+        if (!data.exists || data.status === 'empty') {
+          // No resident registered — redirect to register
+          window.location.href = `/society/register.html?flat=${encodeURIComponent(flat)}`;
+          return;
+        }
+
+        if (data.status === 'pending') {
+          _flatNumber = flat;
+          document.getElementById('pendingText').textContent =
+            `Flat ${flat} — your registration is being reviewed. You'll receive an email once approved.`;
+          showStep('stepPending');
+          return;
+        }
+
+        if (data.status === 'occupied') {
+          _flatNumber = flat;
+          document.getElementById('loginFlatBadge').textContent = `Flat ${flat}`;
+          showStep('stepLogin');
+          loadMsg91Widget();
+          return;
+        }
+
+        // Unknown status — treat as not found
+        window.location.href = `/society/register.html?flat=${encodeURIComponent(flat)}`;
+      } catch (e) {
+        setError(flatError, 'Could not check flat number. Please try again.');
+      } finally {
+        btnCheckFlat.disabled = false;
+        btnCheckFlat.innerHTML = 'Continue';
+      }
     });
+
+    // ── Back buttons ──
+    document.getElementById('btnBackToFlat').addEventListener('click', () => {
+      showStep('stepFlat');
+      setError(document.getElementById('loginAlert'), '');
+    });
+    document.getElementById('btnBackFromPending').addEventListener('click', () => showStep('stepFlat'));
+
+    // ── Google OAuth login ──
+    document.getElementById('btnLoginGoogle').addEventListener('click', () => {
+      const next = encodeURIComponent('/society/');
+      window.location.href = `${WORKER}/auth/google/start?next=${next}`;
+    });
+
+    // ── MSG91 Widget for SMS OTP login ──
+    async function loadMsg91Widget() {
+      if (_msg91Loaded) return;
+      try {
+        const res = await fetch(`${WORKER}/auth/msg91-config`);
+        const cfg = await res.json();
+        if (!cfg.ok || !cfg.widgetId || !cfg.tokenAuth) {
+          document.getElementById('loginMsg91Error').innerHTML =
+            '<div class="info-box warn">SMS login is temporarily unavailable.</div>';
+          return;
+        }
+
+        // Load MSG91 script dynamically
+        const script = document.createElement('script');
+        script.src = 'https://verify.msg91.com/otp-provider.js';
+        script.onload = () => {
+          if (typeof initSendOTP !== 'function') return;
+          initSendOTP(
+            {
+              widgetId: cfg.widgetId,
+              tokenAuth: cfg.tokenAuth,
+              identifier: '',
+              exposeMethods: true
+            },
+            (data) => handleMsg91LoginSuccess(data),
+            (err) => {
+              document.getElementById('loginMsg91Error').innerHTML =
+                `<div class="info-box error">OTP verification failed. Please try again.</div>`;
+              console.error('MSG91 error:', err);
+            },
+            'msg91WidgetContainer'
+          );
+          _msg91Loaded = true;
+        };
+        document.head.appendChild(script);
+      } catch (e) {
+        document.getElementById('loginMsg91Error').innerHTML =
+          '<div class="info-box warn">SMS login unavailable. Please use Google.</div>';
+      }
+    }
+
+    async function handleMsg91LoginSuccess(data) {
+      const loginAlert = document.getElementById('loginAlert');
+      loginAlert.innerHTML = '<div class="info-box info">Verifying… please wait.</div>';
+      try {
+        const res = await fetch(`${WORKER}/auth/sms-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            accessToken: data.access_token || data.accessToken,
+            phone: data.mobile || data.phone || ''
+          })
+        });
+        const result = await res.json();
+        if (result.ok) {
+          loginAlert.innerHTML = '<div class="info-box success">Signed in! Redirecting…</div>';
+          setTimeout(() => { window.location.href = '/society/' }, 500);
+        } else if (result.error === 'not_approved') {
+          loginAlert.innerHTML = `<div class="info-box warn">Your account is pending approval. You'll be notified by email once approved.</div>`;
+        } else if (result.error === 'not_registered') {
+          loginAlert.innerHTML = `<div class="info-box warn">This phone number is not registered. <a href="/society/register.html?flat=${encodeURIComponent(_flatNumber)}" style="color:var(--jade);font-weight:600">Register here</a></div>`;
+        } else {
+          loginAlert.innerHTML = `<div class="info-box error">Sign in failed. Please try again.</div>`;
+        }
+      } catch (e) {
+        loginAlert.innerHTML = '<div class="info-box error">Network error. Please try again.</div>';
+      }
+    }
+
+    // Auto-focus flat input
+    flatInput.focus();
+
+    // Pre-fill flat from URL param (e.g. coming back from register)
+    const urlFlat = new URLSearchParams(location.search).get('flat');
+    if (urlFlat) flatInput.value = urlFlat;
   </script>
 </body>
 </html>

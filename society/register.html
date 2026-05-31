@@ -1,522 +1,1116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="/assets/psots-logo.png"/>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register · PSOTS Society</title>
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/base.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/assets/psots-logo.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSOTS Society — Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    :root {
+      --jade: #1a4a3a;
+      --jade-light: #2d6b57;
+      --jade-dark: #102c22;
+      --gold: #b8882a;
+      --gold-light: #d4a84b;
+      --cream: #faf6f0;
+      --cream-dark: #f0e8db;
+      --surface: #fffcf7;
+      --ink: #1a1208;
+      --muted: #8a7a6a;
+      --border: rgba(160, 130, 90, 0.22);
+      --red: #c0392b;
+      --green: #16a34a;
+    }
+    html { height: 100% }
     body {
-      background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
-      font-family: 'Nunito Sans', system-ui, sans-serif;
-      min-height: 100vh;
-      padding: 32px 16px;
+      font-family: 'Nunito Sans', sans-serif;
+      background: var(--cream);
       color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem 1.2rem 4rem;
     }
-    .page { max-width: 580px; margin: 0 auto; background: white; border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(26,74,58,0.12); padding: 40px 32px; }
-    .header { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid var(--gold); }
-    .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--jade); margin-bottom: 6px; }
-    .header p { color: var(--muted); font-size: 14px; }
-
-    .stepper { display:flex; justify-content:center; gap:8px; margin-bottom:24px; }
-    .stepper .dot { width:8px; height:8px; border-radius:50%; background: var(--border); }
-    .stepper .dot.active { background: var(--jade); width:24px; border-radius:4px; }
-    .stepper .dot.done { background: var(--gold); }
-
-    .section { display: none; }
-    .section.visible { display: block; animation: slideIn .25s ease-out; }
-    @keyframes slideIn { from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
-
-    .form-group { margin-bottom: 18px; }
-    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: var(--ink); }
-    input, select {
-      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
-      border-radius: 8px; font-size: 15px; font-family: inherit; transition: all .15s;
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.8rem 2.4rem;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 4px 40px rgba(26, 74, 58, 0.08);
+      margin-top: 1rem;
     }
-    input:focus, select:focus { outline: none; border-color: var(--jade); box-shadow: 0 0 0 3px rgba(26,74,58,0.08); }
-
-    .btn { width:100%; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600;
-           cursor:pointer; transition: all .15s; font-family: inherit; }
-    .btn-primary { background: var(--jade); color: white; }
-    .btn-primary:hover:not(:disabled) { background: var(--jade-light, #2d6b54); transform: translateY(-1px); }
-    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-google { background: white; color: #444; border: 1.5px solid var(--border); display:flex; align-items:center; justify-content:center; gap:10px; }
-    .btn-google:hover { background: #f8f8f8; }
-    .btn-secondary { background: transparent; color: var(--jade); border: 1.5px solid var(--jade); }
-
-    .divider { text-align:center; margin: 16px 0; color: var(--muted); font-size: 13px; position:relative; }
-    .divider::before, .divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background: var(--border); }
-    .divider::before { left:0; } .divider::after { right:0; }
-
-    .message { padding: 11px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; line-height: 1.4; }
-    .message.error { background: #fee; color: #c33; border: 1px solid #fcc; }
-    .message.success { background: #efe; color: #2d7a4d; border: 1px solid #cfc; }
-    .message.info { background: #eef4ff; color: #335; border: 1px solid #ccd9f0; }
-
-    .upload-area {
-      border: 2px dashed var(--border); border-radius: 10px; padding: 32px 16px;
-      text-align: center; background: var(--cream); cursor: pointer; transition: all .15s;
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.8rem;
     }
-    .upload-area:hover { border-color: var(--jade); background: rgba(26,74,58,0.04); }
-    .upload-area.has-file { border-style: solid; border-color: var(--jade); background: rgba(26,74,58,0.04); }
-
-    .phone-input-group { display:flex; gap:8px; }
-    .phone-prefix {
-      display:flex; align-items:center; gap:6px; padding:11px 14px;
-      background: var(--cream-dark, #f0e8db); border:1.5px solid var(--border); border-radius:8px; font-size:15px; min-width:78px;
+    .logo-circle {
+      width: 44px;
+      height: 44px;
+      background: var(--jade);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-
-    .extracted-card {
-      background: rgba(26,74,58,0.05); border: 1px solid rgba(26,74,58,0.15);
-      border-radius: 8px; padding: 12px 14px; margin: 12px 0; font-size: 13px;
+    .logo-circle img { width: 28px; height: 28px; object-fit: contain; filter: brightness(10) }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 500; color: var(--ink) }
+    .logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px }
+    /* Progress steps */
+    .progress {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
     }
-    .extracted-card .row { display:flex; justify-content:space-between; padding:3px 0; }
-    .extracted-card .label { color: var(--muted); }
-    .extracted-card .value { font-weight: 600; }
-
-    .footer-link { text-align:center; margin-top:18px; font-size:13px; color: var(--muted); }
-    .footer-link a { color: var(--jade); text-decoration:none; font-weight: 600; }
-
-    .loader { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3);
-              border-radius:50%; border-top-color:white; animation:spin .8s linear infinite; margin-right:6px; vertical-align:middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .help-tip {
-      background: rgba(184,136,42,0.08); border-left: 3px solid var(--gold);
-      padding: 10px 12px; margin: 8px 0 14px; font-size: 13px; color: var(--ink-soft, #3d2f1e); border-radius: 4px;
+    .prog-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .prog-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--cream-dark);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.3s;
+    }
+    .prog-dot.active { background: var(--jade); border-color: var(--jade); color: white }
+    .prog-dot.done { background: var(--green); border-color: var(--green); color: white }
+    .prog-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-align: center; line-height: 1.3 }
+    .prog-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin: 0 4px;
+      margin-bottom: 1.4rem;
+      transition: background 0.3s;
+    }
+    .prog-line.done { background: var(--green) }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+    .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 1.8rem; line-height: 1.5 }
+    .field { margin-bottom: 1rem }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px }
+    input[type="text"], input[type="tel"], input[type="email"], select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 15px;
+      background: var(--cream);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus, select:focus { border-color: var(--jade); background: white }
+    input.error { border-color: var(--red) }
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-jade { background: var(--jade); color: white; margin-top: 1.4rem }
+    .btn-jade:hover { background: var(--jade-light) }
+    .btn-jade:disabled { opacity: 0.55; cursor: not-allowed }
+    .btn-outline {
+      background: white;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      margin-top: 0.8rem;
+    }
+    .btn-outline:hover { border-color: var(--jade); color: var(--jade) }
+    .btn-google {
+      background: white;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      margin-top: 1.2rem;
+    }
+    .btn-google:hover { border-color: #4285f4; box-shadow: 0 0 0 3px rgba(66,133,244,0.12) }
+    .btn-google:disabled { opacity: 0.55; cursor: not-allowed }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 1.2rem 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border) }
+    .info-box {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 0.8rem;
+    }
+    .info-box.warn { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e }
+    .info-box.error { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b }
+    .info-box.success { background: #f0fdf4; border: 1px solid #86efac; color: #166534 }
+    .info-box.info { background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .spinner-jade {
+      border-color: rgba(26,74,58,0.2);
+      border-top-color: var(--jade);
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .step { display: none }
+    .step.active { display: block }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      margin-bottom: 1rem;
+      background: none;
+      border: none;
+      font-family: 'Nunito Sans', sans-serif;
+      padding: 0;
+    }
+    .back-link:hover { color: var(--jade) }
+    /* Document upload */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--cream);
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--jade);
+      background: rgba(26,74,58,0.04);
+    }
+    .upload-zone.has-file {
+      border-color: var(--green);
+      background: rgba(22,163,74,0.04);
+    }
+    .upload-icon { font-size: 2.5rem; margin-bottom: 0.6rem }
+    .upload-label { font-size: 14px; color: var(--muted); line-height: 1.5 }
+    .upload-label strong { color: var(--jade) }
+    input[type="file"] { display: none }
+    /* Radio group */
+    .radio-row { display: flex; gap: 0.8rem; flex-wrap: wrap }
+    .radio-card {
+      flex: 1;
+      min-width: 100px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .radio-card:hover { border-color: var(--jade) }
+    .radio-card input { display: none }
+    .radio-card.selected { border-color: var(--jade); background: rgba(26,74,58,0.05) }
+    .radio-card-icon { font-size: 1.4rem; margin-bottom: 4px }
+    .radio-card-label { font-size: 12px; font-weight: 600; color: var(--ink) }
+    .radio-card-sub { font-size: 11px; color: var(--muted); margin-top: 2px }
+    /* Auth method step */
+    .auth-method {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .auth-method:hover { border-color: var(--jade) }
+    .auth-method.selected { border-color: var(--jade); background: rgba(26,74,58,0.04) }
+    .auth-method-title { font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 2px }
+    .auth-method-sub { font-size: 12px; color: var(--muted) }
+    /* Final success */
+    .success-card { text-align: center; padding: 1rem 0 }
+    .success-icon { font-size: 3.5rem; margin-bottom: 1rem }
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .success-sub { font-size: 14px; color: var(--muted); line-height: 1.6 }
+    .login-link { text-align: center; font-size: 13px; color: var(--muted); margin-top: 1.4rem }
+    .login-link a { color: var(--jade); font-weight: 600; text-decoration: none }
+    .login-link a:hover { text-decoration: underline }
+    /* Phone input with country code */
+    .phone-row { display: flex; gap: 8px }
+    .phone-cc {
+      width: 80px;
+      flex-shrink: 0;
+      padding: 12px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--cream);
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      text-align: center;
+    }
+    /* OTP inline */
+    .otp-box {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-top: 0.8rem;
+      background: var(--cream);
+    }
+    .otp-label { font-size: 13px; color: var(--muted); margin-bottom: 0.6rem }
+    .otp-input {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 0.8rem;
+    }
+    .otp-input input {
+      width: 40px;
+      height: 44px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 0;
+      letter-spacing: 0;
     }
   </style>
 </head>
 <body>
-
-<div class="page">
-  <div class="header">
-    <h1>Join PSOTS</h1>
-    <p>Verify your flat, then choose how to sign in</p>
-  </div>
-
-  <div class="stepper">
-    <div id="dot1" class="dot active"></div>
-    <div id="dot2" class="dot"></div>
-    <div id="dot3" class="dot"></div>
-  </div>
-
-  <div id="globalMessage"></div>
-
-  <!-- STEP 1: Flat Number + Name -->
-  <div id="step-flat" class="section visible">
-    <div class="form-group">
-      <label>Your Flat Number *</label>
-      <input id="flatNumber" type="text" placeholder="e.g., 15167" maxlength="5" inputmode="numeric" />
-    </div>
-    <div class="form-group">
-      <label>Your Full Name *</label>
-      <input id="residentName" type="text" placeholder="As it appears on documents" />
-      <div class="help-tip">We'll match this against the Owner or "Paid By" name on your maintenance receipt.</div>
-    </div>
-    <button class="btn btn-primary" onclick="goToDocument()">Continue →</button>
-  </div>
-
-  <!-- STEP 2: Document Upload -->
-  <div id="step-doc" class="section">
-    <p style="margin-bottom: 14px; color: var(--muted); font-size: 14px;">
-      Flat <strong id="docFlatLabel"></strong> · <span id="docNameLabel"></span>
-    </p>
-
-    <label>Upload Ownership Proof *</label>
-    <div class="help-tip">
-      <strong>Accepted:</strong> PSOTS Maintenance Invoice or MyGate Receipt (PDF/JPG/PNG, max 5MB)<br>
-      <strong>Where:</strong> MyGate app → Community → Society Dues → Download receipt
-    </div>
-    <input type="file" id="docInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadDocument()" />
-    <div id="uploadArea" class="upload-area" onclick="document.getElementById('docInput').click()">
-      <div style="font-size: 42px; margin-bottom: 8px;">📄</div>
-      <div style="font-size: 15px; font-weight: 600; margin-bottom: 2px;" id="uploadTitle">Choose Document</div>
-      <div style="font-size: 13px; color: var(--muted);" id="uploadSub">Click to upload</div>
-    </div>
-
-    <div id="verificationStatus"></div>
-
-    <button class="btn btn-secondary" style="margin-top: 12px;" onclick="showStep('step-flat')">← Back</button>
-  </div>
-
-  <!-- STEP 3: Choose auth + complete -->
-  <div id="step-auth" class="section">
-    <div class="message success">
-      <strong>✓ Document verified.</strong> Now choose how to sign in.
-    </div>
-
-    <div id="extractedSummary"></div>
-
-    <button class="btn btn-google" onclick="signUpWithGoogle()">
-      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
-
-    <div class="divider">OR</div>
-
-    <div class="form-group">
-      <label>Phone Number *</label>
-      <div class="phone-input-group">
-        <div class="phone-prefix"><span>🇮🇳</span><span>+91</span></div>
-        <input id="phoneNumber" type="tel" placeholder="98XXX XXXXX" maxlength="10" inputmode="numeric" style="flex: 1;" />
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-circle">
+        <img src="/assets/psots-logo.png" alt="PSOTS" onerror="this.parentElement.innerHTML='🏢'">
+      </div>
+      <div>
+        <div class="logo-text">PSOTS Society</div>
+        <div class="logo-sub">New Resident Registration</div>
       </div>
     </div>
-    <div class="form-group">
-      <label>Email (optional)</label>
-      <input id="emailField" type="email" placeholder="for receipts and notifications" />
+
+    <!-- Progress indicator -->
+    <div class="progress" id="progressBar">
+      <div class="prog-step">
+        <div class="prog-dot active" id="dot1">1</div>
+        <div class="prog-label">Identity</div>
+      </div>
+      <div class="prog-line" id="line1"></div>
+      <div class="prog-step">
+        <div class="prog-dot" id="dot2">2</div>
+        <div class="prog-label">Document</div>
+      </div>
+      <div class="prog-line" id="line2"></div>
+      <div class="prog-step">
+        <div class="prog-dot" id="dot3">3</div>
+        <div class="prog-label">Verify</div>
+      </div>
     </div>
 
-    <button class="btn btn-primary" onclick="signUpWithSms()">
-      📱 Verify Phone & Create Account
-    </button>
+    <!-- STEP 1: Name, flat number, resident type -->
+    <div class="step active" id="step1">
+      <h1>Tell us about you</h1>
+      <p class="subtitle">Enter your details to get started with your PSOTS Society account.</p>
 
-    <button class="btn btn-secondary" style="margin-top: 12px;" onclick="showStep('step-doc')">← Back</button>
+      <div class="field">
+        <label for="s1Name">Full Name *</label>
+        <input type="text" id="s1Name" placeholder="As on your ID / agreement" autocomplete="name" />
+      </div>
+
+      <div class="field">
+        <label for="s1Flat">Flat Number *</label>
+        <input type="tel" id="s1Flat" placeholder="e.g. 15167" maxlength="8" inputmode="numeric" />
+      </div>
+
+      <div class="field">
+        <label>I am a… *</label>
+        <div class="radio-row" id="residentTypeGroup">
+          <label class="radio-card selected" id="rc_owner">
+            <input type="radio" name="residentType" value="owner" checked>
+            <div class="radio-card-icon">🏠</div>
+            <div class="radio-card-label">Owner</div>
+            <div class="radio-card-sub">Primary resident</div>
+          </label>
+          <label class="radio-card" id="rc_tenant">
+            <input type="radio" name="residentType" value="tenant">
+            <div class="radio-card-icon">🔑</div>
+            <div class="radio-card-label">Tenant</div>
+            <div class="radio-card-sub">Renting the flat</div>
+          </label>
+          <label class="radio-card" id="rc_family">
+            <input type="radio" name="residentType" value="family">
+            <div class="radio-card-icon">👨‍👩‍👧</div>
+            <div class="radio-card-label">Family</div>
+            <div class="radio-card-sub">Owner's family</div>
+          </label>
+        </div>
+      </div>
+
+      <div id="s1Alert"></div>
+      <button class="btn btn-jade" id="btnStep1Next">Continue →</button>
+
+      <div class="login-link">Already registered? <a href="/society/login.html">Sign in here</a></div>
+    </div>
+
+    <!-- STEP 2: Document upload & verification -->
+    <div class="step" id="step2">
+      <button class="back-link" id="btnBack1">← Back</button>
+      <h1>Verify your residence</h1>
+      <p class="subtitle" id="s2Subtitle">Upload your maintenance invoice or ownership document for flat <strong id="s2FlatNum"></strong>.</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">📄</div>
+        <div class="upload-label">
+          <strong>Click to upload</strong> or drag and drop<br>
+          JPG, PNG, PDF up to 5 MB
+        </div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,application/pdf" />
+      </div>
+      <div id="s2FileInfo"></div>
+
+      <div id="s2Alert"></div>
+      <button class="btn btn-jade" id="btnVerifyDoc" style="display:none">
+        Verify Document
+      </button>
+    </div>
+
+    <!-- STEP 2b: Manual review forwarded to admin -->
+    <div class="step" id="stepManualReview">
+      <div class="success-card">
+        <div class="success-icon">📋</div>
+        <div class="success-title">Sent for Review</div>
+        <p class="success-sub">
+          We couldn't automatically verify your document for flat <strong id="mrFlatNum"></strong>.<br><br>
+          Your details have been forwarded to the admin team for manual verification. You'll receive an email once your account is approved — usually within 24 hours.
+        </p>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem">
+        <a href="/society/login.html" style="color:var(--jade);font-size:14px;font-weight:600;text-decoration:none">← Back to Sign In</a>
+      </div>
+    </div>
+
+    <!-- STEP 3: Dual auth binding -->
+    <div class="step" id="step3">
+      <button class="back-link" id="btnBack2">← Back</button>
+      <h1>Secure your account</h1>
+      <p class="subtitle">Choose your primary login method. You'll also verify a second factor.</p>
+
+      <div id="authMethodGroup">
+        <div class="auth-method selected" id="am_google" data-method="google">
+          <div class="auth-method-title">🔵 Google Account</div>
+          <div class="auth-method-sub">Sign in with Google + verify phone via SMS OTP</div>
+        </div>
+        <div class="auth-method" id="am_sms" data-method="sms">
+          <div class="auth-method-title">📱 Phone (SMS OTP)</div>
+          <div class="auth-method-sub">Sign in with phone + verify with email OTP</div>
+        </div>
+      </div>
+
+      <!-- Google primary: show SMS widget for binding -->
+      <div id="googlePrimary">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 1 — Sign in with Google to link your account</p>
+        <button class="btn btn-google" id="btnGoogleAuth">
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 2 — Verify your phone number (SMS OTP)</p>
+        <div id="googleSmsWidget" style="opacity:0.4;pointer-events:none"></div>
+        <div id="googleSmsStatus"></div>
+      </div>
+
+      <!-- SMS primary: show email field for binding -->
+      <div id="smsPrimary" style="display:none">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 1 — Verify your phone number (SMS OTP)</p>
+        <div id="smsPrimaryWidget"></div>
+        <div id="smsPrimaryStatus"></div>
+
+        <div id="emailBindSection" style="display:none">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 2 — Enter your email address (mandatory)</p>
+          <div class="field">
+            <label for="bindEmail">Email Address *</label>
+            <input type="email" id="bindEmail" placeholder="your@email.com" autocomplete="email" />
+          </div>
+          <button class="btn btn-jade" id="btnSendEmailOtp" style="margin-top:0.8rem">Send Email OTP</button>
+          <div id="emailOtpSection" style="display:none;margin-top:1rem">
+            <div class="otp-box">
+              <div class="otp-label">Enter the 6-digit code sent to your email</div>
+              <div class="otp-input">
+                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
+                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
+                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
+                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
+                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
+                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
+              </div>
+              <button class="btn btn-jade" id="btnVerifyEmailOtp" style="margin-top:0">Verify Email & Complete</button>
+            </div>
+          </div>
+          <div id="emailBindAlert"></div>
+        </div>
+      </div>
+
+      <div id="s3Alert"></div>
+    </div>
+
+    <!-- Final: success -->
+    <div class="step" id="stepDone">
+      <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Registration Submitted!</div>
+        <p class="success-sub">
+          Welcome to PSOTS Society! Your registration for flat <strong id="doneFlatNum"></strong> is pending admin approval.<br><br>
+          You'll receive an email once your account is approved. This usually takes up to 24 hours.
+        </p>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem">
+        <a href="/society/login.html" style="color:var(--jade);font-size:14px;font-weight:600;text-decoration:none">← Back to Sign In</a>
+      </div>
+    </div>
   </div>
 
-  <div class="footer-link">
-    Already registered? <a href="/society/login.html">Sign in</a>
-  </div>
-</div>
+  <script>
+    const WORKER = 'https://telegram.psots.in';
 
-<!-- MSG91 OTP Widget -->
-<script src="https://verify.msg91.com/otp-provider.js"></script>
+    // ── State ──
+    const S = {
+      name: '',
+      flatNumber: '',
+      residentType: 'owner',
+      verificationToken: null,
+      verificationResult: null,
+      smsVerifyToken: null,
+      verifiedPhone: '',
+      googleLinked: false,
+      authMethod: 'google'
+    };
 
-<script type="module">
-  import { auth } from '/js/core/firebase.js';
-  import {
-    signInWithPopup, GoogleAuthProvider, signInWithCustomToken
-  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-  const WORKER_URL = 'https://telegram.psots.in';
-  // Escape user/Worker-supplied strings before interpolating into innerHTML.
-  // OCR output and Firestore values are NOT trusted.
-  const escapeHTML = (s) => String(s ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  let MSG91_WIDGET_ID = '';
-  let MSG91_TOKEN_AUTH = '';
-  (async () => {
-    try {
-      const cfg = await fetch(`${WORKER_URL}/auth/msg91-config`).then(r => r.json());
-      if (cfg.ok) { MSG91_WIDGET_ID = cfg.widgetId; MSG91_TOKEN_AUTH = cfg.tokenAuth; }
-    } catch (e) { console.warn('msg91 config fetch failed:', e); }
-  })();
-
-  const state = {
-    flatNumber: null,
-    residentName: null,
-    verificationToken: null,
-    smsVerifyToken: null,
-    verifiedPhone: null,
-    extracted: null
-  };
-
-  // Pre-fill flat from URL
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('flat')) document.getElementById('flatNumber').value = params.get('flat');
-
-  function showMessage(text, type='error') {
-    const el = document.getElementById('globalMessage');
-    el.innerHTML = `<div class="message ${type}">${text}</div>`;
-    el.scrollIntoView({ behavior:'smooth', block:'center' });
-    if (type === 'success' || type === 'info') {
-      setTimeout(() => { el.innerHTML = ''; }, 4500);
+    // ── Helpers ──
+    function showStep(id) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
-  }
-  function clearMessage() { document.getElementById('globalMessage').innerHTML = ''; }
 
-  function showStep(id) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
-    document.getElementById(id).classList.add('visible');
-    const stepIndex = { 'step-flat': 1, 'step-doc': 2, 'step-auth': 3 }[id] || 1;
-    ['dot1','dot2','dot3'].forEach((d, i) => {
-      const dot = document.getElementById(d);
-      dot.classList.remove('active','done');
-      if (i + 1 < stepIndex) dot.classList.add('done');
-      else if (i + 1 === stepIndex) dot.classList.add('active');
+    function setAlert(el, msg, type = 'error') {
+      document.getElementById(el).innerHTML = msg
+        ? `<div class="info-box ${type}">${msg}</div>` : '';
+    }
+
+    function updateProgress(active) {
+      const dots = [null, 'dot1', 'dot2', 'dot3'];
+      const lines = [null, null, 'line1', 'line2'];
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(dots[i]);
+        if (i < active) { dot.classList.add('done'); dot.innerHTML = '✓' }
+        else if (i === active) { dot.classList.add('active'); dot.classList.remove('done') }
+        else { dot.classList.remove('active', 'done'); dot.innerHTML = i }
+        if (lines[i]) {
+          const line = document.getElementById(lines[i]);
+          line.classList.toggle('done', i < active);
+        }
+      }
+    }
+
+    function escHtml(str) {
+      return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ── Pre-fill flat from URL ──
+    const urlFlat = new URLSearchParams(location.search).get('flat');
+    if (urlFlat) document.getElementById('s1Flat').value = urlFlat;
+
+    // ── STEP 1 ──
+    document.querySelectorAll('.radio-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        card.querySelector('input').checked = true;
+        S.residentType = card.querySelector('input').value;
+        updateDocumentHint();
+      });
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  window.showStep = showStep;
 
-  window.goToDocument = async function() {
-    const flat = document.getElementById('flatNumber').value.trim();
-    const name = document.getElementById('residentName').value.trim();
-    if (!flat) return showMessage('Please enter your flat number');
-    if (!/^\d{5}$/.test(flat)) return showMessage('Flat number should be 5 digits (e.g., 15167)');
-    if (!name || name.length < 3) return showMessage('Please enter your full name');
-
-    clearMessage();
-    // Pre-check flat status so user can't proceed if it's already occupied
-    try {
-      const res = await fetch(`${WORKER_URL}/flat/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flatNumber: flat })
-      });
-      const data = await res.json();
-      if (data.status === 'occupied') {
-        return showMessage(`Flat ${escapeHTML(flat)} is already registered by ${escapeHTML(data.ownerFirstName || 'another resident')}. <a href="/society/login.html?flat=${encodeURIComponent(flat)}">Sign in instead →</a>`);
-      }
-      if (data.status === 'pending') {
-        return showMessage(`A registration for flat ${escapeHTML(flat)} is already pending admin review.`);
-      }
-    } catch (e) {
-      console.warn('flat check failed (non-fatal):', e);
-    }
-
-    state.flatNumber = flat;
-    state.residentName = name;
-    document.getElementById('docFlatLabel').textContent = flat;
-    document.getElementById('docNameLabel').textContent = name;
-    showStep('step-doc');
-  };
-
-  window.uploadDocument = async function() {
-    const file = document.getElementById('docInput').files[0];
-    if (!file) return;
-
-    const statusDiv = document.getElementById('verificationStatus');
-    const uploadArea = document.getElementById('uploadArea');
-
-    if (file.size > 5 * 1024 * 1024) {
-      statusDiv.innerHTML = '<div class="message error">File too large (max 5MB)</div>';
-      return;
-    }
-    if (!['application/pdf','image/jpeg','image/png'].includes(file.type)) {
-      statusDiv.innerHTML = '<div class="message error">Please upload PDF, JPG, or PNG</div>';
-      return;
-    }
-
-    uploadArea.classList.add('has-file');
-    document.getElementById('uploadTitle').textContent = file.name;
-    document.getElementById('uploadSub').textContent = `${(file.size/1024).toFixed(0)} KB`;
-    statusDiv.innerHTML = '<div class="message info"><span class="loader" style="border-color:rgba(0,0,0,0.2); border-top-color: var(--jade);"></span>Reading document...</div>';
-
-    try {
-      const base64 = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result.split(',')[1]);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-
-      statusDiv.innerHTML = '<div class="message info"><span class="loader" style="border-color:rgba(0,0,0,0.2); border-top-color: var(--jade);"></span>Verifying ownership with AI...</div>';
-
-      const res = await fetch(`${WORKER_URL}/resident/verify-document`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          base64Document: base64,
-          mimeType: file.type,
-          residentName: state.residentName,
-          flatNumber: state.flatNumber,
-          residentType: 'owner'
-        })
-      });
-      const data = await res.json();
-
-      // Helper: build a list of which checks failed, with the extracted vs. entered values
-      const buildMismatchList = () => {
-        const issues = [];
-        if (!data.checks?.society) {
-          issues.push(`Society name not recognised (document shows "<strong>${escapeHTML(data.extracted?.societyName || '—')}</strong>", we expect a PSOTS receipt)`);
-        }
-        if (!data.checks?.flatNumber) {
-          issues.push(`Flat number mismatch (document shows "<strong>${escapeHTML(data.extracted?.flatNumber || '—')}</strong>", you entered "<strong>${escapeHTML(state.flatNumber)}</strong>")`);
-        }
-        if (!data.checks?.ownerName) {
-          issues.push(`Name not found on document (document Owner "<strong>${escapeHTML(data.extracted?.ownerName || '—')}</strong>", Paid By "<strong>${escapeHTML(data.extracted?.paidByName || '—')}</strong>", you entered "<strong>${escapeHTML(state.residentName)}</strong>")`);
-        }
-        return issues;
+    function updateDocumentHint() {
+      const hints = {
+        owner: 'Upload your maintenance invoice or ownership document.',
+        tenant: 'Upload your rental/lease agreement.',
+        family: 'Upload a maintenance invoice showing the flat number.'
       };
-
-      if (data.result === 'verified') {
-        state.verificationToken = data.token;
-        state.extracted = data.extracted;
-        const matchedAs = data.checks?.matchedAs;
-        statusDiv.innerHTML = `<div class="message success">✅ Verified! ${matchedAs === 'paidBy' ? "We matched your name in the 'Paid By' field — you'll register as a family member of the owner." : 'Your name matches the owner on the document.'}</div>`;
-        renderExtractedSummary(data.extracted, matchedAs);
-        setTimeout(() => showStep('step-auth'), 1400);
-      } else if (data.result === 'manual_review') {
-        state.verificationToken = data.token;
-        state.extracted = data.extracted;
-        const issues = buildMismatchList();
-        const issuesHtml = issues.length
-          ? `<br><br><strong>What didn't match:</strong><ul style="margin:8px 0 0 18px; padding:0;">${issues.map(i => `<li style="margin-bottom:4px;">${i}</li>`).join('')}</ul>`
-          : '';
-        statusDiv.innerHTML = `<div class="message info">📋 Partial match — we'll continue but an admin will review your registration before approval.${issuesHtml}</div>`;
-        renderExtractedSummary(data.extracted, null);
-        setTimeout(() => showStep('step-auth'), 2800);
-      } else {
-        const issues = buildMismatchList();
-        const issuesHtml = issues.length
-          ? `<ul style="margin:8px 0 0 18px; padding:0;">${issues.map(i => `<li style="margin-bottom:4px;">${i}</li>`).join('')}</ul>`
-          : '<p style="margin:6px 0 0 0;">Document unreadable.</p>';
-        statusDiv.innerHTML = `<div class="message error">❌ We couldn't verify this document.<br><br><strong>What didn't match:</strong>${issuesHtml}<br>Please upload a recent PSOTS maintenance receipt, or contact admin if your name on records differs.</div>`;
-        uploadArea.classList.remove('has-file');
-      }
-    } catch (err) {
-      statusDiv.innerHTML = `<div class="message error">Upload failed: ${escapeHTML(err.message)}</div>`;
-      uploadArea.classList.remove('has-file');
+      const s2Sub = document.getElementById('s2Subtitle');
+      if (s2Sub) s2Sub.innerHTML = `${hints[S.residentType] || hints.owner} Flat <strong>${escHtml(S.flatNumber)}</strong>.`;
     }
-  };
 
-  function renderExtractedSummary(extracted, matchedAs) {
-    const el = document.getElementById('extractedSummary');
-    if (!extracted) { el.innerHTML = ''; return; }
-    const rows = [
-      ['Society', extracted.societyName || '—'],
-      ['Flat', extracted.flatNumber || '—'],
-      ['Owner', extracted.ownerName || '—'],
-      ['Paid By', extracted.paidByName || '—']
-    ];
-    el.innerHTML = `
-      <div class="extracted-card">
-        <div style="font-weight:600; margin-bottom:6px;">Extracted from document${matchedAs ? ` · matched as ${escapeHTML(matchedAs)}` : ''}</div>
-        ${rows.map(([k, v]) => `<div class="row"><span class="label">${escapeHTML(k)}</span><span class="value">${escapeHTML(v)}</span></div>`).join('')}
-      </div>
-    `;
-  }
+    document.getElementById('btnStep1Next').addEventListener('click', async () => {
+      const name = document.getElementById('s1Name').value.trim();
+      const flat = document.getElementById('s1Flat').value.trim().replace(/\D/g, '');
+      const type = document.querySelector('input[name="residentType"]:checked')?.value || 'owner';
 
-  // ── Auth: Google ──
-  window.signUpWithGoogle = async function() {
-    if (!state.verificationToken) return showMessage('Please verify your document first');
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const email = result.user.email;
-      const displayName = result.user.displayName || state.residentName;
-      const idToken = await result.user.getIdToken();
+      if (!name || name.length < 2) { setAlert('s1Alert', 'Please enter your full name.'); return; }
+      if (!flat || flat.length < 4) { setAlert('s1Alert', 'Please enter a valid flat number (e.g. 15167).'); return; }
 
-      // Get phone if user entered one (optional but recommended for SMS login later)
-      let phone = document.getElementById('phoneNumber').value.trim();
-      if (phone && /^\d{10}$/.test(phone)) phone = `+91${phone}`;
-      else phone = `+91${'0'.repeat(10)}`;  // placeholder; user can edit later
+      const btn = document.getElementById('btnStep1Next');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Checking…';
+      setAlert('s1Alert', '');
 
-      showMessage('Creating your account...', 'info');
-      const regRes = await fetch(`${WORKER_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'google',
-          identifier: email,
-          name: displayName,
-          flatNumber: state.flatNumber,
-          email,
-          phone,
-          firebaseToken: idToken,
-          residentType: 'owner',
-          verificationMethod: 'document',
-          verificationToken: state.verificationToken
-        })
-      });
-      const regData = await regRes.json();
-      if (!regData.ok) {
-        if (regData.error === 'credential_exists') {
-          showMessage('You already have an account! <a href="/society/">Go to dashboard →</a>', 'info');
+      try {
+        const res = await fetch(`${WORKER}/flat/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ flatNumber: flat })
+        });
+        const data = await res.json();
+
+        if (data.exists && data.status === 'occupied') {
+          setAlert('s1Alert', `Flat ${escHtml(flat)} already has a registered owner. If you are a family member or tenant, ask the owner to add you from their profile page. <a href="/society/login.html" style="color:var(--jade);font-weight:600">Sign in instead →</a>`, 'warn');
           return;
         }
-        return showMessage(escapeHTML(regData.message || regData.error || 'Registration failed'));
+
+        S.name = name;
+        S.flatNumber = flat;
+        S.residentType = type;
+
+        document.getElementById('s2FlatNum').textContent = flat;
+        updateDocumentHint();
+        updateProgress(2);
+        showStep('step2');
+      } catch (e) {
+        setAlert('s1Alert', 'Could not check flat status. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Continue →';
       }
-      showMessage('✅ Welcome to PSOTS! Redirecting...', 'success');
-      setTimeout(() => { window.location.href = '/society/'; }, 1500);
-    } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') showMessage('Google sign-in failed: ' + escapeHTML(err.message));
+    });
+
+    document.getElementById('btnBack1').addEventListener('click', () => {
+      updateProgress(1);
+      showStep('step1');
+    });
+
+    // ── STEP 2: Document upload ──
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    let _fileBase64 = null;
+    let _fileMime = null;
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover') });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) handleFile(file);
+    });
+
+    function handleFile(file) {
+      const maxBytes = 5 * 1024 * 1024;
+      if (file.size > maxBytes) { setAlert('s2Alert', 'File is too large. Maximum size is 5 MB.'); return; }
+      const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
+      if (!allowed.includes(file.type)) { setAlert('s2Alert', 'Only JPG, PNG, and PDF files are allowed.'); return; }
+
+      setAlert('s2Alert', '');
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        _fileBase64 = dataUrl.split(',')[1];
+        _fileMime = file.type;
+
+        uploadZone.classList.add('has-file');
+        uploadZone.querySelector('.upload-icon').textContent = '✅';
+        uploadZone.querySelector('.upload-label').innerHTML = `<strong>${escHtml(file.name)}</strong><br><span style="font-size:12px">${(file.size / 1024).toFixed(0)} KB</span>`;
+        document.getElementById('btnVerifyDoc').style.display = 'flex';
+        document.getElementById('s2FileInfo').innerHTML = `<div class="info-box info" style="margin-top:0.5rem">Document selected. Click "Verify Document" to continue.</div>`;
+      };
+      reader.readAsDataURL(file);
     }
-  };
 
-  // ── Auth: SMS OTP via MSG91 widget ──
-  window.signUpWithSms = function() {
-    if (!state.verificationToken) return showMessage('Please verify your document first');
-    let phone = document.getElementById('phoneNumber').value.trim();
-    if (!phone || !/^\d{10}$/.test(phone)) return showMessage('Enter a valid 10-digit phone number');
-    if (!MSG91_WIDGET_ID || !MSG91_TOKEN_AUTH) return showMessage('OTP service not configured. Contact admin.');
+    document.getElementById('btnVerifyDoc').addEventListener('click', async () => {
+      if (!_fileBase64) { setAlert('s2Alert', 'Please select a document first.'); return; }
 
-    const phoneE164 = `91${phone}`;
-    const widgetConfig = {
-      widgetId: MSG91_WIDGET_ID,
-      tokenAuth: MSG91_TOKEN_AUTH,
-      identifier: phoneE164,
-      exposeMethods: false,
-      success: async (data) => {
-        // data.message = MSG91 access-token; data.type = 'success'
-        try {
-          showMessage('Verifying OTP...', 'info');
-          const verifyRes = await fetch(`${WORKER_URL}/auth/sms-verify-only`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ accessToken: data.message, phone: phoneE164 })
-          });
-          const verifyData = await verifyRes.json();
-          if (!verifyData.ok) return showMessage(verifyData.detail || 'OTP verification failed');
+      const btn = document.getElementById('btnVerifyDoc');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Verifying…';
+      setAlert('s2Alert', '<div class="info-box info">Analysing your document with AI. This takes a moment…</div>');
 
-          state.smsVerifyToken = verifyData.smsVerifyToken;
-          state.verifiedPhone = verifyData.phone;
+      try {
+        const res = await fetch(`${WORKER}/resident/verify-document`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            base64Document: _fileBase64,
+            mimeType: _fileMime,
+            residentName: S.name,
+            flatNumber: S.flatNumber,
+            residentType: S.residentType
+            // no residentId → pre-registration mode
+          })
+        });
+        const data = await res.json();
 
-          const email = document.getElementById('emailField').value.trim();
-          showMessage('Creating your account...', 'info');
-          const regRes = await fetch(`${WORKER_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'sms',
-              identifier: state.verifiedPhone,
-              name: state.residentName,
-              flatNumber: state.flatNumber,
-              email: email || `${state.verifiedPhone}@sms.psots.in`,  // placeholder if no email
-              phone: `+${state.verifiedPhone}`,
-              residentType: 'owner',
-              verificationMethod: 'document',
-              verificationToken: state.verificationToken,
-              smsVerifyToken: state.smsVerifyToken
-            })
-          });
-          const regData = await regRes.json();
-          if (!regData.ok) {
-            if (regData.error === 'credential_exists') {
-              showMessage('You already have an account! <a href="/society/login.html">Sign in instead →</a>', 'info');
-              return;
-            }
-            return showMessage(escapeHTML(regData.message || regData.error || 'Registration failed'));
-          }
+        if (!data.ok) throw new Error(data.error || 'Verification failed');
 
-          // Auto-login: call /auth/sms-login to get a customToken + session
-          const loginRes = await fetch(`${WORKER_URL}/auth/sms-login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ accessToken: data.message, phone: state.verifiedPhone })
-          });
-          const loginData = await loginRes.json();
-          if (loginData.ok && loginData.customToken) {
-            await signInWithCustomToken(auth, loginData.customToken);
-          }
-          if (loginData.sessionId) {
-            try { localStorage.setItem('psots_session', loginData.sessionId); } catch (_) {}
-          }
+        S.verificationResult = data.result;
+        S.verificationToken = data.token || null;
 
-          showMessage('✅ Welcome to PSOTS! Redirecting...', 'success');
-          setTimeout(() => { window.location.href = '/society/'; }, 1500);
-        } catch (err) {
-          showMessage('Verification error: ' + escapeHTML(err.message));
+        if (data.result === 'verified') {
+          setAlert('s2Alert', '');
+          updateProgress(3);
+          showStep('step3');
+          initAuthStep();
+        } else if (data.result === 'manual_review') {
+          // Forward to admin for manual review
+          await forwardToAdminReview(data);
+          document.getElementById('mrFlatNum').textContent = S.flatNumber;
+          showStep('stepManualReview');
+        } else {
+          // Verification failed
+          const extracted = data.extracted || {};
+          let hint = 'The document could not be verified. ';
+          if (!data.checks?.society) hint += 'Society name not found. ';
+          if (!data.checks?.flatNumber) hint += `Flat number ${escHtml(S.flatNumber)} not found. `;
+          if (!data.checks?.ownerName) hint += 'Name did not match document. ';
+          hint += 'Please upload a clearer copy of your maintenance invoice or ownership document.';
+          setAlert('s2Alert', hint, 'warn');
         }
-      },
-      failure: (error) => {
-        showMessage('OTP failed: ' + escapeHTML(error?.message || 'try again'));
+      } catch (e) {
+        setAlert('s2Alert', 'Verification error: ' + escHtml(e.message) + '. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Verify Document';
       }
-    };
-    if (typeof initSendOTP !== 'function') {
-      return showMessage('OTP widget not loaded. Refresh the page and try again.');
+    });
+
+    async function forwardToAdminReview(verifyData) {
+      try {
+        await fetch(`${WORKER}/notify-registration`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: S.name,
+            flatNumber: S.flatNumber,
+            residentType: S.residentType,
+            verificationResult: 'manual_review',
+            documentNote: 'Document submitted for manual review — AI could not auto-verify.',
+            checks: verifyData.checks || {},
+            extracted: verifyData.extracted || {}
+          })
+        });
+      } catch (_) { /* fire and forget */ }
     }
-    initSendOTP(widgetConfig);
-  };
-</script>
+
+    document.getElementById('btnBack2').addEventListener('click', () => {
+      updateProgress(2);
+      showStep('step2');
+    });
+
+    // ── STEP 3: Dual auth binding ──
+    let _googleDone = false;
+    let _smsDone = false;
+    let _emailDone = false;
+    let _msg91GoogleLoaded = false;
+    let _msg91SmsLoaded = false;
+
+    document.querySelectorAll('.auth-method').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.auth-method').forEach(a => a.classList.remove('selected'));
+        el.classList.add('selected');
+        S.authMethod = el.dataset.method;
+        document.getElementById('googlePrimary').style.display = S.authMethod === 'google' ? 'block' : 'none';
+        document.getElementById('smsPrimary').style.display = S.authMethod === 'sms' ? 'block' : 'none';
+        if (S.authMethod === 'sms' && !_msg91SmsLoaded) loadMsg91Widget('smsPrimaryWidget', 'sms');
+      });
+    });
+
+    function initAuthStep() {
+      S.authMethod = 'google';
+      document.getElementById('googlePrimary').style.display = 'block';
+      document.getElementById('smsPrimary').style.display = 'none';
+    }
+
+    // Google button → save state then redirect to OAuth
+    document.getElementById('btnGoogleAuth').addEventListener('click', () => {
+      // Save registration state so we can restore after OAuth redirect
+      sessionStorage.setItem('psots_reg_pending', JSON.stringify({
+        name: S.name,
+        flatNumber: S.flatNumber,
+        residentType: S.residentType,
+        verificationToken: S.verificationToken
+      }));
+      // Worker will redirect back here with ?from=google&email=...&name=... for new users
+      const next = encodeURIComponent('/society/register.html');
+      window.location.href = `${WORKER}/auth/google/start?next=${next}`;
+    });
+
+    // Handle Google OAuth return
+    // Two possible return scenarios:
+    // 1. ?from=google&email=...&name=... — Worker redirected new user here (no credential found)
+    // 2. ?oauth_error=... — OAuth failed
+    async function handleGoogleOAuthReturn() {
+      const params = new URLSearchParams(location.search);
+      const fromGoogle = params.get('from') === 'google';
+      const oauthError = params.get('oauth_error');
+
+      if (oauthError) {
+        // OAuth failed — show on step 3 if we have state, else step 1
+        const pending = JSON.parse(sessionStorage.getItem('psots_reg_pending') || '{}');
+        if (pending.name && pending.flatNumber) {
+          S.name = pending.name;
+          S.flatNumber = pending.flatNumber;
+          S.residentType = pending.residentType || 'owner';
+          S.verificationToken = pending.verificationToken;
+          showProgress_step3();
+          showStep('step3');
+          updateProgress(3);
+          setAlert('s3Alert', 'Google sign-in failed. Please try again.', 'error');
+        }
+        history.replaceState({}, '', `/society/register.html${S.flatNumber ? '?flat=' + S.flatNumber : ''}`);
+        return;
+      }
+
+      if (!fromGoogle) return;
+
+      const googleEmail = (params.get('email') || '').toLowerCase();
+      const googleName = params.get('name') || '';
+
+      // Restore registration state from sessionStorage
+      const pending = JSON.parse(sessionStorage.getItem('psots_reg_pending') || '{}');
+      if (!pending.flatNumber) {
+        // No pending state — pre-fill what we have and ask user to continue from step 1
+        if (googleName) document.getElementById('s1Name').value = googleName;
+        history.replaceState({}, '', '/society/register.html');
+        return;
+      }
+
+      S.name = pending.name || googleName;
+      S.flatNumber = pending.flatNumber;
+      S.residentType = pending.residentType || 'owner';
+      S.verificationToken = pending.verificationToken;
+      S.googleLinked = true;
+      S.googleEmail = googleEmail;
+
+      // Show step 3 with Google done
+      showProgress_step3();
+      showStep('step3');
+      updateProgress(3);
+
+      document.getElementById('btnGoogleAuth').disabled = true;
+      document.getElementById('btnGoogleAuth').innerHTML = '✅ Google linked — ' + escHtml(S.googleEmail);
+      // Enable SMS widget for phone verification
+      document.getElementById('googleSmsWidget').style.opacity = '1';
+      document.getElementById('googleSmsWidget').style.pointerEvents = 'auto';
+      loadMsg91Widget('googleSmsWidget', 'google');
+      setAlert('s3Alert', 'Google account linked! Now verify your phone number to complete registration.', 'success');
+
+      history.replaceState({}, '', `/society/register.html?flat=${S.flatNumber}`);
+    }
+
+    function showProgress_step3() {
+      document.getElementById('s2FlatNum').textContent = S.flatNumber;
+      document.getElementById('doneFlatNum').textContent = S.flatNumber;
+    }
+
+    // ── MSG91 Widget loader ──
+    let _msg91ScriptLoaded = false;
+
+    async function loadMsg91Widget(containerId, mode) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      try {
+        const res = await fetch(`${WORKER}/auth/msg91-config`);
+        const cfg = await res.json();
+        if (!cfg.ok || !cfg.widgetId) {
+          container.innerHTML = '<div class="info-box warn">SMS verification unavailable. Please use Google login.</div>';
+          return;
+        }
+
+        const initWidget = () => {
+          if (typeof initSendOTP !== 'function') return;
+          initSendOTP(
+            { widgetId: cfg.widgetId, tokenAuth: cfg.tokenAuth, identifier: '', exposeMethods: true },
+            (data) => handleMsg91Callback(data, mode),
+            (err) => { console.error('MSG91 err:', err) },
+            containerId
+          );
+          if (mode === 'google') _msg91GoogleLoaded = true;
+          if (mode === 'sms') _msg91SmsLoaded = true;
+        };
+
+        if (!_msg91ScriptLoaded) {
+          const s = document.createElement('script');
+          s.src = 'https://verify.msg91.com/otp-provider.js';
+          s.onload = () => { _msg91ScriptLoaded = true; initWidget() };
+          document.head.appendChild(s);
+        } else {
+          initWidget();
+        }
+      } catch (e) {
+        container.innerHTML = '<div class="info-box warn">SMS verification unavailable.</div>';
+      }
+    }
+
+    async function handleMsg91Callback(data, mode) {
+      const accessToken = data.access_token || data.accessToken;
+      const phone = data.mobile || data.phone || '';
+
+      if (mode === 'google') {
+        // SMS is secondary factor for Google primary flow
+        await verifyAndLinkSms(accessToken, phone);
+      } else if (mode === 'sms') {
+        // SMS is primary factor
+        await verifySmsAsPrimary(accessToken, phone);
+      }
+    }
+
+    // ── Google primary + SMS secondary ──
+    async function verifyAndLinkSms(accessToken, phone) {
+      const statusEl = document.getElementById('googleSmsStatus');
+      statusEl.innerHTML = '<div class="info-box info">Verifying phone…</div>';
+      try {
+        const res = await fetch(`${WORKER}/auth/sms-verify-only`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken, phone })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          S.smsVerifyToken = data.smsVerifyToken;
+          S.verifiedPhone = data.phone || phone;
+          statusEl.innerHTML = '<div class="info-box success">Phone verified!</div>';
+          // Both Google and SMS done — complete registration
+          await completeRegistration('google');
+        } else {
+          statusEl.innerHTML = `<div class="info-box error">SMS verification failed: ${escHtml(data.error || 'unknown error')}. Please try again.</div>`;
+        }
+      } catch (e) {
+        statusEl.innerHTML = '<div class="info-box error">Network error. Please try again.</div>';
+      }
+    }
+
+    // ── SMS primary: verify phone then show email field ──
+    async function verifySmsAsPrimary(accessToken, phone) {
+      const statusEl = document.getElementById('smsPrimaryStatus');
+      statusEl.innerHTML = '<div class="info-box info">Verifying phone…</div>';
+      try {
+        const res = await fetch(`${WORKER}/auth/sms-verify-only`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken, phone })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          S.smsVerifyToken = data.smsVerifyToken;
+          S.verifiedPhone = data.phone || phone;
+          statusEl.innerHTML = '<div class="info-box success">Phone verified! Now verify your email below.</div>';
+          document.getElementById('emailBindSection').style.display = 'block';
+        } else {
+          statusEl.innerHTML = `<div class="info-box error">Phone verification failed. Please try again.</div>`;
+        }
+      } catch (e) {
+        statusEl.innerHTML = '<div class="info-box error">Network error. Please try again.</div>';
+      }
+    }
+
+    // ── Email OTP for SMS primary binding ──
+    document.getElementById('btnSendEmailOtp').addEventListener('click', async () => {
+      const email = document.getElementById('bindEmail').value.trim();
+      if (!email || !email.includes('@')) { setAlert('emailBindAlert', 'Please enter a valid email address.'); return; }
+
+      const btn = document.getElementById('btnSendEmailOtp');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Sending…';
+
+      try {
+        const res = await fetch(`${WORKER}/auth/send-email-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name: S.name })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          setAlert('emailBindAlert', `OTP sent to ${escHtml(email)}. Check your inbox.`, 'success');
+          document.getElementById('emailOtpSection').style.display = 'block';
+          S.bindEmail = email;
+          setupOtpInputs();
+        } else {
+          setAlert('emailBindAlert', 'Could not send OTP. Please try again.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = 'Send Email OTP';
+        }
+      } catch (e) {
+        setAlert('emailBindAlert', 'Network error. Please try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Send Email OTP';
+      }
+    });
+
+    function setupOtpInputs() {
+      const chars = document.querySelectorAll('.otp-char');
+      chars.forEach((inp, i) => {
+        inp.addEventListener('input', () => {
+          inp.value = inp.value.replace(/\D/g, '').slice(-1);
+          if (inp.value && i < chars.length - 1) chars[i + 1].focus();
+        });
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Backspace' && !inp.value && i > 0) chars[i - 1].focus();
+        });
+        inp.addEventListener('paste', e => {
+          const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+          chars.forEach((c, j) => { c.value = text[j] || '' });
+          chars[Math.min(text.length, chars.length - 1)].focus();
+          e.preventDefault();
+        });
+      });
+    }
+
+    document.getElementById('btnVerifyEmailOtp').addEventListener('click', async () => {
+      const chars = document.querySelectorAll('.otp-char');
+      const otp = Array.from(chars).map(c => c.value).join('');
+      if (otp.length < 6) { setAlert('emailBindAlert', 'Please enter the complete 6-digit OTP.'); return; }
+
+      const btn = document.getElementById('btnVerifyEmailOtp');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Verifying…';
+
+      try {
+        const res = await fetch(`${WORKER}/auth/verify-email-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: S.bindEmail, otp, registration: true })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          setAlert('emailBindAlert', 'Email verified!', 'success');
+          S.emailVerifyToken = data.token || null;
+          await completeRegistration('sms');
+        } else {
+          setAlert('emailBindAlert', 'Invalid or expired OTP. Please try again.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = 'Verify Email & Complete';
+        }
+      } catch (e) {
+        setAlert('emailBindAlert', 'Network error. Please try again.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Verify Email & Complete';
+      }
+    });
+
+    // ── Complete registration ──
+    async function completeRegistration(primaryMethod) {
+      setAlert('s3Alert', '<div class="info-box info">Creating your account…</div>');
+
+      const isGoogle = primaryMethod === 'google';
+      const body = {
+        type: isGoogle ? 'google' : 'sms',
+        identifier: isGoogle ? (S.googleEmail || '') : S.verifiedPhone,
+        name: S.name,
+        flatNumber: S.flatNumber,
+        residentType: S.residentType,
+        email: isGoogle ? S.googleEmail : S.bindEmail,
+        phone: S.verifiedPhone || '',
+        verificationToken: S.verificationToken,
+        verificationResult: S.verificationResult,
+        verificationMethod: S.verificationToken ? 'document' : undefined,
+      };
+
+      if (!isGoogle && S.smsVerifyToken) body.smsVerifyToken = S.smsVerifyToken;
+
+      try {
+        const res = await fetch(`${WORKER}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          // Notify admin
+          try {
+            await fetch(`${WORKER}/admin/notify-registration`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                residentId: data.residentId,
+                name: S.name,
+                flatNumber: S.flatNumber,
+                residentType: S.residentType
+              })
+            });
+          } catch (_) { /* non-critical */ }
+
+          sessionStorage.removeItem('psots_reg_pending');
+          document.getElementById('doneFlatNum').textContent = S.flatNumber;
+          showStep('stepDone');
+        } else {
+          const errMsg = {
+            missing_fields: 'Some required fields are missing. Please go back and check your details.',
+            email_phone_required: 'Both email and phone are required for registration.',
+            flat_occupied: 'This flat already has a registered owner.',
+            sms_not_verified: 'Phone verification required. Please complete the SMS OTP step.',
+            sms_token_expired: 'Phone verification expired. Please verify your phone again.',
+            already_registered: 'An account with these details already exists. <a href="/society/login.html" style="color:var(--jade);font-weight:600">Sign in instead →</a>',
+          }[data.error] || ('Registration failed: ' + escHtml(data.error || 'unknown error'));
+          setAlert('s3Alert', errMsg, 'error');
+        }
+      } catch (e) {
+        setAlert('s3Alert', 'Network error. Please try again.', 'error');
+      }
+    }
+
+    // ── Handle Google OAuth return on page load ──
+    handleGoogleOAuthReturn();
+  </script>
 </body>
 </html>
