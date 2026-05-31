@@ -2395,17 +2395,24 @@ export default {
       // /SOCIETY/* ENDPOINTS — Credentialed, D1-backed society features
       // ══════════════════════════════════════════════════════════════════════════════════
 
+      // Helper for credentialed CORS (cookie-based requests from UI)
+      const credentialedCORS = {
+        'Access-Control-Allow-Origin': request.headers.get('Origin') || 'https://society.psots.in',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+      };
+
       // GET /society/announcements — list announcements (no auth required)
       if (pathname === '/society/announcements' && request.method === 'GET') {
         try {
           const announcements = await db.listAnnouncements(env);
           return new Response(JSON.stringify({ ok: true, announcements }), {
-            headers: { 'Content-Type': 'application/json', ...CORS }
+            headers: credentialedCORS
           });
         } catch (e) {
           console.error('/society/announcements error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2415,16 +2422,16 @@ export default {
           const auth = await resolveAuth(request, env);
           if (!auth?.isAdmin) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
-              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 403, headers: credentialedCORS });
           }
           const { title, body } = await request.json();
           const result = await db.createAnnouncement({ title, body, createdBy: auth.uid }, env);
           return new Response(JSON.stringify({ ok: true, id: result.id }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('POST /society/announcements error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2435,11 +2442,11 @@ export default {
           const filters = category ? { category } : {};
           const listings = await db.listMarketplaceListings(filters, env);
           return new Response(JSON.stringify({ ok: true, listings }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('/society/marketplace error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2449,7 +2456,7 @@ export default {
           const auth = await resolveAuth(request, env);
           if (!auth) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 401, headers: credentialedCORS });
           }
           const body = await request.json();
           const listing = await db.createMarketplaceListing({
@@ -2458,11 +2465,11 @@ export default {
             posterFlat: auth.flatNumber
           }, env);
           return new Response(JSON.stringify({ ok: true, id: listing.id }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('POST /society/marketplace error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2472,17 +2479,17 @@ export default {
           const auth = await resolveAuth(request, env);
           if (!auth) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 401, headers: credentialedCORS });
           }
           const id = pathname.split('/').pop();
           const body = await request.json();
           await db.updateMarketplaceListing(id, body, env);
           return new Response(JSON.stringify({ ok: true }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('PUT /society/marketplace error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2492,16 +2499,16 @@ export default {
           const auth = await resolveAuth(request, env);
           if (!auth) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 401, headers: credentialedCORS });
           }
           const id = pathname.split('/').pop();
           await db.deleteMarketplaceListing(id, env);
           return new Response(JSON.stringify({ ok: true }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('DELETE /society/marketplace error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2512,11 +2519,11 @@ export default {
           const filters = type ? { type } : {};
           const posts = await db.listCarpoolingPosts(filters, env);
           return new Response(JSON.stringify({ ok: true, posts }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('/society/carpooling error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2526,7 +2533,7 @@ export default {
           const auth = await resolveAuth(request, env);
           if (!auth) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 401, headers: credentialedCORS });
           }
           const body = await request.json();
           const post = await db.createCarpoolingPost({
@@ -2535,11 +2542,11 @@ export default {
             posterFlat: auth.flatNumber
           }, env);
           return new Response(JSON.stringify({ ok: true, id: post.id }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('POST /society/carpooling error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2550,11 +2557,11 @@ export default {
           const filters = type ? { type } : {};
           const posts = await db.listLostFoundPosts(filters, env);
           return new Response(JSON.stringify({ ok: true, posts }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('/society/lost-found error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2564,7 +2571,7 @@ export default {
           const auth = await resolveAuth(request, env);
           if (!auth) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 401, headers: credentialedCORS });
           }
           const body = await request.json();
           const post = await db.createLostFoundPost({
@@ -2573,11 +2580,11 @@ export default {
             posterFlat: auth.flatNumber
           }, env);
           return new Response(JSON.stringify({ ok: true, id: post.id }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('POST /society/lost-found error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2590,11 +2597,11 @@ export default {
           const { results } = await env.PSOTS_DB.prepare(query).bind(...params).all();
           const recommendations = results.map(parseD1Row);
           return new Response(JSON.stringify({ ok: true, recommendations }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+            { headers: credentialedCORS });
         } catch (e) {
           console.error('/society/recommendations error:', e);
           return new Response(JSON.stringify({ ok: false, error: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: credentialedCORS });
         }
       }
 
@@ -2607,7 +2614,7 @@ export default {
 
           if (!message || !type) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
-              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 400, headers: credentialedCORS });
           }
 
           // Rate limit: max 5 per hour per email
@@ -2616,7 +2623,7 @@ export default {
           const rlCount = rlVal ? parseInt(rlVal) : 0;
           if (rlCount >= 5) {
             return new Response(JSON.stringify({ ok: false, error: 'rate_limited' }),
-              { status: 429, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 429, headers: credentialedCORS });
           }
           await env.VIOLATIONS.put(rlKey, String(rlCount + 1), { expirationTtl: 3600 });
 
