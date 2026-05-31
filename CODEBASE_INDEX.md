@@ -64,36 +64,37 @@ Migrate PSOTS Society frontend from Firebase Firestore client-side reads/writes 
 ## 🔄 In-Progress Phase
 
 ### Phase 2-3: Carpooling, Lost & Found, Recommendations Migration
-**Status:** 🔄 STARTING NOW (branch: `claude/relaxed-heisenberg-WFFXw`)  
+**Status:** 🔄 HALF DONE — Worker endpoints ✅, frontend migrations 🔄 (branch: `claude/relaxed-heisenberg-WFFXw`)  
 **Target Pages:**
 1. `society/carpooling.html` — list/create/update carpooling offers
 2. `society/lostandfound.html` — list/create found & lost items
 3. `society/recommendations.html` — list recommendations (read-only, data from bulk imports)
 
-**What Needs to be Done:**
-- [ ] Create D1 migrations (if tables don't exist):
-  - `carpooling` — from, to, date, phone, description
-  - `lost_found` — type, category, date, description, location, contact, phone, photo_url
-  - `recommendations` — category, vendor, description, rating, contact, source
-- [ ] Add Worker endpoints:
-  - `GET /society/carpooling` — list offers (filter by from/to)
-  - `POST /society/carpooling` — create offer (auth required)
-  - `PUT /society/carpooling/:id` — update own offer
-  - `DELETE /society/carpooling/:id` — delete own offer
-  - `GET /society/lost-found` — list items (filter by type)
-  - `POST /society/lost-found` — create item
-  - `PUT /society/lost-found/:id` — update own item
-  - `DELETE /society/lost-found/:id` — delete own item
-  - `GET /society/recommendations` — list by category (already bulk-imported)
+**What's Done:**
+- [x] Worker endpoints implemented (commits 9af272c, b3b579b):
+  - GET/POST `/society/carpooling` (with type filter)
+  - PUT/DELETE `/society/carpooling/:id`
+  - GET/POST `/society/lost-found` (with type filter)
+  - PUT/DELETE `/society/lost-found/:id`
+  - GET `/society/announcements` (admin-only POST)
+  - GET `/society/marketplace` (with category filter, CRUD operations)
+  - GET `/society/recommendations` (with category filter)
+- [x] resolveAuth() helper — cookie-first, falls back to Firebase Bearer token
+- [x] DB functions added: createCarpoolingPost, updateCarpoolingPost, deleteCarpoolingPost
+- [x] CORS configuration updated for /society/* (credentialed, not wildcard)
+
+**Still Needed:**
 - [ ] Update frontend pages:
-  - Remove Firestore imports and client-side writes
-  - Use Worker endpoints via fetch + credentials: 'include'
-  - Apply `escapeHTML()` to user data
-  - Update forms to POST to Worker
+  - [ ] `society/carpooling.html` — remove Firestore, use Worker endpoints
+  - [ ] `society/lostandfound.html` — remove Firestore, use Worker endpoints
+  - [ ] `society/recommendations.html` — remove Firestore, use Worker endpoints
+  - Apply `escapeHTML()` to user data before innerHTML
+  - Update forms to POST to `/society/` endpoints with credentials: 'include'
 
 **Known Issues:**
+- Announcements/marketplace endpoints added but dashboard not yet migrated to use them (Phase 1 follow-up)
 - Recommendations can't store all fields in D1 yet (drive photos, ratings, etc.) — DEFERRED to Phase 4 schema update
-- No filtering UI in recommendations yet — add when doing the migration
+- All /society/* endpoints exist but frontend pages haven't been updated yet
 
 ---
 
