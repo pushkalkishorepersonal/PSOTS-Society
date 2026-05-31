@@ -39,30 +39,65 @@ function _timeout(ms) {
   return new Promise(resolve => setTimeout(() => resolve(null), ms));
 }
 
-// Boot — subscribe to Firebase auth state once
-onAuthStateChanged(auth, async user => {
-  _currentUser     = user;
-  _currentResident = null;
+// Boot — cookie-native session first (direct Google OAuth / Worker cookie),
+// then fall back to Firebase auth state for the transition period.
+async function _bootCookieSession() {
+  try {
+    const res = await fetch('https://telegram.psots.in/auth/me', { credentials: 'include' });
+    if (res.ok) {
+      const me = await res.json();
+      if (me.ok && me.user) {
+        const u = me.user;
+        _currentUser = {
+          uid: u.uid,
+          email: u.email || null,
+          displayName: u.name || null,
+          cookie: true,
+          getIdToken: async () => null
+        };
+        _currentResident = {
+          uid: u.uid,
+          residentId: u.uid,
+          email: u.email || null,
+          name: u.name || null,
+          flatNumber: u.flatNumber || null,
+          isAdmin: !!u.isAdmin
+        };
+        _authResolved = true;
+        _notify();
+        return true;
+      }
+    }
+  } catch (_) { /* no cookie session — fall back to Firebase */ }
+  return false;
+}
 
-  if (user) {
-    try {
-      // Race resolveIdentity + member load against 8-second timeout
-      // so auth never hangs the page indefinitely.
-      _currentResident = await Promise.race([
-        (async () => {
-          const identity = await residentService.resolveIdentity(user.uid);
-          if (identity) {
-            return residentService.get(user.uid);
-          }
-          return null; // no record yet → triggers onboarding
-        })(),
-        _timeout(8000),
-      ]);
-    } catch (_) {}
-  }
+_bootCookieSession().then(hasCookie => {
+  if (hasCookie) return; // cookie session wins; ignore Firebase state
+  onAuthStateChanged(auth, async user => {
+    _currentUser     = user;
+    _currentResident = null;
 
-  _authResolved = true;
-  _notify();
+    if (user) {
+      try {
+        // Race resolveIdentity + member load against 8-second timeout
+        // so auth never hangs the page indefinitely.
+        _currentResident = await Promise.race([
+          (async () => {
+            const identity = await residentService.resolveIdentity(user.uid);
+            if (identity) {
+              return residentService.get(user.uid);
+            }
+            return null; // no record yet → triggers onboarding
+          })(),
+          _timeout(8000),
+        ]);
+      } catch (_) {}
+    }
+
+    _authResolved = true;
+    _notify();
+  });
 });
 
 const Auth = {
@@ -119,7 +154,8 @@ const Auth = {
    */
   async signOut() {
     cache.clear();
-    await signOut(auth);
+    try { await fetch('https://telegram.psots.in/auth/logout', { method: 'POST', credentials: 'include' }); } catch (_) { /* ignore */ }
+    await signOut(auth).catch(() => {});
     window.location.href = '/residents.html';
   },
 

@@ -394,6 +394,65 @@ async function verifyFirebaseToken(authHeader, env) {
   }
 }
 
+// resolveAuth(request, env) — cookie-native auth with a Bearer fallback.
+// Returns ONE normalized identity for both the new psots_session cookie and
+// (during the Firebase→cookie transition) a legacy Firebase Bearer idToken,
+// so endpoints never branch on auth method. Returns null if unauthenticated.
+//
+// Shape: { uid, residentId, email, name, flatNumber, isAdmin, authMethod }
+async function resolveAuth(request, env) {
+  // 1) Cookie path (preferred)
+  const cookieHeader = request.headers.get('Cookie') || '';
+  const m = cookieHeader.match(/psots_session=([^;]+)/);
+  if (m) {
+    try {
+      const { data } = await db.getSession(env, m[1]);
+      if (data?.uid) {
+        let admin = false;
+        try { admin = await db.isAdmin(data.uid, env); } catch (_e) { /* default false */ }
+        if (!admin && data.email === 'pushkalkishore@gmail.com') admin = true;
+        return {
+          uid: data.uid,
+          residentId: data.uid,
+          email: data.email || null,
+          name: data.name || null,
+          flatNumber: data.flatNumber || null,
+          isAdmin: admin,
+          authMethod: 'cookie'
+        };
+      }
+    } catch (_e) { /* fall through to Bearer */ }
+  }
+
+  // 2) Bearer fallback (transition only) — Firebase/Google idToken
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const payload = await verifyFirebaseToken(authHeader, env);
+    if (payload?.email) {
+      const email = String(payload.email).toLowerCase();
+      let credential = await db.getCredentialByTypeAndIdentifier('google', email, env);
+      if (!credential) credential = await db.getCredentialByTypeAndIdentifier('email', email, env);
+      const residentId = credential?.resident_id || credential?.residentId || null;
+      let resident = null;
+      if (residentId) resident = await db.getResidentV2(residentId, env);
+      let admin = false;
+      try { if (residentId) admin = await db.isAdmin(residentId, env); } catch (_e) { /* default false */ }
+      if (!admin && email === 'pushkalkishore@gmail.com') admin = true;
+      return {
+        uid: residentId,
+        residentId,
+        email,
+        name: payload.name || resident?.name || null,
+        flatNumber: resident?.flat_number || resident?.flatNumber || null,
+        isAdmin: admin,
+        authMethod: 'firebase'
+      };
+    }
+  }
+
+  return null;
+}
+
 function pemToArrayBuffer(pem) {
   const b64 = pem.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').replace(/\s+/g, '');
   const binaryString = atob(b64);
@@ -985,7 +1044,7 @@ export default {
 
       // Credentialed endpoints (cookie-based auth) need specific origin + credentials:true.
       // Wildcard origin is rejected by browsers when credentials are sent.
-      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout';
+      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout' || pathname.startsWith('/society/');
       if (request.method === 'OPTIONS') {
         if (isCredentialedAuth) {
           const origin = request.headers.get('Origin') || '';
@@ -1935,7 +1994,40 @@ export default {
         if (!m) return new Response(JSON.stringify({ ok: false, error: 'no_session' }), { status: 401, headers: corsHeaders });
         const { data } = await db.getSession(env, m[1]);
         if (!data) return new Response(JSON.stringify({ ok: false, error: 'invalid_session' }), { status: 401, headers: corsHeaders });
-        return new Response(JSON.stringify({ ok: true, user: data }), { headers: corsHeaders });
+        // Compute isAdmin so the frontend (SocietyNav, admin gate) can show/hide
+        // admin UI without a separate round-trip.
+        let isAdmin = false;
+        try { isAdmin = await db.isAdmin(data.uid, env); } catch (_e) { /* default false */ }
+        if (!isAdmin && data.email === 'pushkalkishore@gmail.com') isAdmin = true;
+        return new Response(JSON.stringify({ ok: true, user: { ...data, isAdmin } }), { headers: corsHeaders });
+      }
+
+      // ── Cookie-native resident data endpoints (Firebase-removal migration) ──
+      // These replace direct Firestore client-SDK reads on the dashboard. Auth via
+      // resolveAuth (cookie OR Bearer). Credentialed CORS so cookie fetches work
+      // cross-subdomain from society.psots.in.
+      if ((pathname === '/society/announcements' || pathname === '/society/marketplace') && request.method === 'GET') {
+        const origin = request.headers.get('Origin') || '';
+        const allowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(origin) ? origin : 'https://society.psots.in';
+        const ch = {
+          'Access-Control-Allow-Origin': allowOrigin,
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'application/json'
+        };
+        const auth = await resolveAuth(request, env);
+        if (!auth) return new Response(JSON.stringify({ ok: false, error: 'unauthenticated' }), { status: 401, headers: ch });
+        try {
+          if (pathname === '/society/announcements') {
+            const announcements = await db.listAnnouncements(env);
+            return new Response(JSON.stringify({ ok: true, announcements }), { headers: ch });
+          }
+          const category = url.searchParams.get('category') || null;
+          const listings = await db.listMarketplaceListings({ category, status: 'active' }, env);
+          return new Response(JSON.stringify({ ok: true, listings }), { headers: ch });
+        } catch (e) {
+          console.error(`${pathname} error:`, e);
+          return new Response(JSON.stringify({ ok: false, error: 'server_error' }), { status: 500, headers: ch });
+        }
       }
 
       // POST /auth/sms-login — MSG91 SMS OTP verification + login/signup intent.

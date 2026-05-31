@@ -676,10 +676,11 @@
   </footer>
 
   <script type="module">
-    import { db } from '../../js/core/firebase.js';
     import { setupHybridAuth, onChange, signOutUser } from '../js/core/hybrid-auth.js';
-    import { collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import { renderSocietyNav } from '../../js/components/shared/SocietyNav.js';
+
+    const WORKER_URL = 'https://telegram.psots.in';
+    const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     // Setup hybrid auth (Firebase + Telegram session) and check immediately
     const { user: authUser } = await setupHybridAuth();
@@ -726,17 +727,15 @@
       }
       document.getElementById('greetingMeta').textContent = metaLines.join('\n');
 
-      // Load announcements
+      // Load announcements + stats from the Worker (cookie-native, no Firestore)
+      let announcements = [];
       try {
-        const q = query(
-          collection(db, 'announcements'),
-          orderBy('createdAt', 'desc'),
-          limit(5)
-        );
-        const snapshot = await getDocs(q);
+        const res = await fetch(`${WORKER_URL}/society/announcements`, { credentials: 'include' });
+        const data = await res.json();
+        announcements = (data.ok && data.announcements) ? data.announcements : [];
         const announcementsList = document.getElementById('announcementsList');
 
-        if (snapshot.empty) {
+        if (!announcements.length) {
           announcementsList.innerHTML = `
             <div class="empty-state">
               <div class="empty-state-icon">📭</div>
@@ -744,15 +743,14 @@
             </div>
           `;
         } else {
-          announcementsList.innerHTML = snapshot.docs.map(doc => {
-            const data = doc.data();
-            const date = data.createdAt?.toDate?.() || new Date();
+          announcementsList.innerHTML = announcements.slice(0, 5).map(a => {
+            const date = a.postedAt ? new Date(a.postedAt) : new Date();
             const dateStr = date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
             return `
               <div class="announcement-item">
-                <div class="announcement-title">${data.title || '(No title)'}</div>
+                <div class="announcement-title">${escapeHTML(a.title || '(No title)')}</div>
                 <div class="announcement-date">${dateStr}</div>
-                <div class="announcement-body">${data.body || '(No content)'}</div>
+                <div class="announcement-body">${escapeHTML(a.content || '(No content)')}</div>
               </div>
             `;
           }).join('');
@@ -767,12 +765,12 @@
         `;
       }
 
-      // Load stats (placeholder - can integrate with real data)
+      // Stats
       try {
-        const announcementsSnap = await getDocs(query(collection(db, 'announcements'), limit(100)));
-        const listingsSnap = await getDocs(query(collection(db, 'marketplace_listings'), limit(100)));
-        document.getElementById('statAnnouncements').textContent = announcementsSnap.size;
-        document.getElementById('statListings').textContent = listingsSnap.size;
+        document.getElementById('statAnnouncements').textContent = announcements.length;
+        const mRes = await fetch(`${WORKER_URL}/society/marketplace`, { credentials: 'include' });
+        const mData = await mRes.json();
+        document.getElementById('statListings').textContent = (mData.ok && mData.listings) ? mData.listings.length : 0;
       } catch (err) {
         console.debug('Stats load error:', err);
       }

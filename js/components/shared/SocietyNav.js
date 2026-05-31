@@ -598,74 +598,76 @@ export async function renderSocietyNav(containerId, activePage = '') {
     });
   });
 
+  // Populate avatar/greeting/admin-link from a resolved identity
+  function applyIdentity(residentName, email, isAdmin) {
+    const name = residentName || 'Resident';
+    const firstName = name.split(' ')[0];
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    document.getElementById('societyNavAvatar').textContent = initials;
+    document.getElementById('societyNavGreeting').textContent = `Hi ${firstName}`;
+    document.getElementById('societyNavMobileAvatar').textContent = initials;
+    document.getElementById('societyNavMobileGreeting').textContent = firstName;
+    document.getElementById('societyNavMobileEmail').textContent = email || '';
+    if (isAdmin) {
+      document.getElementById('societyNavAdminLink').style.display = 'block';
+      document.getElementById('societyNavMobileAdminLink').style.display = 'block';
+    }
+  }
+
   // Wait for auth state and populate user info
   return new Promise((resolve) => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        // Not logged in — nav won't be visible on login/register pages
-        resolve();
-        return;
-      }
-
+    (async () => {
+      // Cookie-native session first (direct Google OAuth / Worker cookie)
       try {
-        // Fetch resident data via unified-login to get proper name (V2 schema)
-        let residentName = user.displayName || 'Resident';
-        try {
-          if (!user.email) return;
-          const idToken = await user.getIdToken();
-          const residentRes = await fetch(
-            'https://telegram.psots.in/auth/unified-login',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
-              },
-              body: JSON.stringify({
-                type: 'google',
-                identifier: user.email
-              })
-            }
-          );
-          const residentData = await residentRes.json();
-          if (residentData.resident?.name) {
-            residentName = residentData.resident.name;
+        const meRes = await fetch('https://telegram.psots.in/auth/me', { credentials: 'include' });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          if (me.ok && me.user) {
+            applyIdentity(me.user.name, me.user.email, !!me.user.isAdmin);
+            resolve();
+            return;
           }
-        } catch (_) {}
-
-        const firstName = residentName.split(' ')[0];
-        const initials = residentName
-          .split(' ')
-          .map(n => n[0])
-          .join('')
-          .substring(0, 2)
-          .toUpperCase();
-
-        // Update desktop
-        document.getElementById('societyNavAvatar').textContent = initials;
-        document.getElementById('societyNavGreeting').textContent = `Hi ${firstName}`;
-
-        // Update mobile
-        document.getElementById('societyNavMobileAvatar').textContent = initials;
-        document.getElementById('societyNavMobileGreeting').textContent = firstName;
-        document.getElementById('societyNavMobileEmail').textContent = user.email || '';
-
-        // Check if user is admin and show admin link
-        try {
-          const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-          if (adminDoc.exists() || user.email === SUPER_ADMIN) {
-            document.getElementById('societyNavAdminLink').style.display = 'block';
-            document.getElementById('societyNavMobileAdminLink').style.display = 'block';
-          }
-        } catch (err) {
-          console.debug('Admin check failed:', err);
         }
+      } catch (_) { /* fall back to Firebase */ }
 
-        resolve();
-      } catch (err) {
-        console.error('SocietyNav init error:', err);
-        resolve();
-      }
-    });
+      // Firebase fallback (transition period)
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          // Not logged in — nav won't be visible on login/register pages
+          resolve();
+          return;
+        }
+        try {
+          let residentName = user.displayName || 'Resident';
+          try {
+            if (!user.email) { resolve(); return; }
+            const idToken = await user.getIdToken();
+            const residentRes = await fetch(
+              'https://telegram.psots.in/auth/unified-login',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ type: 'google', identifier: user.email })
+              }
+            );
+            const residentData = await residentRes.json();
+            if (residentData.resident?.name) residentName = residentData.resident.name;
+          } catch (_) {}
+
+          let isAdmin = user.email === SUPER_ADMIN;
+          if (!isAdmin) {
+            try { isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists(); } catch (_) {}
+          }
+          applyIdentity(residentName, user.email, isAdmin);
+          resolve();
+        } catch (err) {
+          console.error('SocietyNav init error:', err);
+          resolve();
+        }
+      });
+    })();
   });
 }

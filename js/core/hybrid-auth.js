@@ -90,6 +90,37 @@ async function _trackLogin(firebaseUser, residentData) {
 }
 
 export async function setupHybridAuth() {
+  // Cookie-native path first: if a Worker session cookie (psots_session) exists,
+  // use it and skip Firebase entirely. This is how direct Google OAuth resolves,
+  // and the path all logins move to as Firebase is removed.
+  try {
+    const meRes = await fetch('https://telegram.psots.in/auth/me', { credentials: 'include' });
+    if (meRes.ok) {
+      const me = await meRes.json();
+      if (me.ok && me.user) {
+        const u = me.user;
+        _currentUser = {
+          uid: u.uid,
+          email: u.email || null,
+          displayName: u.name || null,
+          cookie: true,
+          getIdToken: async () => null
+        };
+        _currentResident = {
+          uid: u.uid,
+          residentId: u.uid,
+          email: u.email || null,
+          name: u.name || null,
+          flatNumber: u.flatNumber || null,
+          isAdmin: !!u.isAdmin
+        };
+        _authResolved = true;
+        _notify();
+        return { user: _currentUser, resident: _currentResident };
+      }
+    }
+  } catch (_e) { /* no cookie session — fall back to Firebase */ }
+
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       // Don't resolve on first null - wait for Firebase to fully initialize
@@ -196,6 +227,8 @@ export function getResident() {
 export async function signOutUser() {
   localStorage.removeItem('psots_login_method');
   localStorage.removeItem('psots_device_token');
+  // Clear the Worker cookie session (OAuth/cookie users) and Firebase (transition)
+  try { await fetch('https://telegram.psots.in/auth/logout', { method: 'POST', credentials: 'include' }); } catch (_e) { /* ignore */ }
   await signOut(auth).catch(() => {});
   window.location.href = '/society/login';
 }
