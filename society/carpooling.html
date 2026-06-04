@@ -648,19 +648,14 @@
 
   <script type="module">
     import session from '/js/core/auth.js';
-    import { db } from '/js/core/firebase.js';
     import { renderSocietyNav } from '/js/components/shared/SocietyNav.js';
-    import {
-      collection, query, where, orderBy, getDocs,
-      doc, setDoc, updateDoc, serverTimestamp
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const WORKER_URL = 'https://telegram.psots.in';
 
     // Render shared nav
-    // Load data immediately before nav
     await renderSocietyNav('societyNav', 'carpooling');
 
     const app = document.getElementById('app');
-    const COLL = 'carpooling';
 
     const RECURRING_LABELS = {
       'one-time': '🗓️ One-time',
@@ -770,19 +765,17 @@
         const container = document.getElementById('listingsContainer');
         container.innerHTML = '<div class="loader-ring"></div>';
         try {
-          const q = query(
-            collection(db, COLL),
-            where('type', '==', type),
-            where('status', 'in', ['active', 'full']),
-            orderBy('createdAt', 'desc')
-          );
-          const snap = await getDocs(q);
-          if (snap.empty) {
+          const res = await fetch(`${WORKER_URL}/society/carpooling?type=${type}`, {
+            credentials: 'include'
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const posts = data.posts || [];
+          if (!posts.length) {
             container.innerHTML = `<div class="empty-state"><div class="empty-icon">${type === 'offering' ? '🚗' : '🙋'}</div><p class="empty-text">No ${type === 'offering' ? 'ride offers' : 'ride requests'} posted yet.</p></div>`;
             return;
           }
-          const cards = snap.docs.map(d => {
-            const p = { id: d.id, ...d.data() };
+          const cards = posts.map(p => {
             const isOwn = p.posterUid === user.uid;
             const recurringLabel = RECURRING_LABELS[p.recurring] || p.recurring;
             const badgeClass = p.status === 'full' ? 'badge-full' : p.status === 'cancelled' ? 'badge-cancelled' : `badge-${p.type}`;
@@ -837,7 +830,13 @@
         btn.textContent = '…';
         try {
           const newStatus = action === 'full' ? 'full' : 'cancelled';
-          await updateDoc(doc(db, COLL, id), { status: newStatus, updatedAt: serverTimestamp() });
+          const res = await fetch(`${WORKER_URL}/society/carpooling/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ status: newStatus })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           toast(action === 'full' ? 'Marked as full.' : 'Ride cancelled.');
           loadListings(_activeTab);
         } catch (err) {
@@ -877,25 +876,24 @@
           btn.disabled = true;
           btn.textContent = 'Posting…';
 
-          const postId = `${user.uid}_${Date.now()}`;
           try {
-            await setDoc(doc(db, COLL, postId), {
-              id: postId,
-              type,
-              from,
-              to,
-              date,
-              time,
-              seats: seats ?? null,
-              recurring,
-              notes: notes || null,
-              posterUid: user.uid,
-              posterFlat: resident?.flatNumber || null,
-              posterTelegram: tgUsername || null,
-              status: 'active',
-              createdAt: serverTimestamp(),
+            const res = await fetch(`${WORKER_URL}/society/carpooling`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                type,
+                from,
+                to,
+                date,
+                time,
+                seats: seats ?? null,
+                recurring,
+                notes: notes || null,
+                posterFlat: resident?.flatNumber || null,
+              })
             });
-            // Reset form
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             document.getElementById('cpFrom').value = '';
             document.getElementById('cpTo').value = '';
             document.getElementById('cpDate').value = new Date().toISOString().split('T')[0];
@@ -903,7 +901,6 @@
             document.getElementById('cpNotes').value = '';
             document.getElementById('cpRecurring').value = 'one-time';
             toast('Ride posted successfully!');
-            // Switch to matching tab
             document.querySelector(`[data-tab="${type}"]`)?.click();
           } catch (err) {
             alertEl.innerHTML = '<div class="info-box warn">Failed to post. Please try again.</div>';

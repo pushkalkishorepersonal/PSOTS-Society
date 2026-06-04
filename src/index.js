@@ -58,6 +58,54 @@ function escapeHTML(str) {
   }[c]));
 }
 
+// resolveAuth — extract identity from cookie OR Firebase Bearer token
+// Returns: { uid, residentId, email, name, flatNumber, isAdmin, authMethod: 'cookie'|'firebase' } or null
+async function resolveAuth(request, env) {
+  try {
+    // Try cookie first (OAuth users, direct Google login)
+    const cookieStr = request.headers.get('Cookie') || '';
+    const m = cookieStr.match(/psots_session=([^;]+)/);
+    if (m) {
+      const { data } = await db.getSession(env, m[1]);
+      if (data) {
+        const isAdmin = data.isAdmin || (await db.isAdmin(data.uid, env));
+        return {
+          uid: data.uid,
+          residentId: data.uid,
+          email: data.email,
+          name: data.name,
+          flatNumber: data.flatNumber,
+          isAdmin,
+          authMethod: 'cookie'
+        };
+      }
+    }
+
+    // Fall back to Firebase Bearer token (transition period)
+    const authHeader = request.headers.get('Authorization') || '';
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const resident = await db.getResident(token, env);
+      if (resident) {
+        const isAdmin = resident.isAdmin || (await db.isAdmin(token, env));
+        return {
+          uid: token,
+          residentId: token,
+          email: resident.email,
+          name: resident.name,
+          flatNumber: resident.flatNumber,
+          isAdmin,
+          authMethod: 'firebase'
+        };
+      }
+    }
+
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 // Verify Telegram login widget hash using HMAC-SHA256
 async function verifyTelegramHash(data, botToken) {
   const dataCheckString = Object.keys(data)
@@ -985,7 +1033,7 @@ export default {
 
       // Credentialed endpoints (cookie-based auth) need specific origin + credentials:true.
       // Wildcard origin is rejected by browsers when credentials are sent.
-      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout';
+      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout' || pathname.startsWith('/society/');
       if (request.method === 'OPTIONS') {
         if (isCredentialedAuth) {
           const origin = request.headers.get('Origin') || '';
@@ -1495,7 +1543,7 @@ export default {
           // - Tenant: lease agreement required
           // - Family: no document needed, pending approval
           const isAdminEmail = identifier === 'pushkalkishore@gmail.com';
-          const hasDocument = documentBase64 && verificationMethod === 'document';
+          const hasDocument = (documentBase64 && verificationMethod === 'document') || !!verificationToken;
           const isOwner = residentType === 'owner';
           const isTenant = residentType === 'tenant';
 
@@ -2343,6 +2391,281 @@ export default {
         });
       }
 
+      // ══════════════════════════════════════════════════════════════════════════════════
+      // /SOCIETY/* ENDPOINTS — Credentialed, D1-backed society features
+      // ══════════════════════════════════════════════════════════════════════════════════
+
+      // Helper for credentialed CORS (cookie-based requests from UI)
+      const credentialedCORS = {
+        'Access-Control-Allow-Origin': request.headers.get('Origin') || 'https://society.psots.in',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json'
+      };
+
+      // GET /society/announcements — list announcements (no auth required)
+      if (pathname === '/society/announcements' && request.method === 'GET') {
+        try {
+          const announcements = await db.listAnnouncements(env);
+          return new Response(JSON.stringify({ ok: true, announcements }), {
+            headers: credentialedCORS
+          });
+        } catch (e) {
+          console.error('/society/announcements error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // POST /society/announcements — create announcement (admin only)
+      if (pathname === '/society/announcements' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth?.isAdmin) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 403, headers: credentialedCORS });
+          }
+          const { title, body } = await request.json();
+          const result = await db.createAnnouncement({ title, body, createdBy: auth.uid }, env);
+          return new Response(JSON.stringify({ ok: true, id: result.id }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('POST /society/announcements error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // GET /society/marketplace — list marketplace listings
+      if (pathname === '/society/marketplace' && request.method === 'GET') {
+        try {
+          const category = url.searchParams.get('category');
+          const filters = category ? { category } : {};
+          const listings = await db.listMarketplaceListings(filters, env);
+          return new Response(JSON.stringify({ ok: true, listings }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('/society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // POST /society/marketplace — create listing (auth required)
+      if (pathname === '/society/marketplace' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const body = await request.json();
+          const listing = await db.createMarketplaceListing({
+            ...body,
+            createdBy: auth.uid,
+            posterFlat: auth.flatNumber
+          }, env);
+          return new Response(JSON.stringify({ ok: true, id: listing.id }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('POST /society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // PUT /society/marketplace/:id — update listing (owner only)
+      if (pathname.match(/^\/society\/marketplace\/[^/]+$/) && request.method === 'PUT') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const id = pathname.split('/').pop();
+          const body = await request.json();
+          await db.updateMarketplaceListing(id, body, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('PUT /society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // DELETE /society/marketplace/:id — delete listing (owner only)
+      if (pathname.match(/^\/society\/marketplace\/[^/]+$/) && request.method === 'DELETE') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const id = pathname.split('/').pop();
+          await db.deleteMarketplaceListing(id, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('DELETE /society/marketplace error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // GET /society/carpooling — list carpooling posts
+      if (pathname === '/society/carpooling' && request.method === 'GET') {
+        try {
+          const type = url.searchParams.get('type');
+          const filters = type ? { type } : {};
+          const posts = await db.listCarpoolingPosts(filters, env);
+          return new Response(JSON.stringify({ ok: true, posts }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('/society/carpooling error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // POST /society/carpooling — create carpooling post (auth required)
+      if (pathname === '/society/carpooling' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const body = await request.json();
+          const post = await db.createCarpoolingPost({
+            ...body,
+            createdBy: auth.uid,
+            posterFlat: auth.flatNumber
+          }, env);
+          return new Response(JSON.stringify({ ok: true, id: post.id }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('POST /society/carpooling error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // PUT /society/carpooling/:id — update carpooling post status (auth required)
+      if (pathname.match(/^\/society\/carpooling\/[^/]+$/) && request.method === 'PUT') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const id = pathname.split('/').pop();
+          const body = await request.json();
+          await db.updateCarpoolingPost(id, body, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('PUT /society/carpooling error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // GET /society/lost-found — list lost & found posts
+      if (pathname === '/society/lost-found' && request.method === 'GET') {
+        try {
+          const type = url.searchParams.get('type');
+          const filters = type ? { type } : {};
+          const posts = await db.listLostFoundPosts(filters, env);
+          return new Response(JSON.stringify({ ok: true, posts }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('/society/lost-found error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // POST /society/lost-found — create lost & found post (auth required)
+      if (pathname === '/society/lost-found' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const body = await request.json();
+          const post = await db.createLostFoundPost({
+            ...body,
+            createdBy: auth.uid,
+            posterFlat: auth.flatNumber
+          }, env);
+          return new Response(JSON.stringify({ ok: true, id: post.id }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('POST /society/lost-found error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // PUT /society/lost-found/:id — update lost & found post status (auth required)
+      if (pathname.match(/^\/society\/lost-found\/[^/]+$/) && request.method === 'PUT') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const id = pathname.split('/').pop();
+          const body = await request.json();
+          await db.updateLostFoundPost(id, body, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('PUT /society/lost-found error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // GET /society/recommendations — list recommendations
+      if (pathname === '/society/recommendations' && request.method === 'GET') {
+        try {
+          const category = url.searchParams.get('category');
+          const filters = category ? { category } : {};
+          const recommendations = await db.listRecommendations(filters, env);
+          return new Response(JSON.stringify({ ok: true, recommendations }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('/society/recommendations error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
+      // POST /society/recommendations — create recommendation (auth required)
+      if (pathname === '/society/recommendations' && request.method === 'POST') {
+        try {
+          const auth = await resolveAuth(request, env);
+          if (!auth) {
+            return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
+              { status: 401, headers: credentialedCORS });
+          }
+          const body = await request.json();
+          await db.createRecommendation({
+            ...body,
+            createdBy: auth.uid,
+            status: 'pending'
+          }, env);
+          return new Response(JSON.stringify({ ok: true }),
+            { headers: credentialedCORS });
+        } catch (e) {
+          console.error('POST /society/recommendations error:', e);
+          return new Response(JSON.stringify({ ok: false, error: e.message }),
+            { status: 500, headers: credentialedCORS });
+        }
+      }
+
       // POST /resident/feedback { type, message, flatNumber, residentName, residentEmail }
       // Feedback stored in Firestore only, no email sent
       if (pathname === '/resident/feedback' && request.method === 'POST') {
@@ -2352,7 +2675,7 @@ export default {
 
           if (!message || !type) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
-              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 400, headers: credentialedCORS });
           }
 
           // Rate limit: max 5 per hour per email
@@ -2361,7 +2684,7 @@ export default {
           const rlCount = rlVal ? parseInt(rlVal) : 0;
           if (rlCount >= 5) {
             return new Response(JSON.stringify({ ok: false, error: 'rate_limited' }),
-              { status: 429, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 429, headers: credentialedCORS });
           }
           await env.VIOLATIONS.put(rlKey, String(rlCount + 1), { expirationTtl: 3600 });
 
