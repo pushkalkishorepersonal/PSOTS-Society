@@ -43,6 +43,7 @@ jobs:
         run: npm install
 
       - name: Store BOT_TOKEN in Cloudflare KV
+        if: secrets.TELEGRAM_BOT_TOKEN != ''
         run: npx wrangler kv key put _bot_token "${{ secrets.TELEGRAM_BOT_TOKEN }}" --binding=VIOLATIONS
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
