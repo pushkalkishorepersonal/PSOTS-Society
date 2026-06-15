@@ -798,9 +798,10 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 residentId: data.residentId,
-                name: S.name,
+                residentName: S.name,
                 flatNumber: S.flatNumber,
-                residentType: S.residentType
+                residentType: S.residentType,
+                email: S.googleEmail
               })
             });
           } catch (_) { /* non-critical */ }
