@@ -430,68 +430,27 @@
       </div>
     </div>
 
-    <!-- STEP 3: Dual auth binding -->
+    <!-- STEP 3: Create account with Google -->
     <div class="step" id="step3">
       <button class="back-link" id="btnBack2">← Back</button>
-      <h1>Secure your account</h1>
-      <p class="subtitle">Choose your primary login method. You'll also verify a second factor.</p>
+      <h1>Create your account</h1>
+      <p class="subtitle">Sign in with Google to complete your registration. Your document has been verified and your application will be reviewed by the admin team.</p>
 
-      <div id="authMethodGroup">
-        <div class="auth-method selected" id="am_google" data-method="google">
-          <div class="auth-method-title">🔵 Google Account</div>
-          <div class="auth-method-sub">Sign in with Google + verify phone via SMS OTP</div>
-        </div>
-        <div class="auth-method" id="am_sms" data-method="sms">
-          <div class="auth-method-title">📱 Phone (SMS OTP)</div>
-          <div class="auth-method-sub">Sign in with phone + verify with email OTP</div>
-        </div>
-      </div>
+      <button class="btn btn-google" id="btnGoogleAuth">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
 
-      <!-- Google primary: show SMS widget for binding -->
-      <div id="googlePrimary">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 1 — Sign in with Google to link your account</p>
-        <button class="btn btn-google" id="btnGoogleAuth">
-          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-            <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 2 — Verify your phone number (SMS OTP)</p>
-        <div id="googleSmsWidget" style="opacity:0.4;pointer-events:none"></div>
-        <div id="googleSmsStatus"></div>
-      </div>
-
-      <!-- SMS primary: show email field for binding -->
-      <div id="smsPrimary" style="display:none">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 1 — Verify your phone number (SMS OTP)</p>
-        <div id="smsPrimaryWidget"></div>
-        <div id="smsPrimaryStatus"></div>
-
-        <div id="emailBindSection" style="display:none">
-          <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem;margin-top:1rem">Step 2 — Enter your email address (mandatory)</p>
-          <div class="field">
-            <label for="bindEmail">Email Address *</label>
-            <input type="email" id="bindEmail" placeholder="your@email.com" autocomplete="email" />
-          </div>
-          <button class="btn btn-jade" id="btnSendEmailOtp" style="margin-top:0.8rem">Send Email OTP</button>
-          <div id="emailOtpSection" style="display:none;margin-top:1rem">
-            <div class="otp-box">
-              <div class="otp-label">Enter the 6-digit code sent to your email</div>
-              <div class="otp-input">
-                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
-                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
-                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
-                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
-                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
-                <input type="tel" maxlength="1" inputmode="numeric" class="otp-char" />
-              </div>
-              <button class="btn btn-jade" id="btnVerifyEmailOtp" style="margin-top:0">Verify Email & Complete</button>
-            </div>
-          </div>
-          <div id="emailBindAlert"></div>
+      <div class="field" style="margin-top:1.4rem">
+        <label for="s3Phone">Phone Number <span style="color:var(--muted);font-weight:400">(optional — enables SMS login later)</span></label>
+        <div class="phone-row">
+          <span class="phone-cc">+91</span>
+          <input type="tel" id="s3Phone" placeholder="9999999999" maxlength="10" inputmode="numeric" />
         </div>
       </div>
 
@@ -754,64 +713,43 @@
       showStep('step2');
     });
 
-    // ── STEP 3: Dual auth binding ──
-    let _googleDone = false;
-    let _smsDone = false;
-    let _emailDone = false;
-    let _msg91GoogleLoaded = false;
-    let _msg91SmsLoaded = false;
+    // ── STEP 3: Google OAuth ──
 
-    document.querySelectorAll('.auth-method').forEach(el => {
-      el.addEventListener('click', () => {
-        document.querySelectorAll('.auth-method').forEach(a => a.classList.remove('selected'));
-        el.classList.add('selected');
-        S.authMethod = el.dataset.method;
-        document.getElementById('googlePrimary').style.display = S.authMethod === 'google' ? 'block' : 'none';
-        document.getElementById('smsPrimary').style.display = S.authMethod === 'sms' ? 'block' : 'none';
-        if (S.authMethod === 'sms' && !_msg91SmsLoaded) loadMsg91Widget('smsPrimaryWidget', 'sms');
-      });
+    document.getElementById('btnBack2').addEventListener('click', () => {
+      updateProgress(2);
+      showStep('step2');
     });
 
-    function initAuthStep() {
-      S.authMethod = 'google';
-      document.getElementById('googlePrimary').style.display = 'block';
-      document.getElementById('smsPrimary').style.display = 'none';
-    }
-
-    // Google button → save state then redirect to OAuth
+    // Google button — save state + optional phone, then redirect to OAuth
     document.getElementById('btnGoogleAuth').addEventListener('click', () => {
-      // Save registration state so we can restore after OAuth redirect
+      const rawPhone = document.getElementById('s3Phone').value.trim().replace(/\D/g, '');
       sessionStorage.setItem('psots_reg_pending', JSON.stringify({
         name: S.name,
         flatNumber: S.flatNumber,
         residentType: S.residentType,
-        verificationToken: S.verificationToken
+        verificationToken: S.verificationToken,
+        phone: rawPhone ? `+91${rawPhone}` : ''
       }));
-      // Worker will redirect back here with ?from=google&email=...&name=... for new users
       const next = encodeURIComponent('/society/register.html');
       window.location.href = `${WORKER}/auth/google/start?next=${next}`;
     });
 
-    // Handle Google OAuth return
-    // Two possible return scenarios:
-    // 1. ?from=google&email=...&name=... — Worker redirected new user here (no credential found)
-    // 2. ?oauth_error=... — OAuth failed
+    // Handle Google OAuth return on page load
     async function handleGoogleOAuthReturn() {
       const params = new URLSearchParams(location.search);
       const fromGoogle = params.get('from') === 'google';
       const oauthError = params.get('oauth_error');
 
       if (oauthError) {
-        // OAuth failed — show on step 3 if we have state, else step 1
         const pending = JSON.parse(sessionStorage.getItem('psots_reg_pending') || '{}');
         if (pending.name && pending.flatNumber) {
           S.name = pending.name;
           S.flatNumber = pending.flatNumber;
           S.residentType = pending.residentType || 'owner';
           S.verificationToken = pending.verificationToken;
-          showProgress_step3();
-          showStep('step3');
+          document.getElementById('doneFlatNum').textContent = S.flatNumber;
           updateProgress(3);
+          showStep('step3');
           setAlert('s3Alert', 'Google sign-in failed. Please try again.', 'error');
         }
         history.replaceState({}, '', `/society/register.html${S.flatNumber ? '?flat=' + S.flatNumber : ''}`);
@@ -823,10 +761,8 @@
       const googleEmail = (params.get('email') || '').toLowerCase();
       const googleName = params.get('name') || '';
 
-      // Restore registration state from sessionStorage
       const pending = JSON.parse(sessionStorage.getItem('psots_reg_pending') || '{}');
       if (!pending.flatNumber) {
-        // No pending state — pre-fill what we have and ask user to continue from step 1
         if (googleName) document.getElementById('s1Name').value = googleName;
         history.replaceState({}, '', '/society/register.html');
         return;
@@ -836,247 +772,47 @@
       S.flatNumber = pending.flatNumber;
       S.residentType = pending.residentType || 'owner';
       S.verificationToken = pending.verificationToken;
-      S.googleLinked = true;
+      S.verifiedPhone = pending.phone || '';
       S.googleEmail = googleEmail;
 
-      // Show step 3 with Google done
-      showProgress_step3();
-      showStep('step3');
-      updateProgress(3);
-
-      document.getElementById('btnGoogleAuth').disabled = true;
-      document.getElementById('btnGoogleAuth').innerHTML = '✅ Google linked — ' + escHtml(S.googleEmail);
-      // Enable SMS widget for phone verification
-      document.getElementById('googleSmsWidget').style.opacity = '1';
-      document.getElementById('googleSmsWidget').style.pointerEvents = 'auto';
-      loadMsg91Widget('googleSmsWidget', 'google');
-      setAlert('s3Alert', 'Google account linked! Now verify your phone number to complete registration.', 'success');
-
-      history.replaceState({}, '', `/society/register.html?flat=${S.flatNumber}`);
-    }
-
-    function showProgress_step3() {
       document.getElementById('s2FlatNum').textContent = S.flatNumber;
       document.getElementById('doneFlatNum').textContent = S.flatNumber;
+      updateProgress(3);
+      showStep('step3');
+      sessionStorage.removeItem('psots_reg_pending');
+      history.replaceState({}, '', `/society/register.html?flat=${S.flatNumber}`);
+
+      setAlert('s3Alert', 'Google account linked! Completing registration…', 'info');
+      await completeRegistration();
     }
 
-    // ── MSG91 Widget loader ──
-    let _msg91ScriptLoaded = false;
-
-    async function loadMsg91Widget(containerId, mode) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      try {
-        const res = await fetch(`${WORKER}/auth/msg91-config`);
-        const cfg = await res.json();
-        if (!cfg.ok || !cfg.widgetId) {
-          container.innerHTML = '<div class="info-box warn">SMS verification unavailable. Please use Google login.</div>';
-          return;
-        }
-
-        const initWidget = () => {
-          if (typeof initSendOTP !== 'function') return;
-          initSendOTP(
-            { widgetId: cfg.widgetId, tokenAuth: cfg.tokenAuth, identifier: '', exposeMethods: true },
-            (data) => handleMsg91Callback(data, mode),
-            (err) => { console.error('MSG91 err:', err) },
-            containerId
-          );
-          if (mode === 'google') _msg91GoogleLoaded = true;
-          if (mode === 'sms') _msg91SmsLoaded = true;
-        };
-
-        if (!_msg91ScriptLoaded) {
-          const s = document.createElement('script');
-          s.src = 'https://verify.msg91.com/otp-provider.js';
-          s.onload = () => { _msg91ScriptLoaded = true; initWidget() };
-          document.head.appendChild(s);
-        } else {
-          initWidget();
-        }
-      } catch (e) {
-        container.innerHTML = '<div class="info-box warn">SMS verification unavailable.</div>';
-      }
-    }
-
-    async function handleMsg91Callback(data, mode) {
-      const accessToken = data.access_token || data.accessToken;
-      const phone = data.mobile || data.phone || '';
-
-      if (mode === 'google') {
-        // SMS is secondary factor for Google primary flow
-        await verifyAndLinkSms(accessToken, phone);
-      } else if (mode === 'sms') {
-        // SMS is primary factor
-        await verifySmsAsPrimary(accessToken, phone);
-      }
-    }
-
-    // ── Google primary + SMS secondary ──
-    async function verifyAndLinkSms(accessToken, phone) {
-      const statusEl = document.getElementById('googleSmsStatus');
-      statusEl.innerHTML = '<div class="info-box info">Verifying phone…</div>';
-      try {
-        const res = await fetch(`${WORKER}/auth/sms-verify-only`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessToken, phone })
-        });
-        const data = await res.json();
-        if (data.ok) {
-          S.smsVerifyToken = data.smsVerifyToken;
-          S.verifiedPhone = data.phone || phone;
-          statusEl.innerHTML = '<div class="info-box success">Phone verified!</div>';
-          // Both Google and SMS done — complete registration
-          await completeRegistration('google');
-        } else {
-          statusEl.innerHTML = `<div class="info-box error">SMS verification failed: ${escHtml(data.error || 'unknown error')}. Please try again.</div>`;
-        }
-      } catch (e) {
-        statusEl.innerHTML = '<div class="info-box error">Network error. Please try again.</div>';
-      }
-    }
-
-    // ── SMS primary: verify phone then show email field ──
-    async function verifySmsAsPrimary(accessToken, phone) {
-      const statusEl = document.getElementById('smsPrimaryStatus');
-      statusEl.innerHTML = '<div class="info-box info">Verifying phone…</div>';
-      try {
-        const res = await fetch(`${WORKER}/auth/sms-verify-only`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessToken, phone })
-        });
-        const data = await res.json();
-        if (data.ok) {
-          S.smsVerifyToken = data.smsVerifyToken;
-          S.verifiedPhone = data.phone || phone;
-          statusEl.innerHTML = '<div class="info-box success">Phone verified! Now verify your email below.</div>';
-          document.getElementById('emailBindSection').style.display = 'block';
-        } else {
-          statusEl.innerHTML = `<div class="info-box error">Phone verification failed. Please try again.</div>`;
-        }
-      } catch (e) {
-        statusEl.innerHTML = '<div class="info-box error">Network error. Please try again.</div>';
-      }
-    }
-
-    // ── Email OTP for SMS primary binding ──
-    document.getElementById('btnSendEmailOtp').addEventListener('click', async () => {
-      const email = document.getElementById('bindEmail').value.trim();
-      if (!email || !email.includes('@')) { setAlert('emailBindAlert', 'Please enter a valid email address.'); return; }
-
-      const btn = document.getElementById('btnSendEmailOtp');
+    async function completeRegistration() {
+      const btn = document.getElementById('btnGoogleAuth');
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Sending…';
-
-      try {
-        const res = await fetch(`${WORKER}/auth/send-email-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name: S.name })
-        });
-        const data = await res.json();
-        if (data.ok) {
-          setAlert('emailBindAlert', `OTP sent to ${escHtml(email)}. Check your inbox.`, 'success');
-          document.getElementById('emailOtpSection').style.display = 'block';
-          S.bindEmail = email;
-          setupOtpInputs();
-        } else {
-          setAlert('emailBindAlert', 'Could not send OTP. Please try again.', 'error');
-          btn.disabled = false;
-          btn.innerHTML = 'Send Email OTP';
-        }
-      } catch (e) {
-        setAlert('emailBindAlert', 'Network error. Please try again.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = 'Send Email OTP';
-      }
-    });
-
-    function setupOtpInputs() {
-      const chars = document.querySelectorAll('.otp-char');
-      chars.forEach((inp, i) => {
-        inp.addEventListener('input', () => {
-          inp.value = inp.value.replace(/\D/g, '').slice(-1);
-          if (inp.value && i < chars.length - 1) chars[i + 1].focus();
-        });
-        inp.addEventListener('keydown', e => {
-          if (e.key === 'Backspace' && !inp.value && i > 0) chars[i - 1].focus();
-        });
-        inp.addEventListener('paste', e => {
-          const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
-          chars.forEach((c, j) => { c.value = text[j] || '' });
-          chars[Math.min(text.length, chars.length - 1)].focus();
-          e.preventDefault();
-        });
-      });
-    }
-
-    document.getElementById('btnVerifyEmailOtp').addEventListener('click', async () => {
-      const chars = document.querySelectorAll('.otp-char');
-      const otp = Array.from(chars).map(c => c.value).join('');
-      if (otp.length < 6) { setAlert('emailBindAlert', 'Please enter the complete 6-digit OTP.'); return; }
-
-      const btn = document.getElementById('btnVerifyEmailOtp');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Verifying…';
-
-      try {
-        const res = await fetch(`${WORKER}/auth/verify-email-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: S.bindEmail, otp, registration: true })
-        });
-        const data = await res.json();
-        if (data.ok) {
-          setAlert('emailBindAlert', 'Email verified!', 'success');
-          S.emailVerifyToken = data.token || null;
-          await completeRegistration('sms');
-        } else {
-          setAlert('emailBindAlert', 'Invalid or expired OTP. Please try again.', 'error');
-          btn.disabled = false;
-          btn.innerHTML = 'Verify Email & Complete';
-        }
-      } catch (e) {
-        setAlert('emailBindAlert', 'Network error. Please try again.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = 'Verify Email & Complete';
-      }
-    });
-
-    // ── Complete registration ──
-    async function completeRegistration(primaryMethod) {
-      setAlert('s3Alert', '<div class="info-box info">Creating your account…</div>');
-
-      const isGoogle = primaryMethod === 'google';
-      const body = {
-        type: isGoogle ? 'google' : 'sms',
-        identifier: isGoogle ? (S.googleEmail || '') : S.verifiedPhone,
-        name: S.name,
-        flatNumber: S.flatNumber,
-        residentType: S.residentType,
-        email: isGoogle ? S.googleEmail : S.bindEmail,
-        phone: S.verifiedPhone || '',
-        verificationToken: S.verificationToken,
-        verificationResult: S.verificationResult,
-        verificationMethod: S.verificationToken ? 'document' : undefined,
-      };
-
-      if (!isGoogle && S.smsVerifyToken) body.smsVerifyToken = S.smsVerifyToken;
+      btn.innerHTML = '<span class="spinner spinner-jade"></span> Submitting…';
+      setAlert('s3Alert', 'Creating your account…', 'info');
 
       try {
         const res = await fetch(`${WORKER}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify(body)
+          body: JSON.stringify({
+            type: 'google',
+            identifier: S.googleEmail || '',
+            name: S.name,
+            flatNumber: S.flatNumber,
+            residentType: S.residentType,
+            email: S.googleEmail || '',
+            phone: S.verifiedPhone || '',
+            verificationToken: S.verificationToken,
+            verificationResult: S.verificationResult,
+            verificationMethod: S.verificationToken ? 'document' : undefined,
+          })
         });
         const data = await res.json();
 
         if (data.ok) {
-          // Notify admin
           try {
             await fetch(`${WORKER}/admin/notify-registration`, {
               method: 'POST',
@@ -1090,26 +826,26 @@
             });
           } catch (_) { /* non-critical */ }
 
-          sessionStorage.removeItem('psots_reg_pending');
-          document.getElementById('doneFlatNum').textContent = S.flatNumber;
           showStep('stepDone');
         } else {
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg> Try Again with Google';
           const errMsg = {
-            missing_fields: 'Some required fields are missing. Please go back and check your details.',
-            email_phone_required: 'Both email and phone are required for registration.',
-            flat_occupied: 'This flat already has a registered owner.',
-            sms_not_verified: 'Phone verification required. Please complete the SMS OTP step.',
-            sms_token_expired: 'Phone verification expired. Please verify your phone again.',
+            missing_fields: 'Some required fields are missing. Please go back to Step 1 and check your details.',
+            email_required: 'Could not retrieve your email from Google. Please try again.',
+            flat_occupied: 'This flat already has a registered owner. <a href="/society/login.html" style="color:var(--jade);font-weight:600">Sign in instead →</a>',
+            credential_exists: 'You already have an account with this Google account. <a href="/society/login.html" style="color:var(--jade);font-weight:600">Sign in instead →</a>',
             already_registered: 'An account with these details already exists. <a href="/society/login.html" style="color:var(--jade);font-weight:600">Sign in instead →</a>',
           }[data.error] || ('Registration failed: ' + escHtml(data.error || 'unknown error'));
           setAlert('s3Alert', errMsg, 'error');
         }
       } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = 'Try Again with Google';
         setAlert('s3Alert', 'Network error. Please try again.', 'error');
       }
     }
 
-    // ── Handle Google OAuth return on page load ──
     handleGoogleOAuthReturn();
   </script>
 </body>
