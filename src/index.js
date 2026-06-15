@@ -2932,8 +2932,21 @@ export default {
             }).catch(err => console.error(`Failed to send confirmation email to ${email}:`, err));
           }
 
-          // TODO: Update Firestore resident document with approval/rejection status
-          // This will require Firebase admin SDK or REST API call with proper auth
+          // Update resident status in D1
+          try {
+            let credential = await db.getCredentialByTypeAndIdentifier('google', email, env);
+            if (!credential) credential = await db.getCredentialByTypeAndIdentifier('email', email, env);
+            if (credential) {
+              const residentId = credential.resident_id || credential.residentId;
+              const newStatus = action === 'approve' ? 'approved' : 'rejected';
+              await db.updateResident(residentId, { status: newStatus, updatedAt: new Date().toISOString() }, env);
+              console.log(`/admin/process-action: set resident ${residentId} → ${newStatus}`);
+            } else {
+              console.error(`/admin/process-action: no credential found for email ${email}`);
+            }
+          } catch (dbErr) {
+            console.error('/admin/process-action: D1 update failed:', dbErr.message);
+          }
 
           // Send Telegram notification to admin about the action taken
           const botToken = await getBotToken(env.VIOLATIONS);
