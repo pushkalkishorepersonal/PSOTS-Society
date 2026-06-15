@@ -1525,11 +1525,11 @@ export default {
             return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          if (!email || !phone) {
+          if (!email) {
             return new Response(JSON.stringify({
               ok: false,
-              error: 'email_phone_required',
-              message: 'Both email and phone number are required for registration. This allows you to login using either method.'
+              error: 'email_required',
+              message: 'Email is required for registration.'
             }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
           if (!['google', 'email', 'telegram', 'sms'].includes(type)) {
@@ -1635,7 +1635,8 @@ export default {
           const hasUnverifiedDocument = hasDocument && status !== 'approved';
           let residentStatus;
           if (hasVerifiedToken) {
-            residentStatus = 'approved';
+            // PDF was verified — admin still needs to approve (except for admin email)
+            residentStatus = isAdminEmail ? 'approved' : 'pending';
           } else if (isAdminEmail) {
             residentStatus = 'approved';
           } else if (hasVerifiedDocument) {
