@@ -1962,10 +1962,13 @@ export default {
         try { await db.updateCredentialLastUsed(credential.credential_id || credential.credentialId, env); } catch (_e) { /* non-fatal */ }
 
         const cookie = `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
+        const nextDest = stateData.next && stateData.next.includes('register')
+          ? '/society/login.html?signed_in=1'
+          : (stateData.next || '/society/login.html');
         return new Response(null, {
           status: 302,
           headers: {
-            'Location': `${FRONTEND_BASE}${stateData.next}`,
+            'Location': `${FRONTEND_BASE}${nextDest}`,
             'Set-Cookie': cookie
           }
         });

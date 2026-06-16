@@ -474,17 +474,6 @@
       googleEmail: ''
     };
 
-    // Redirect already-signed-in users to dashboard (unless returning from OAuth)
-    (async () => {
-      const params = new URLSearchParams(location.search);
-      if (params.get('from') === 'google' || params.get('oauth_error')) return;
-      try {
-        const r = await fetch(`${WORKER}/auth/me`, { credentials: 'include' });
-        const d = await r.json();
-        if (d.ok && d.user) window.location.replace('/society/index.html');
-      } catch (_) {}
-    })();
-
     // ── Helpers ──
     function showStep(id) {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
