@@ -3,7 +3,7 @@
  * Sprint 1.5 — PWA Layer 2 (offline support)
  */
 
-const CACHE_VERSION = 'psots-v1';
+const CACHE_VERSION = 'psots-v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PAGES_CACHE = `${CACHE_VERSION}-pages`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
