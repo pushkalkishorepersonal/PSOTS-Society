@@ -6544,7 +6544,7 @@ Return JSON only:
 {"ownerName":"...","paidByName":"...","flatNumber":"...","societyName":"...","confidence":"high/medium/low"}`;
 
               const geminiRes = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${env.GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
                 {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -6562,7 +6562,9 @@ Return JSON only:
 
               const geminiData = await geminiRes.json();
               try {
-                const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+                let responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+                // Strip markdown code fences if Gemini wraps JSON in ```json ... ```
+                responseText = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
                 const parsed = JSON.parse(responseText);
                 extracted = { ...extracted, ...parsed };
                 extracted.extractionMethod = 'gemini_fallback';
