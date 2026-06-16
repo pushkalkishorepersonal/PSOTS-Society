@@ -496,6 +496,23 @@ function decodeJwtPayload(authHeader) {
   }
 }
 
+// Resolves user from psots_session cookie or legacy Bearer JWT
+async function resolveSessionAuth(request, env) {
+  const cookieStr = request.headers.get('Cookie') || '';
+  const m = cookieStr.match(/psots_session=([^;]+)/);
+  if (m) {
+    const session = await env.SESSIONS_KV.get(m[1], 'json');
+    if (session?.uid) return { uid: session.uid, email: session.email || '' };
+  }
+  const authHeader = request.headers.get('Authorization') || '';
+  if (authHeader.startsWith('Bearer ')) {
+    const payload = decodeJwtPayload(authHeader);
+    const uid = payload?.user_id || payload?.sub || '';
+    if (uid) return { uid, email: payload?.email || '' };
+  }
+  return null;
+}
+
 // ── INVITE AUDIT HELPER ──────────────────────────────────────
 async function auditInvitePatch(token, fields, env) {
   try {
@@ -1981,7 +1998,12 @@ export default {
         if (!m) return new Response(JSON.stringify({ ok: false, error: 'no_session' }), { status: 401, headers: corsHeaders });
         const { data } = await db.getSession(env, m[1]);
         if (!data) return new Response(JSON.stringify({ ok: false, error: 'invalid_session' }), { status: 401, headers: corsHeaders });
-        return new Response(JSON.stringify({ ok: true, user: data }), { headers: corsHeaders });
+        // Rolling 30-day extension: refresh TTL on each auth check
+        await env.SESSIONS_KV.put(m[1], JSON.stringify(data), { expirationTtl: 30 * 24 * 60 * 60 });
+        const refreshCookie = `psots_session=${m[1]}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
+        return new Response(JSON.stringify({ ok: true, user: data }), {
+          headers: { ...corsHeaders, 'Set-Cookie': refreshCookie }
+        });
       }
 
       // POST /auth/sms-login — MSG91 SMS OTP verification + login/signup intent.
@@ -4128,11 +4150,12 @@ export default {
       // POST /invite/create — create family member invite
       if (pathname === '/invite/create' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
+          const inviterUid = authCtx.uid;
 
           const body = await request.json().catch(() => ({}));
           const { flatNumber, relation } = body;
@@ -4141,18 +4164,12 @@ export default {
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // Decode uid from ID token and look up inviter
-          const payload = decodeJwtPayload(authHeader);
-          const inviterUid = payload?.user_id || payload?.sub || '';
           let inviterName = '';
           let inviterTelegram = '';
-          if (inviterUid) {
-            const inviterDoc = await db.firestoreGet(`residents/${inviterUid}`, env);
-            const inviter = parseFirestoreDoc(inviterDoc);
-            if (inviter) {
-              inviterName = [inviter.firstName, inviter.lastName].filter(Boolean).join(' ').trim() || inviter.name || '';
-              inviterTelegram = inviter.telegramUsername || inviter.tgUsername || '';
-            }
+          const inviterResident = await db.getResidentV2(inviterUid, env);
+          if (inviterResident) {
+            inviterName = inviterResident.name || '';
+            inviterTelegram = inviterResident.telegramUsername || '';
           }
 
           const method = body.emailSentTo ? 'email' : 'qr';
@@ -4230,17 +4247,12 @@ export default {
       // POST /invite/send-email — send family member invite via email
       if (pathname === '/invite/send-email' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const payload = decodeJwtPayload(authHeader);
-          const inviterUid = payload?.user_id || payload?.sub || '';
-          if (!inviterUid) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
+          const inviterUid = authCtx.uid;
 
           // Rate limit: max 10 invites per hour per user
           const rateLimitKey = `${inviterUid}:invite_send_email`;
@@ -4610,14 +4622,12 @@ export default {
       // GET /family/list?flatNumber=X — get family members for a flat
       if (pathname === '/family/list' && request.method === 'GET') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-
-          const payload = decodeJwtPayload(authHeader);
-          const callerUid = payload?.user_id || payload?.sub || '';
+          const callerUid = authCtx.uid;
 
           const url = new URL(request.url);
           const flatNumber = url.searchParams.get('flatNumber');
@@ -4645,17 +4655,12 @@ export default {
       // POST /family/approve — primary resident approves family member
       if (pathname === '/family/approve' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const payload = decodeJwtPayload(authHeader);
-          const primaryUid = payload?.user_id || payload?.sub || '';
-          if (!primaryUid) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
+          const primaryUid = authCtx.uid;
 
           const body = await request.json();
           const memberUid = body.memberUid;
@@ -4733,17 +4738,12 @@ export default {
       // POST /family/reject — primary resident rejects family member
       if (pathname === '/family/reject' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const payload = decodeJwtPayload(authHeader);
-          const primaryUid = payload?.user_id || payload?.sub || '';
-          if (!primaryUid) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
+          const primaryUid = authCtx.uid;
 
           const body = await request.json();
           const memberUid = body.memberUid;
@@ -4985,21 +4985,12 @@ export default {
       // GET /tenant/list?ownerUid=xxx — list tenants for an owner
       if (pathname === '/tenant/list' && request.method === 'GET') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const uid = decodeJwtPayload(authHeader);
-          const ownerUid = url.searchParams.get('ownerUid');
-          if (!ownerUid) {
-            return new Response(JSON.stringify({ ok: false, error: 'ownerUid_required' }),
-              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-          if (ownerUid !== uid && uid !== 'pushkalkishore@gmail.com') {
-            return new Response(JSON.stringify({ ok: false, error: 'forbidden' }),
-              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
+          const ownerUid = authCtx.uid;
           const tenants = await firestoreQuery('tenants', [['ownerUid', ownerUid]], env);
           const results = [];
           for (const t of tenants) {
@@ -5595,18 +5586,17 @@ export default {
 
       if (pathname.startsWith('/device/list') && request.method === 'GET') {
         try {
-          const auth = request.headers.get('Authorization');
-          if (!auth) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const payload = decodeJwtPayload(auth);
-          const uid = payload?.user_id || payload?.sub || '';
+          const uid = authCtx.uid;
           const url = new URL(request.url);
           const queryUid = url.searchParams.get('uid');
           const currentToken = url.searchParams.get('currentToken');
 
-          if (!queryUid || (queryUid !== uid && uid !== 'pushkalkishore@gmail.com')) {
+          if (queryUid && queryUid !== uid) {
             return new Response(JSON.stringify({ ok: false, error: 'forbidden' }),
               { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
@@ -5628,13 +5618,12 @@ export default {
 
       if (pathname === '/device/revoke' && request.method === 'POST') {
         try {
-          const auth = request.headers.get('Authorization');
-          if (!auth) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const payload = decodeJwtPayload(auth);
-          const uid = payload?.user_id || payload?.sub || '';
+          const uid = authCtx.uid;
           const { deviceToken } = await request.json();
 
           if (!deviceToken) {
@@ -6146,36 +6135,30 @@ Original message: "${rec.description.substring(0, 300)}"`;
 
       if (pathname === '/resident/privacy-settings' && request.method === 'POST') {
         try {
-          const auth = request.headers.get('Authorization');
-          if (!auth) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          const payload = decodeJwtPayload(auth);
-          const uid = payload?.user_id || payload?.sub;
-          if (!uid) return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
 
           const settings = await request.json();
-          const updateData = {
-            privacyShowFlat: settings.privacyShowFlat !== undefined ? settings.privacyShowFlat : true,
-            privacyAllowContact: settings.privacyAllowContact !== undefined ? settings.privacyAllowContact : true,
-            privacyShowNameOnRecs: settings.privacyShowNameOnRecs !== undefined ? settings.privacyShowNameOnRecs : true,
-            privacyEmailOnContact: settings.privacyEmailOnContact !== undefined ? settings.privacyEmailOnContact : true
-          };
-
-          await firestoreSet(`residents/${uid}`, updateData, env);
+          const privacyJson = JSON.stringify({
+            showFlat: settings.privacyShowFlat !== false,
+            allowContact: settings.privacyAllowContact !== false,
+            showNameOnRecommendations: settings.privacyShowNameOnRecs !== false,
+            emailOnContact: settings.privacyEmailOnContact !== false
+          });
+          await env.PSOTS_DB.prepare('UPDATE residents SET privacy_settings = ?, updated_at = CURRENT_TIMESTAMP WHERE resident_id = ?')
+            .bind(privacyJson, authCtx.uid).run();
 
           return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (e) {
-          console.error('/resident/privacy-settings error:', e);
           return new Response(JSON.stringify({ ok: false, error: 'server_error' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
       }
 
       if (pathname === '/resident/my-access-log' && request.method === 'GET') {
         try {
-          const auth = request.headers.get('Authorization');
-          if (!auth) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          const payload = decodeJwtPayload(auth);
-          const uid = payload?.user_id || payload?.sub;
-          if (!uid) return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const uid = authCtx.uid;
 
           const logs = await firestoreQuery('admin_access_log', [['targetUid', '==', uid]], env);
           const sorted = logs.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || '')).slice(0, 20);
@@ -6187,18 +6170,15 @@ Original message: "${rec.description.substring(0, 300)}"`;
 
           return new Response(JSON.stringify({ ok: true, events }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (e) {
-          console.error('/resident/my-access-log error:', e);
           return new Response(JSON.stringify({ ok: false, error: 'server_error' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
       }
 
       if (pathname === '/resident/delete-account' && request.method === 'POST') {
         try {
-          const auth = request.headers.get('Authorization');
-          if (!auth) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          const payload = decodeJwtPayload(auth);
-          const uid = payload?.user_id || payload?.sub;
-          if (!uid) return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const uid = authCtx.uid;
 
           const { confirmation } = await request.json();
           if (confirmation !== 'DELETE') {
@@ -6256,59 +6236,42 @@ Original message: "${rec.description.substring(0, 300)}"`;
         }
       }
 
-      // GET /resident/profile — Get authenticated resident profile with email from credentials
+      // GET /resident/profile — Get authenticated resident profile from D1
       if (pathname === '/resident/profile' && request.method === 'GET') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const payload = await verifyFirebaseToken(authHeader, env);
-          if (!payload) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          const uid = payload?.user_id || payload?.sub;
-          const email = payload?.email || '';
-
-          if (!uid) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          // Get credential to find residentId
-          const creds = await firestoreQuery('credentials', [['firebaseUid', uid]], env);
-          const cred = creds?.[0];
-          if (!cred) {
-            return new Response(JSON.stringify({ ok: false, error: 'credential_not_found' }),
-              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          // Get resident by residentId
-          const resDoc = parseFirestoreDoc(await db.firestoreGet(`residents/${cred.residentId}`, env));
-          if (!resDoc) {
+          const residentRow = await db.getResidentV2(authCtx.uid, env);
+          if (!residentRow) {
             return new Response(JSON.stringify({ ok: false, error: 'resident_not_found' }),
               { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // Return resident with email from credentials
+          let privacySettings = {};
+          try { privacySettings = JSON.parse(residentRow.privacySettings || '{}'); } catch (_) {}
+
           const resident = {
-            residentId: resDoc.id || cred.residentId,
-            name: resDoc.name,
-            flatNumber: resDoc.flatNumber,
-            residentType: resDoc.residentType,
-            status: resDoc.status,
-            email: cred.identifier || email,
-            phone: resDoc.phone || null
+            residentId: residentRow.residentId || authCtx.uid,
+            name: residentRow.name,
+            flatNumber: residentRow.flatNumber,
+            residentType: residentRow.residentType,
+            status: residentRow.status,
+            email: authCtx.email || residentRow.email || '',
+            phone: residentRow.phone || null,
+            secondaryEmail: residentRow.secondaryEmail || null,
+            secondaryPhone: residentRow.secondaryPhone || null,
+            telegram: residentRow.telegramUsername || null,
+            isAdmin: !!residentRow.isAdmin,
+            privacySettings
           };
 
           return new Response(JSON.stringify({ ok: true, resident }),
             { status: 200, headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
-          console.error('/resident/profile error:', err);
           return new Response(JSON.stringify({ ok: false, error: 'server_error' }),
             { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
@@ -6317,76 +6280,20 @@ Original message: "${rec.description.substring(0, 300)}"`;
       // POST /resident/update-profile — Update resident profile (name, phone)
       if (pathname === '/resident/update-profile' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-
-          // Superadmin bypass: extract email from JWT without crypto verification
-          const token = authHeader?.slice(7);
-          const parts = token?.split('.');
-          let earlyEmail = '';
-          let earlyUid = '';
-          try {
-            let p = parts[1].replace(/-/g,'+').replace(/_/g,'/');
-            while (p.length % 4) p += '=';
-            const decoded = JSON.parse(atob(p));
-            earlyEmail = decoded.email || '';
-            earlyUid = decoded.user_id || decoded.sub || '';
-          } catch(_) {}
-
-          let payload = null;
-          let uid = '';
-
-          if (earlyEmail === 'pushkalkishore@gmail.com' && earlyUid) {
-            // Superadmin bypass: skip token verification for superadmin
-            payload = { email: earlyEmail, user_id: earlyUid, sub: earlyUid };
-            uid = earlyUid;
-          } else {
-            // Normal flow: verify token for regular residents
-            payload = await verifyFirebaseToken(authHeader, env);
-            if (!payload) {
-              return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
-                { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-            uid = payload?.user_id || payload?.sub;
-            if (!uid) {
-              return new Response(JSON.stringify({ ok: false, error: 'invalid_auth' }),
-                { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-          }
+          const uid = authCtx.uid;
+          const residentId = uid;
 
           const body = await request.json();
           const { name, phone, secondaryEmail, secondaryPhone, telegram } = body;
-          const email = payload?.email;
 
           if (name !== undefined && name !== null && !name.trim()) {
             return new Response(JSON.stringify({ ok: false, error: 'name_required' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          // Get credential to find residentId by email
-          let cred = null;
-          let residentId = null;
-
-          if (email) {
-            const creds = await firestoreQuery('credentials', [['identifier', email]], env);
-            cred = creds?.[0];
-            residentId = cred?.residentId;
-          }
-
-          // Fallback: Check old schema residents by uid directly
-          if (!residentId) {
-            const oldResident = await firestoreGet(`residents/${uid}`, env);
-            if (oldResident && oldResident.fields) {
-              residentId = uid;
-            }
-          }
-
-          if (!residentId) {
-            return new Response(JSON.stringify({ ok: false, error: 'credential_not_found' }),
-              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
           // Update resident document with updateMask to preserve other fields
@@ -6420,18 +6327,15 @@ Original message: "${rec.description.substring(0, 300)}"`;
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const success = await firestoreSet(`residents/${residentId}`, updatePayload, env, updateFields);
-          console.log(`/resident/update-profile: Updated ${residentId} with fields:`, updateFields);
-
-          if (!success) {
-            return new Response(JSON.stringify({ ok: false, error: 'update_failed' }),
-              { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
+          const colMap = { name: 'name', phone: 'phone', secondaryEmail: 'secondary_email', secondaryPhone: 'secondary_phone', telegram: 'telegram_username' };
+          const setClauses = updateFields.map(f => `${colMap[f] || f} = ?`);
+          const values = updateFields.map(f => updatePayload[f] ?? null);
+          await env.PSOTS_DB.prepare(`UPDATE residents SET ${setClauses.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE resident_id = ?`)
+            .bind(...values, residentId).run();
 
           return new Response(JSON.stringify({ ok: true }),
             { status: 200, headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
-          console.error('/resident/update-profile error:', err);
           return new Response(JSON.stringify({ ok: false, error: 'server_error' }),
             { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
