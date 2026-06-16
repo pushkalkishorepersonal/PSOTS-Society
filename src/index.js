@@ -6561,8 +6561,13 @@ Return JSON only:
               );
 
               const geminiData = await geminiRes.json();
+              console.log('Gemini raw response:', JSON.stringify(geminiData).substring(0, 500));
               try {
-                let responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+                // gemini-2.5-flash is a thinking model: parts[0] = thoughts, parts[N-1] = actual response
+                // Find the non-thinking part (no `thought: true` flag)
+                const parts = geminiData.candidates?.[0]?.content?.parts || [];
+                const responsePart = parts.find(p => !p.thought) || parts[parts.length - 1] || {};
+                let responseText = responsePart.text || '{}';
                 // Strip markdown code fences if Gemini wraps JSON in ```json ... ```
                 responseText = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
                 const parsed = JSON.parse(responseText);
