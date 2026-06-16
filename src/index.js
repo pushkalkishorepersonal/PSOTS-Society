@@ -1050,7 +1050,7 @@ export default {
 
       // Credentialed endpoints (cookie-based auth) need specific origin + credentials:true.
       // Wildcard origin is rejected by browsers when credentials are sent.
-      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout' || pathname.startsWith('/society/');
+      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout' || pathname === '/auth/sms-login' || pathname.startsWith('/society/');
       if (request.method === 'OPTIONS') {
         if (isCredentialedAuth) {
           const origin = request.headers.get('Origin') || '';
@@ -2077,10 +2077,11 @@ export default {
             console.error('mintFirebaseCustomToken failed:', ctErr.message);
           }
 
+          const smsOrigin = request.headers.get('Origin') || '';
+          const smsAllowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(smsOrigin) ? smsOrigin : 'https://society.psots.in';
+          const smsCookie = `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
           return new Response(JSON.stringify({
             ok: true,
-            sessionId,
-            customToken,
             resident: {
               residentId: credential.residentId,
               name: resident.name,
@@ -2091,7 +2092,12 @@ export default {
               residentType: resident.residentType || null,
               isAdmin: resident.isAdmin || false
             }
-          }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+          }), { headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': smsAllowOrigin,
+            'Access-Control-Allow-Credentials': 'true',
+            'Set-Cookie': smsCookie
+          } });
         } catch (e) {
           console.error('/auth/sms-login error:', e);
           return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
