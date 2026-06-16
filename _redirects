@@ -16,6 +16,16 @@ https://society.psots.in/society/join.html /society/join.html 200
 https://society.psots.in/recommendations /society/recommendations.html 200
 https://society.psots.in/jobs /society/jobs.html 200
 
+# Kill register-simple — hard redirect all variants to register.html
+/society/register-simple.html              /society/register.html    301
+/society/register-simple                   /society/register.html    301
+/society/registration-simple.html          /society/register.html    301
+/society/registration-simple               /society/register.html    301
+https://society.psots.in/society/register-simple.html    /society/register.html    301
+https://society.psots.in/society/register-simple         /society/register.html    301
+https://society.psots.in/society/registration-simple.html /society/register.html   301
+https://society.psots.in/society/registration-simple     /society/register.html    301
+
 # Legacy redirects (psots.in)
 /residents       /society/register.html    301
 /profile         /society/profile.html     301
