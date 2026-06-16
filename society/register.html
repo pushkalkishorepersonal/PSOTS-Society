@@ -647,15 +647,15 @@
         S.verificationResult = data.result;
         S.verificationToken = data.token || null;
 
-        if (data.result === 'verified') {
-          setAlert('s2Alert', '');
+        if (data.result === 'verified' || data.result === 'manual_review') {
+          // verified: AI confirmed document matches
+          // manual_review: AI couldn't fully read it — admin will review after account creation
+          const note = data.result === 'manual_review'
+            ? 'Document uploaded. An admin will verify it before approving your account.'
+            : '';
+          setAlert('s2Alert', note, 'info');
           updateProgress(3);
           showStep('step3');
-        } else if (data.result === 'manual_review') {
-          // Forward to admin for manual review
-          await forwardToAdminReview(data);
-          document.getElementById('mrFlatNum').textContent = S.flatNumber;
-          showStep('stepManualReview');
         } else {
           // Verification failed
           const extracted = data.extracted || {};

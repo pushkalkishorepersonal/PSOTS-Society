@@ -6646,9 +6646,18 @@ Return JSON only:
               if (!isPreRegistration) {
                 await firestoreSet(`residents/${residentId}`, { status: 'verified_owner' }, env, ['status']);
               }
-            } else if (checks.society && (extracted.confidence === 'high' || extracted.confidence === 'medium')) {
+            } else if (checks.society && checks.flatNumber && checks.ownerName) {
+              // All checks pass but low confidence — send for manual review
+              result = 'manual_review';
+            } else if (!extracted.extractionMethod) {
+              // AI completely failed to extract anything — can't say doc is invalid,
+              // send to admin for manual review rather than blocking the user
+              result = 'manual_review';
+            } else if (checks.society || checks.flatNumber) {
+              // Partial match — manual review
               result = 'manual_review';
             }
+            // else: extracted data but clearly wrong society/flat → invalid_document (stays)
           }
 
           // Store for admin review or token generation
