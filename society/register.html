@@ -421,7 +421,7 @@
     <div class="step" id="step3">
       <button class="back-link" id="btnBack2">← Back</button>
       <h1>Create your account</h1>
-      <p class="subtitle">Sign in with Google to complete your registration. Your document has been verified and your application will be reviewed by the admin team.</p>
+      <p class="subtitle" id="step3Subtitle">Sign in with Google to complete your registration.</p>
 
       <button class="btn btn-google" id="btnGoogleAuth">
         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -648,12 +648,10 @@
         S.verificationToken = data.token || null;
 
         if (data.result === 'verified' || data.result === 'manual_review') {
-          // verified: AI confirmed document matches
-          // manual_review: AI couldn't fully read it — admin will review after account creation
-          const note = data.result === 'manual_review'
-            ? 'Document uploaded. An admin will verify it before approving your account.'
-            : '';
-          setAlert('s2Alert', note, 'info');
+          setAlert('s2Alert', '');
+          document.getElementById('step3Subtitle').textContent = data.result === 'verified'
+            ? 'Document verified ✓ — sign in with Google to complete your registration.'
+            : 'Document uploaded — sign in with Google to submit your application for admin review.';
           updateProgress(3);
           showStep('step3');
         } else {
