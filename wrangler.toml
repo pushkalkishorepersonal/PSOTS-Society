@@ -4,7 +4,8 @@ compatibility_date = "2024-01-01"
 
 # Custom domain routing
 routes = [
-  { pattern = "telegram.psots.in/*", zone_name = "psots.in" }
+  { pattern = "telegram.psots.in/*", zone_name = "psots.in" },
+  { pattern = "login.society.psots.in/*", zone_name = "psots.in" }
 ]
 
 # Note: Environment variables are injected dynamically by GitHub Actions workflow
