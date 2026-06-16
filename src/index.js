@@ -1142,28 +1142,22 @@ export default {
             return new Response(JSON.stringify({ error: 'flatNumber required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // Check if this uid already has an account (re-registration prevention)
-          if (uid) {
-            const existingByUid = parseFirestoreDoc(await db.firestoreGet(`residents/${uid}`, env));
-            if (existingByUid) {
-              return new Response(JSON.stringify({
-                alreadyRegistered: true,
-                flatNumber: existingByUid.flatNumber,
-                status: existingByUid.status
-              }), { headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-          }
+          // Query D1 residents by flat_number
+          const { results: flatResidents } = await env.PSOTS_DB.prepare(
+            `SELECT resident_id, name, status, resident_type FROM residents WHERE flat_number = ? ORDER BY created_at ASC`
+          ).bind(flatNumber).all();
 
-          const residentsRaw = await firestoreQuery('residents', [['flatNumber', flatNumber]], env);
-          const residents = residentsRaw.map(doc => parseFirestoreDoc(doc));
-          const pending = residents.find(r => r.status === 'pending');
+          const pending = flatResidents.find(r => r.status === 'pending');
           if (pending) {
             return new Response(JSON.stringify({ exists: true, status: 'pending' }), { headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const owner = residents.find(r => r.status === 'approved' && r.residentType === 'owner');
+          const owner = flatResidents.find(r => (r.status === 'approved' || r.status === 'verified_owner') && r.resident_type === 'owner');
           if (owner) {
             const ownerFirstName = (owner.name || '').split(' ')[0] || 'Resident';
             return new Response(JSON.stringify({ exists: true, status: 'occupied', ownerFirstName }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          if (flatResidents.length > 0) {
+            return new Response(JSON.stringify({ exists: true, status: 'pending' }), { headers: { 'Content-Type': 'application/json', ...CORS } });
           }
           return new Response(JSON.stringify({ exists: false, status: 'empty' }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (e) {
@@ -1962,10 +1956,13 @@ export default {
         try { await db.updateCredentialLastUsed(credential.credential_id || credential.credentialId, env); } catch (_e) { /* non-fatal */ }
 
         const cookie = `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
+        const nextDest = stateData.next && stateData.next.includes('register')
+          ? '/society/login.html?signed_in=1'
+          : (stateData.next || '/society/login.html');
         return new Response(null, {
           status: 302,
           headers: {
-            'Location': `${FRONTEND_BASE}${stateData.next}`,
+            'Location': `${FRONTEND_BASE}${nextDest}`,
             'Set-Cookie': cookie
           }
         });

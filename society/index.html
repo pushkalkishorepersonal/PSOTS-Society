@@ -675,108 +675,53 @@
     </div>
   </footer>
 
-  <script type="module">
-    import { db } from '../../js/core/firebase.js';
-    import { setupHybridAuth, onChange, signOutUser } from '../js/core/hybrid-auth.js';
-    import { collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { renderSocietyNav } from '../../js/components/shared/SocietyNav.js';
+  <script>
+    const WORKER = 'https://telegram.psots.in';
 
-    // Setup hybrid auth (Firebase + Telegram session) and check immediately
-    const { user: authUser } = await setupHybridAuth();
-    if (!authUser) {
-      window.location.href = '/society/login.html';
-      throw new Error('Not authenticated');
-    }
+    (async () => {
+      // Check D1 session
+      let session;
+      try {
+        const r = await fetch(`${WORKER}/auth/me`, { credentials: 'include' });
+        const d = await r.json();
+        if (!d.ok || !d.user) { window.location.href = '/society/login.html'; return; }
+        session = d.user;
+      } catch (_) { window.location.href = '/society/login.html'; return; }
 
-    // Render shared nav
-    await renderSocietyNav('societyNav', 'dashboard');
-
-    // Auth state check
-    onChange(async ({ user, resident }) => {
-      if (!user) {
-        await signOutUser();
-        return;
-      }
-
-      // Personalize greeting with time-aware message
-      const name = resident?.name?.split(' ')[0] || user.displayName?.split(' ')[0] || 'neighbour';
+      // Greeting
+      const name = (session.name || 'neighbour').split(' ')[0];
       const hour = new Date().getHours();
       let greeting, subtext;
-
-      if (hour >= 5 && hour < 12) {
-        greeting = `Good morning, ${name}! ☀️`;
-        subtext = 'Hope your day is off to a great start.';
-      } else if (hour >= 12 && hour < 17) {
-        greeting = `Good afternoon, ${name}! 🌤️`;
-        subtext = 'Hope your day is going well.';
-      } else if (hour >= 17 && hour < 21) {
-        greeting = `Good evening, ${name}! 🌆`;
-        subtext = 'Hope you had a wonderful day.';
-      } else {
-        greeting = `Good night, ${name}! 🌙`;
-        subtext = 'Rest well, see you tomorrow.';
-      }
+      if (hour >= 5 && hour < 12) { greeting = `Good morning, ${name}! ☀️`; subtext = 'Hope your day is off to a great start.'; }
+      else if (hour >= 12 && hour < 17) { greeting = `Good afternoon, ${name}! 🌤️`; subtext = 'Hope your day is going well.'; }
+      else if (hour >= 17 && hour < 21) { greeting = `Good evening, ${name}! 🌆`; subtext = 'Hope you had a wonderful day.'; }
+      else { greeting = `Good night, ${name}! 🌙`; subtext = 'Rest well, see you tomorrow.'; }
 
       document.getElementById('greetingText').textContent = greeting;
-      document.getElementById('greetingAvatar').textContent = resident?.flatNumber ? '🏘️' : '👤';
-
+      document.getElementById('greetingAvatar').textContent = session.flatNumber ? '🏘️' : '👤';
       const metaLines = [subtext];
-      if (resident?.flatNumber) {
-        metaLines.push(`Flat ${resident.flatNumber} · Prestige Song of the South`);
-      }
+      if (session.flatNumber) metaLines.push(`Flat ${session.flatNumber} · Prestige Song of the South`);
       document.getElementById('greetingMeta').textContent = metaLines.join('\n');
 
-      // Load announcements
-      try {
-        const q = query(
-          collection(db, 'announcements'),
-          orderBy('createdAt', 'desc'),
-          limit(5)
-        );
-        const snapshot = await getDocs(q);
-        const announcementsList = document.getElementById('announcementsList');
+      // Announcements placeholder until Worker endpoint is ready
+      document.getElementById('announcementsList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <p class="empty-state-text">No announcements yet. Check back soon!</p>
+        </div>`;
 
-        if (snapshot.empty) {
-          announcementsList.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">📭</div>
-              <p class="empty-state-text">No announcements yet. Check back soon!</p>
-            </div>
-          `;
-        } else {
-          announcementsList.innerHTML = snapshot.docs.map(doc => {
-            const data = doc.data();
-            const date = data.createdAt?.toDate?.() || new Date();
-            const dateStr = date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
-            return `
-              <div class="announcement-item">
-                <div class="announcement-title">${data.title || '(No title)'}</div>
-                <div class="announcement-date">${dateStr}</div>
-                <div class="announcement-body">${data.body || '(No content)'}</div>
-              </div>
-            `;
-          }).join('');
-        }
-      } catch (err) {
-        console.error('Announcements error:', err);
-        document.getElementById('announcementsList').innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">⚠️</div>
-            <p class="empty-state-text">Could not load announcements. Please refresh.</p>
+      // Inject minimal nav
+      const isAdmin = session.email === 'pushkalkishore@gmail.com' || session.isAdmin;
+      document.getElementById('societyNav').innerHTML = `
+        <nav style="background:var(--jade);color:#fff;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
+          <a href="/society/" style="color:#fff;text-decoration:none;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700">PSOTS Society</a>
+          <div style="display:flex;align-items:center;gap:1rem">
+            ${isAdmin ? `<a href="/society/admin.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:600;background:rgba(255,255,255,0.15);padding:5px 10px;border-radius:6px">Admin</a>` : ''}
+            <a href="/society/profile.html" title="Profile" style="color:#fff;text-decoration:none;font-size:22px">👤</a>
+            <button onclick="fetch('${WORKER}/auth/logout',{method:'POST',credentials:'include'}).then(()=>location.href='/society/login.html')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Sign out</button>
           </div>
-        `;
-      }
-
-      // Load stats (placeholder - can integrate with real data)
-      try {
-        const announcementsSnap = await getDocs(query(collection(db, 'announcements'), limit(100)));
-        const listingsSnap = await getDocs(query(collection(db, 'marketplace_listings'), limit(100)));
-        document.getElementById('statAnnouncements').textContent = announcementsSnap.size;
-        document.getElementById('statListings').textContent = listingsSnap.size;
-      } catch (err) {
-        console.debug('Stats load error:', err);
-      }
-    });
+        </nav>`;
+    })();
   </script>
   <script src="/society/js/pwa-init.js" defer></script>
 </body>

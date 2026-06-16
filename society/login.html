@@ -468,6 +468,11 @@
     // Handle OAuth error returns (e.g. pending approval after Google login attempt)
     (function handleOAuthError() {
       const params = new URLSearchParams(location.search);
+      if (params.get('signed_in') === '1') {
+        setError(flatError, 'You\'re already signed in. Enter your flat number below to continue.');
+        history.replaceState({}, '', '/society/login.html');
+        return;
+      }
       const oauthError = params.get('oauth_error');
       const status = params.get('status');
       if (!oauthError) return;
