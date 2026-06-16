@@ -6518,67 +6518,65 @@ Reply in JSON only:
             console.error('⚠️ Workers AI failed, falling back to Gemini:', aiError.message);
           }
 
-          // STEP 2: Fall back to Gemini if Workers AI failed or low confidence
+          // STEP 2: Fall back to Claude if Workers AI failed or low confidence
           if (!extracted.societyName || extracted.confidence === 'low') {
-            console.log('🔄 Workers AI incomplete, trying Gemini fallback...');
+            console.log('🔄 Workers AI incomplete, trying Claude fallback...');
 
             try {
               const isLease = residentType === 'tenant';
-              const geminiPrompt = isLease ?
-              `Analyze this rental/lease agreement document.
+              const prompt = isLease
+                ? `Analyze this rental/lease agreement document.
 EXTRACT:
 1. PROPERTY: Look for "Prestige Song of the South" or "PSOTS"
 2. TENANT NAME: Full name of person renting
-3. FLAT NUMBER: e.g., "15167"
+3. FLAT NUMBER: digits only (e.g. "15167" not "Tower 15-15167")
 4. LEASE DATES: Start and end dates
-Return JSON only:
-{"tenantName":"...","flatNumber":"...","societyName":"...","leaseStartDate":"DD/MM/YYYY","leaseEndDate":"DD/MM/YYYY","confidence":"high/medium/low"}` :
-              `Analyze this ownership document from a residential society (MyGate maintenance invoice/receipt).
+Return JSON only, no explanation:
+{"tenantName":"...","flatNumber":"...","societyName":"...","leaseStartDate":"DD/MM/YYYY","leaseEndDate":"DD/MM/YYYY","confidence":"high/medium/low"}`
+                : `Analyze this residential society document (MyGate maintenance invoice/receipt).
 EXTRACT:
 1. SOCIETY NAME: Look for "Prestige Song of the South" or "PSOTS" at top
-2. FLAT NUMBER: After "House:" or "Flat:" label. Return DIGITS ONLY (e.g. "15167" not "Tower 15-15167")
+2. FLAT NUMBER: After "House:" or "Flat:" label. Digits only (e.g. "15167" not "Tower 15-15167")
 3. OWNER NAME: After "Owner:" label
-4. PAID BY NAME: After "Paid By:" label (the person who paid - can be a family member of the owner)
-5. CONFIDENCE: high if society + flat + at least one name found, medium if 2 of 3 categories
-Return JSON only:
+4. PAID BY NAME: After "Paid By:" label (may be a family member)
+5. CONFIDENCE: "high" if society+flat+name all found, "medium" if 2 of 3, "low" otherwise
+Return JSON only, no explanation:
 {"ownerName":"...","paidByName":"...","flatNumber":"...","societyName":"...","confidence":"high/medium/low"}`;
 
-              const geminiRes = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
-                {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    contents: [{
-                      parts: [
-                        { text: geminiPrompt },
-                        { inline_data: { mime_type: mimeType, data: base64Document } }
-                      ]
-                    }],
-                    generationConfig: { temperature: 0.1, maxOutputTokens: 300 }
-                  })
-                }
-              );
+              // Build content block — PDFs use document type, images use image type
+              const contentBlock = mimeType === 'application/pdf'
+                ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Document } }
+                : { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64Document } };
 
-              const geminiData = await geminiRes.json();
-              console.log('Gemini raw response:', JSON.stringify(geminiData).substring(0, 500));
+              const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'x-api-key': env.ANTHROPIC_API_KEY,
+                  'anthropic-version': '2023-06-01',
+                  'anthropic-beta': 'pdfs-2024-09-25',
+                  'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                  model: 'claude-haiku-4-5-20251001',
+                  max_tokens: 300,
+                  messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: prompt }] }]
+                })
+              });
+
+              const claudeData = await claudeRes.json();
+              console.log('Claude response status:', claudeRes.status, JSON.stringify(claudeData).substring(0, 300));
               try {
-                // gemini-2.5-flash is a thinking model: parts[0] = thoughts, parts[N-1] = actual response
-                // Find the non-thinking part (no `thought: true` flag)
-                const parts = geminiData.candidates?.[0]?.content?.parts || [];
-                const responsePart = parts.find(p => !p.thought) || parts[parts.length - 1] || {};
-                let responseText = responsePart.text || '{}';
-                // Strip markdown code fences if Gemini wraps JSON in ```json ... ```
-                responseText = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+                let responseText = claudeData.content?.[0]?.text || '{}';
+                responseText = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
                 const parsed = JSON.parse(responseText);
                 extracted = { ...extracted, ...parsed };
-                extracted.extractionMethod = 'gemini_fallback';
-                console.log('📄 Gemini extraction:', JSON.stringify(extracted, null, 2));
+                extracted.extractionMethod = 'claude_fallback';
+                console.log('📄 Claude extraction:', JSON.stringify(extracted));
               } catch (e) {
-                console.error('❌ Gemini parsing failed:', e);
+                console.error('❌ Claude parsing failed:', e.message);
               }
-            } catch (geminiError) {
-              console.error('❌ Gemini fallback failed:', geminiError.message);
+            } catch (claudeError) {
+              console.error('❌ Claude fallback failed:', claudeError.message);
             }
           }
           // Validate extracted data
