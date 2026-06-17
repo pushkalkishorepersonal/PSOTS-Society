@@ -712,15 +712,18 @@
 
       // Inject minimal nav
       const isAdmin = session.email === 'pushkalkishore@gmail.com' || session.isAdmin;
-      document.getElementById('societyNav').innerHTML = `
-        <nav style="background:var(--jade);color:#fff;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
-          <a href="/society/" style="color:#fff;text-decoration:none;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700">PSOTS Society</a>
-          <div style="display:flex;align-items:center;gap:1rem">
-            ${isAdmin ? `<a href="/society/admin.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:600;background:rgba(255,255,255,0.15);padding:5px 10px;border-radius:6px">Admin</a>` : ''}
-            <a href="/society/profile.html" title="Profile" style="color:#fff;text-decoration:none;font-size:22px">👤</a>
-            <button onclick="fetch('${WORKER}/auth/logout',{method:'POST',credentials:'include'}).then(()=>location.href='/society/login.html')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Sign out</button>
-          </div>
-        </nav>`;
+      const navEl = document.getElementById('societyNav');
+      navEl.innerHTML = '<nav style="background:#1a4a3a;color:#fff;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)">'
+        + '<a href="/society/" style="color:#fff;text-decoration:none;font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:700">PSOTS Society</a>'
+        + '<div style="display:flex;align-items:center;gap:1rem">'
+        + (isAdmin ? '<a href="/society/admin.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:600;background:rgba(255,255,255,0.15);padding:5px 10px;border-radius:6px">Admin</a>' : '')
+        + '<a href="/society/profile.html" style="color:#fff;text-decoration:none;font-size:22px" title="Profile">&#128100;</a>'
+        + '<button id="navSignOut" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Sign out</button>'
+        + '</div></nav>';
+      document.getElementById('navSignOut').addEventListener('click', function() {
+        fetch(WORKER + '/auth/logout', { method: 'POST', credentials: 'include' })
+          .finally(function() { location.href = '/society/login.html'; });
+      });
     })();
   </script>
   <script src="/society/js/pwa-init.js" defer></script>
