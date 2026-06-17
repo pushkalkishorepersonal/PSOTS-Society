@@ -1,16 +1,12 @@
 /**
  * SocietyNav.js — Shared navigation component for all society pages.
- * Replaces inline nav HTML across all 9 pages.
- * Handles: desktop layout, mobile hamburger, profile dropdown, admin link RBAC
+ * Cookie-based auth (psots_session) — no Firebase dependency.
  */
 
-import { auth } from '../../core/firebase.js';
-import { signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { db, getDoc, doc } from '../../core/db.js';
-import { SUPER_ADMIN } from '../../config/constants.js';
+const WORKER = 'https://telegram.psots.in';
+const SUPER_ADMIN = 'pushkalkishore@gmail.com';
 
 const navStyles = `
-  /* ── Global page tokens & body ─────────────────────────── */
   :root {
     --jade:         #1a4a3a;
     --jade-light:   #2d6b54;
@@ -32,10 +28,7 @@ const navStyles = `
     --shadow-card:  0 6px 28px rgba(139,90,26,0.10), 0 1px 4px rgba(0,0,0,0.04);
     --shadow-lift:  0 14px 44px rgba(139,90,26,0.16), 0 3px 10px rgba(0,0,0,0.05);
     --shadow-jade:  0 8px 24px rgba(26,74,58,0.20);
-    --r-md:  12px;
-    --r-lg:  16px;
-    --r-xl:  20px;
-    --r-2xl: 24px;
+    --r-md:  12px; --r-lg: 16px; --r-xl: 20px; --r-2xl: 24px;
     --font-serif: 'Playfair Display', Georgia, serif;
     --font-sans:  'Nunito Sans', system-ui, sans-serif;
   }
@@ -47,26 +40,19 @@ const navStyles = `
     background: var(--cream);
     color: var(--ink);
     line-height: 1.65;
-    /* Subtle warm paper grain */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
   }
 
-  /* Global card hover polish */
-  .card, [class*="listing-card"], [class*="item-card"], [class*="request-card"] {
-    transition: transform 0.20s ease, box-shadow 0.20s ease !important;
-  }
   .card:hover, [class*="listing-card"]:hover, [class*="item-card"]:hover, [class*="request-card"]:hover {
     transform: translateY(-2px) !important;
     box-shadow: var(--shadow-lift) !important;
   }
 
-  /* Global button press feel */
   button:not(:disabled):active, .btn:not(:disabled):active {
     transform: translateY(1px) scale(0.985) !important;
   }
 
-  /* Smooth scrollbar */
-  ::-webkit-scrollbar       { width: 5px; }
+  ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--cream); }
   ::-webkit-scrollbar-thumb { background: rgba(160,130,90,0.30); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(160,130,90,0.50); }
@@ -75,14 +61,13 @@ const navStyles = `
     *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   }
 
-  /* ── Navigation ───────────────────────────────────────── */
   .society-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 40px;
     height: 62px;
-    background: rgba(255, 252, 247, 0.94);
+    background: rgba(255,252,247,0.94);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
@@ -91,286 +76,105 @@ const navStyles = `
     z-index: 200;
     transition: box-shadow 0.24s ease;
   }
-
-  .society-nav.scrolled {
-    box-shadow: 0 2px 20px rgba(139, 90, 26, 0.10);
-  }
+  .society-nav.scrolled { box-shadow: 0 2px 20px rgba(139,90,26,0.10); }
 
   .society-nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: var(--ink);
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: var(--ink); flex-shrink: 0;
   }
+  .society-nav-logo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .society-nav-logo img { width: 34px; height: 34px; object-fit: contain; }
+  .society-nav-brand-text { display: none; }
+  .society-nav-brand-name { font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: var(--jade); line-height: 1.2; letter-spacing: -0.01em; }
+  .society-nav-brand-sub { font-size: 9.5px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
 
-  .society-nav-logo {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .society-nav-logo img {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
-  }
-
-  .society-nav-brand-text {
-    display: none;
-  }
-
-  .society-nav-brand-text.visible {
-    display: block;
-  }
-
-  .society-nav-brand-name {
-    font-family: var(--font-serif);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--jade);
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-  }
-
-  .society-nav-brand-sub {
-    font-size: 9.5px;
-    color: var(--muted);
-    font-weight: 500;
-    letter-spacing: 0.04em;
-  }
-
-  /* Desktop nav links */
-  .society-nav-links {
-    display: flex;
-    gap: 4px;
-    flex: 1;
-    margin-left: 32px;
-  }
-
+  .society-nav-links { display: flex; gap: 4px; flex: 1; margin-left: 32px; }
   .society-nav-link {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    text-decoration: none;
-    padding: 6px 10px;
-    border-radius: 8px;
-    transition: color 0.18s, background 0.18s;
-    white-space: nowrap;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-decoration: none; padding: 6px 10px; border-radius: 8px;
+    transition: color 0.18s, background 0.18s; white-space: nowrap;
   }
+  .society-nav-link:hover { color: var(--jade); background: var(--jade-pale); }
+  .society-nav-link.active { color: var(--jade); background: var(--jade-pale); font-weight: 700; }
 
-  .society-nav-link:hover {
-    color: var(--jade);
-    background: var(--jade-pale);
-  }
-
-  .society-nav-link.active {
-    color: var(--jade);
-    background: var(--jade-pale);
-    font-weight: 700;
-  }
-
-  /* Auth section */
-  .society-nav-auth {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
+  .society-nav-auth { display: flex; align-items: center; gap: 8px; }
   .society-nav-user {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 10px 5px 5px;
-    border-radius: 24px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px 5px 5px; border-radius: 24px;
+    border: 1.5px solid var(--border); background: var(--surface);
     transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
   }
-
-  .society-nav-user:hover {
-    border-color: rgba(26,74,58,0.30);
-    box-shadow: 0 2px 12px rgba(139,90,26,0.10);
-    background: #fffdf9;
-  }
-
+  .society-nav-user:hover { border-color: rgba(26,74,58,0.30); box-shadow: 0 2px 12px rgba(139,90,26,0.10); background: #fffdf9; }
   .society-nav-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--jade);
-    color: var(--gold-pale);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10.5px;
-    font-weight: 700;
-    font-family: var(--font-serif);
-    flex-shrink: 0;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--jade); color: var(--gold-pale);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 700; font-family: var(--font-serif); flex-shrink: 0;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.8), 0 0 0 3px rgba(26,74,58,0.12);
   }
+  .society-nav-user-text { font-size: 13px; font-weight: 700; color: var(--jade); }
+  .society-nav-user-arrow { font-size: 8px; color: var(--muted); margin-left: 1px; }
 
-  .society-nav-user-text {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--jade);
-  }
-
-  .society-nav-user-arrow {
-    font-size: 8px;
-    color: var(--muted);
-    margin-left: 1px;
-  }
-
-  /* Dropdown */
   .society-nav-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 40px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 12px 36px rgba(26,18,8,0.13), 0 2px 8px rgba(0,0,0,0.04);
-    min-width: 172px;
-    overflow-y: auto; overflow-x: hidden;
-    z-index: 300;
-    display: none;
+    position: absolute; top: calc(100% + 10px); right: 40px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; box-shadow: 0 12px 36px rgba(26,18,8,0.13), 0 2px 8px rgba(0,0,0,0.04);
+    min-width: 172px; overflow: hidden; z-index: 300; display: none;
     animation: dropIn 0.18s cubic-bezier(0.22,1,0.36,1);
   }
-
   @keyframes dropIn {
     from { opacity: 0; transform: translateY(-8px) scale(0.96); }
     to   { opacity: 1; transform: none; }
   }
-
   .society-nav-dropdown.open { display: block; }
-
-  .society-nav-dropdown a,
-  .society-nav-dropdown button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 11px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
-    text-decoration: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font-family: var(--font-sans);
-    transition: background 0.14s;
+  .society-nav-dropdown a, .society-nav-dropdown button {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 11px 16px; font-size: 13px; font-weight: 600; color: var(--ink);
+    text-decoration: none; background: none; border: none; cursor: pointer;
+    text-align: left; font-family: var(--font-sans); transition: background 0.14s;
     border-bottom: 1px solid var(--border);
   }
-
-  .society-nav-dropdown a:last-child,
-  .society-nav-dropdown button:last-child { border-bottom: none; }
-
-  .society-nav-dropdown a:hover,
-  .society-nav-dropdown button:hover { background: var(--cream); }
-
+  .society-nav-dropdown a:last-child, .society-nav-dropdown button:last-child { border-bottom: none; }
+  .society-nav-dropdown a:hover, .society-nav-dropdown button:hover { background: var(--cream); }
   .society-nav-dropdown button.signout-btn { color: var(--terra); }
 
-  /* Hamburger */
   .society-nav-hamburger {
-    display: none;
-    width: 36px; height: 36px;
-    background: none;
-    border: 1.5px solid var(--border);
-    border-radius: 9px;
-    cursor: pointer;
-    color: var(--ink);
-    font-size: 16px;
-    align-items: center;
-    justify-content: center;
+    display: none; width: 36px; height: 36px; background: none;
+    border: 1.5px solid var(--border); border-radius: 9px; cursor: pointer;
+    color: var(--ink); font-size: 16px; align-items: center; justify-content: center;
     transition: background 0.15s, border-color 0.15s;
   }
+  .society-nav-hamburger:hover { background: var(--cream-dark); border-color: rgba(160,130,90,0.40); }
 
-  .society-nav-hamburger:hover {
-    background: var(--cream-dark);
-    border-color: rgba(160,130,90,0.40);
-  }
-
-  .society-nav-hamburger.visible { display: flex; }
-
-  /* Mobile menu */
   .society-nav-mobile-menu {
-    display: none;
-    position: fixed;
-    top: 62px;
-    left: 0; right: 0;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    z-index: 250;
-    max-height: 0;
-    overflow-y: auto; overflow-x: hidden;
+    display: none; position: fixed; top: 62px; left: 0; right: 0;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    z-index: 250; max-height: 0; overflow-y: auto;
     transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08); flex-direction: column;
   }
-
-  .society-nav-mobile-menu.open {
-    display: flex;
-    max-height: calc(100vh - 62px);
+  .society-nav-mobile-menu.open { display: flex; max-height: calc(100vh - 62px); }
+  .society-nav-mobile-menu a, .society-nav-mobile-menu button {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 14px 22px; font-size: 14px; font-weight: 600; color: var(--ink);
+    text-decoration: none; background: none; border: none; cursor: pointer;
+    text-align: left; font-family: var(--font-sans); border-bottom: 1px solid var(--border); transition: background 0.14s;
   }
-
-  .society-nav-mobile-menu a,
-  .society-nav-mobile-menu button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 14px 22px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    text-decoration: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font-family: var(--font-sans);
-    border-bottom: 1px solid var(--border);
-    transition: background 0.14s;
-  }
-
-  .society-nav-mobile-menu a:hover,
-  .society-nav-mobile-menu button:hover { background: var(--cream); }
-
+  .society-nav-mobile-menu a:hover, .society-nav-mobile-menu button:hover { background: var(--cream); }
   .society-nav-mobile-menu button.signout-btn {
-    color: #c0392b;
-    font-weight: 700;
-    background: rgba(192,57,43,0.04);
-    border-top: 2px solid var(--border);
-    margin-top: auto;
+    color: #c0392b; font-weight: 700; background: rgba(192,57,43,0.04);
+    border-top: 2px solid var(--border); margin-top: auto;
   }
-
-  .society-nav-mobile-menu button.signout-btn:hover {
-    background: rgba(192,57,43,0.08);
-  }
-
+  .society-nav-mobile-menu button.signout-btn:hover { background: rgba(192,57,43,0.08); }
   .society-nav-mobile-profile-section {
-    padding: 14px 22px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    padding: 14px 22px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
     background: linear-gradient(135deg, rgba(26,74,58,0.04), transparent);
   }
-
   .society-nav-mobile-profile-text { font-size: 13px; }
-  .society-nav-mobile-profile-text .name  { font-weight: 700; color: var(--ink); display: block; }
+  .society-nav-mobile-profile-text .name { font-weight: 700; color: var(--ink); display: block; }
   .society-nav-mobile-profile-text .email { font-size: 11px; color: var(--muted); }
 
-  /* Mobile responsive */
   @media (max-width: 768px) {
     .society-nav { padding: 0 18px; }
     .society-nav-links { display: none; }
@@ -380,292 +184,183 @@ const navStyles = `
     .society-nav-mobile-menu { display: none; }
     .society-nav-mobile-menu.open { display: block; }
   }
-
   @media (min-width: 769px) {
     .society-nav-hamburger { display: none !important; }
     .society-nav-mobile-menu { display: none !important; }
     .society-nav-brand-text { display: block; }
   }
 
-  /* ── Mobile Bottom Navigation ──────────────────────────── */
   .society-bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: none;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 4px 0;
-    z-index: 190;
-    box-shadow: 0 -2px 12px rgba(26,18,8,0.08);
+    position: fixed; bottom: 0; left: 0; right: 0; display: none;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 4px 0; z-index: 190; box-shadow: 0 -2px 12px rgba(26,18,8,0.08);
   }
-
-  @media (max-width: 768px) {
-    .society-bottom-nav { display: flex; }
-  }
-
-  .bottom-nav-items {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
+  @media (max-width: 768px) { .society-bottom-nav { display: flex; } }
+  .bottom-nav-items { display: flex; justify-content: space-around; width: 100%; padding-bottom: env(safe-area-inset-bottom); }
   .bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 10px;
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 10px;
-    font-weight: 600;
-    transition: color var(--t-fast);
-    flex: 1;
-    text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; padding: 10px; color: var(--muted); text-decoration: none;
+    font-size: 10px; font-weight: 600; transition: color 0.15s; flex: 1; text-align: center;
   }
-
-  .bottom-nav-item:active,
-  .bottom-nav-item.active {
-    color: var(--jade);
-  }
-
-  .bottom-nav-icon {
-    font-size: 22px;
-    line-height: 1;
-  }
+  .bottom-nav-item:active, .bottom-nav-item.active { color: var(--jade); }
+  .bottom-nav-icon { font-size: 22px; line-height: 1; }
 `;
 
-export async function renderSocietyNav(containerId, activePage = '') {
+/**
+ * Renders the full society navigation bar.
+ * @param {string} containerId - ID of the container div
+ * @param {string} activePage  - Active page key for link highlighting
+ * @param {object|null} session - Session from /auth/me. If null, fetches automatically.
+ */
+export async function renderSocietyNav(containerId, activePage, session) {
+  activePage = activePage || '';
+  session = session || null;
+
   const container = document.getElementById(containerId);
-  if (!container) {
-    console.error(`SocietyNav: Container #${containerId} not found`);
-    return;
+  if (!container) return;
+
+  if (!session) {
+    try {
+      const r = await fetch(WORKER + '/auth/me', { credentials: 'include' });
+      const d = await r.json();
+      if (!d.ok || !d.user) { window.location.href = '/society/login.html'; return; }
+      session = d.user;
+    } catch (_) { window.location.href = '/society/login.html'; return; }
   }
 
-  // Inject styles
   const styleEl = document.createElement('style');
   styleEl.textContent = navStyles;
   document.head.appendChild(styleEl);
 
-  // Create nav structure
-  const navHTML = `
-    <nav class="society-nav" id="societyNavBar">
-      <a class="society-nav-brand" href="/society/">
-        <div class="society-nav-logo">
-          <img src="/assets/psots-logo.png" alt="PSOTS" />
-        </div>
-        <div class="society-nav-brand-text">
-          <div class="society-nav-brand-name">PSOTS Society</div>
-          <div class="society-nav-brand-sub">Prestige Song of the South</div>
-        </div>
-      </a>
+  function lnk(page, href, label) {
+    var cls = 'society-nav-link' + (activePage === page ? ' active' : '');
+    return '<a class="' + cls + '" href="' + href + '">' + label + '</a>';
+  }
 
-      <!-- Desktop nav links -->
-      <div class="society-nav-links">
-        <a class="society-nav-link ${activePage === 'dashboard' ? 'active' : ''}" href="/society/">Dashboard</a>
-        <a class="society-nav-link ${activePage === 'marketplace' ? 'active' : ''}" href="/society/marketplace.html">Marketplace</a>
-        <a class="society-nav-link ${activePage === 'guide' ? 'active' : ''}" href="/society/guide.html">Guide</a>
-        <a class="society-nav-link ${activePage === 'lostandfound' ? 'active' : ''}" href="/society/lostandfound.html">Lost & Found</a>
-        <a class="society-nav-link ${activePage === 'carpooling' ? 'active' : ''}" href="/society/carpooling.html">Carpooling</a>
-        <a class="society-nav-link ${activePage === 'recommendations' ? 'active' : ''}" href="/society/recommendations.html">Recommendations</a>
-        <a class="society-nav-link ${activePage === 'jobs' ? 'active' : ''}" href="/society/jobs.html">Jobs</a>
-      </div>
+  function blnk(page, href, icon, label) {
+    var cls = 'bottom-nav-item' + (activePage === page ? ' active' : '');
+    return '<a href="' + href + '" class="' + cls + '"><div class="bottom-nav-icon">' + icon + '</div><span>' + label + '</span></a>';
+  }
 
-      <!-- Desktop auth -->
-      <div class="society-nav-auth">
-        <div style="position:relative;">
-          <div class="society-nav-user" onclick="window.societyNavToggleDropdown(event)">
-            <div class="society-nav-avatar" id="societyNavAvatar">NA</div>
-            <span class="society-nav-user-text" id="societyNavGreeting">Resident</span>
-            <span class="society-nav-user-arrow">▾</span>
-          </div>
-          <div id="societyNavDropdown" class="society-nav-dropdown">
-            <a href="/society/profile.html">👤 My Profile</a>
-            <a href="/society/admin.html" id="societyNavAdminLink" style="display:none;">⚙️ Admin Panel</a>
-            <button class="signout-btn" onclick="window.societyNavSignOut()">↩ Sign Out</button>
-          </div>
-        </div>
-      </div>
+  container.innerHTML =
+    '<nav class="society-nav" id="societyNavBar">'
+    + '<a class="society-nav-brand" href="/society/">'
+    +   '<div class="society-nav-logo"><img src="/assets/psots-logo.png" alt="PSOTS"></div>'
+    +   '<div class="society-nav-brand-text">'
+    +     '<div class="society-nav-brand-name">PSOTS Society</div>'
+    +     '<div class="society-nav-brand-sub">Prestige Song of the South</div>'
+    +   '</div>'
+    + '</a>'
+    + '<div class="society-nav-links">'
+    +   lnk('dashboard',       '/society/',                        'Dashboard')
+    +   lnk('marketplace',     '/society/marketplace.html',        'Marketplace')
+    +   lnk('guide',           '/society/guide.html',              'Guide')
+    +   lnk('lostandfound',    '/society/lostandfound.html',       'Lost & Found')
+    +   lnk('carpooling',      '/society/carpooling.html',         'Carpooling')
+    +   lnk('recommendations', '/society/recommendations.html',    'Recommendations')
+    +   lnk('jobs',            '/society/jobs.html',               'Jobs')
+    + '</div>'
+    + '<div class="society-nav-auth"><div style="position:relative">'
+    +   '<div class="society-nav-user" id="snUserBtn">'
+    +     '<div class="society-nav-avatar" id="snAvatar">?</div>'
+    +     '<span class="society-nav-user-text" id="snGreeting">Resident</span>'
+    +     '<span class="society-nav-user-arrow">&#9660;</span>'
+    +   '</div>'
+    +   '<div id="snDropdown" class="society-nav-dropdown">'
+    +     '<a href="/society/profile.html">&#128100; My Profile</a>'
+    +     '<a href="/society/admin.html" id="snAdminLink" style="display:none">&#9881; Admin Panel</a>'
+    +     '<button class="signout-btn" id="snSignOut">&#8617; Sign Out</button>'
+    +   '</div>'
+    + '</div></div>'
+    + '<button class="society-nav-hamburger" id="snHamburger">&#9776;</button>'
+    + '<div id="snMobileMenu" class="society-nav-mobile-menu">'
+    +   '<div class="society-nav-mobile-profile-section">'
+    +     '<div class="society-nav-avatar" id="snMobileAvatar">?</div>'
+    +     '<div class="society-nav-mobile-profile-text">'
+    +       '<span class="name" id="snMobileName">Resident</span>'
+    +       '<span class="email" id="snMobileEmail"></span>'
+    +     '</div>'
+    +   '</div>'
+    +   '<a href="/society/">&#127968; Dashboard</a>'
+    +   '<a href="/society/marketplace.html">&#128722; Marketplace</a>'
+    +   '<a href="/society/guide.html">&#128216; Guide</a>'
+    +   '<a href="/society/lostandfound.html">&#128269; Lost & Found</a>'
+    +   '<a href="/society/carpooling.html">&#128663; Carpooling</a>'
+    +   '<a href="/society/recommendations.html">&#11088; Recommendations</a>'
+    +   '<a href="/society/jobs.html">&#128188; Jobs</a>'
+    +   '<a href="/society/profile.html">&#128100; My Profile</a>'
+    +   '<a href="/society/admin.html" id="snMobileAdminLink" style="display:none">&#9881; Admin Panel</a>'
+    +   '<button class="signout-btn" id="snMobileSignOut">&#8617; Sign Out</button>'
+    + '</div>'
+    + '</nav>'
+    + '<nav class="society-bottom-nav"><div class="bottom-nav-items">'
+    +   blnk('dashboard',   '/society/',                     '&#127968;', 'Home')
+    +   blnk('marketplace', '/society/marketplace.html',     '&#128722;', 'Market')
+    +   blnk('guide',       '/society/guide.html',           '&#128216;', 'Guide')
+    +   blnk('profile',     '/society/profile.html',         '&#128100;', 'Profile')
+    +   '<button class="bottom-nav-item" id="snBottomMore" style="background:none;border:none;cursor:pointer"><div class="bottom-nav-icon">&#8801;</div><span>More</span></button>'
+    + '</div></nav>';
 
-      <!-- Mobile hamburger -->
-      <button class="society-nav-hamburger" id="societyNavHamburger" onclick="window.societyNavToggleMobileMenu()">☰</button>
+  // Populate session data
+  var name = session.name || 'Resident';
+  var firstName = name.split(' ')[0];
+  var initials = name.split(' ').map(function(n) { return n[0] || ''; }).join('').substring(0, 2).toUpperCase();
 
-      <!-- Mobile menu -->
-      <div id="societyNavMobileMenu" class="society-nav-mobile-menu">
-        <div class="society-nav-mobile-profile-section">
-          <div class="society-nav-avatar" id="societyNavMobileAvatar">NA</div>
-          <div class="society-nav-mobile-profile-text">
-            <span class="name" id="societyNavMobileGreeting">Resident</span>
-            <span class="email" id="societyNavMobileEmail">email@example.com</span>
-          </div>
-        </div>
-        <a href="/society/">Dashboard</a>
-        <a href="/society/marketplace.html">Marketplace</a>
-        <a href="/society/guide.html">Guide</a>
-        <a href="/society/lostandfound.html">Lost & Found</a>
-        <a href="/society/carpooling.html">Carpooling</a>
-        <a href="/society/recommendations.html">Recommendations</a>
-        <a href="/society/jobs.html">Jobs</a>
-        <a href="/society/profile.html">👤 My Profile</a>
-        <a href="/society/admin.html" id="societyNavMobileAdminLink" style="display:none;">⚙️ Admin Panel</a>
-        <button class="signout-btn" onclick="window.societyNavSignOut()">↩ Sign Out</button>
-      </div>
-    </nav>
+  document.getElementById('snAvatar').textContent       = initials;
+  document.getElementById('snGreeting').textContent     = 'Hi ' + firstName;
+  document.getElementById('snMobileAvatar').textContent = initials;
+  document.getElementById('snMobileName').textContent   = firstName;
+  document.getElementById('snMobileEmail').textContent  = session.email || '';
 
-    <!-- Mobile bottom navigation -->
-    <nav class="society-bottom-nav" id="societyBottomNav">
-      <div class="bottom-nav-items">
-        <a href="/society/" class="bottom-nav-item ${activePage === 'dashboard' ? 'active' : ''}">
-          <div class="bottom-nav-icon">🏠</div>
-          <span>Home</span>
-        </a>
-        <a href="/society/marketplace.html" class="bottom-nav-item ${activePage === 'marketplace' ? 'active' : ''}">
-          <div class="bottom-nav-icon">🛒</div>
-          <span>Market</span>
-        </a>
-        <a href="/society/guide.html" class="bottom-nav-item ${activePage === 'guide' ? 'active' : ''}">
-          <div class="bottom-nav-icon">📖</div>
-          <span>Guide</span>
-        </a>
-        <a href="/society/profile.html" class="bottom-nav-item ${activePage === 'profile' ? 'active' : ''}">
-          <div class="bottom-nav-icon">👤</div>
-          <span>Profile</span>
-        </a>
-        <button class="bottom-nav-item" id="bottomNavMore" onclick="window.societyNavToggleMobileMenu()" style="background:none;border:none;cursor:pointer;">
-          <div class="bottom-nav-icon">≡</div>
-          <span>More</span>
-        </button>
-      </div>
-    </nav>
-  `;
+  // Admin links
+  if (session.isAdmin || session.email === SUPER_ADMIN) {
+    document.getElementById('snAdminLink').style.display       = 'flex';
+    document.getElementById('snMobileAdminLink').style.display = 'flex';
+  }
 
-  container.innerHTML = navHTML;
+  // Sign out
+  function doSignOut() {
+    fetch(WORKER + '/auth/logout', { method: 'POST', credentials: 'include' })
+      .finally(function() { window.location.href = '/society/login.html'; });
+  }
+  document.getElementById('snSignOut').addEventListener('click', doSignOut);
+  document.getElementById('snMobileSignOut').addEventListener('click', doSignOut);
 
-  // Global functions for dropdown, hamburger, sign out
-  window.societyNavToggleDropdown = function(event) {
-    event.stopPropagation();
-    const dropdown = document.getElementById('societyNavDropdown');
-    dropdown.classList.toggle('open');
-  };
+  // Dropdown
+  document.getElementById('snUserBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.getElementById('snDropdown').classList.toggle('open');
+  });
 
-  window.societyNavToggleMobileMenu = function() {
-    const menu = document.getElementById('societyNavMobileMenu');
-    menu.classList.toggle('open');
-  };
+  // Hamburger + bottom More
+  function toggleMobile() { document.getElementById('snMobileMenu').classList.toggle('open'); }
+  document.getElementById('snHamburger').addEventListener('click', toggleMobile);
+  document.getElementById('snBottomMore').addEventListener('click', toggleMobile);
 
-  window.societyNavSignOut = function() {
-    signOut(auth).then(() => {
-      window.location.href = '/society/login.html';
-    }).catch(err => {
-      console.error('Sign out error:', err);
-      alert('Error signing out. Please try again.');
+  // Close on outside click
+  document.addEventListener('click', function(e) {
+    var userBtn  = document.getElementById('snUserBtn');
+    var dropdown = document.getElementById('snDropdown');
+    var hamburger = document.getElementById('snHamburger');
+    var mobileMenu = document.getElementById('snMobileMenu');
+    if (userBtn && !userBtn.contains(e.target) && dropdown) dropdown.classList.remove('open');
+    if (hamburger && !hamburger.contains(e.target) && mobileMenu && !mobileMenu.contains(e.target)) {
+      mobileMenu.classList.remove('open');
+    }
+  });
+
+  // Close mobile menu on link click
+  document.querySelectorAll('#snMobileMenu a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      document.getElementById('snMobileMenu').classList.remove('open');
     });
-  };
+  });
 
-  // Scroll shadow on nav
-  const navBar = document.getElementById('societyNavBar');
+  // Scroll shadow
+  var navBar = document.getElementById('societyNavBar');
   if (navBar) {
-    const onScroll = () => navBar.classList.toggle('scrolled', window.scrollY > 8);
+    function onScroll() { navBar.classList.toggle('scrolled', window.scrollY > 8); }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
-
-  // Close dropdown/menu when clicking outside
-  document.addEventListener('click', (e) => {
-    const dropdown = document.getElementById('societyNavDropdown');
-    const menu = document.getElementById('societyNavMobileMenu');
-    const hamburger = document.getElementById('societyNavHamburger');
-    const userButton = document.querySelector('.society-nav-user');
-
-    if (userButton && !userButton.contains(e.target) && !dropdown.contains(e.target)) {
-      dropdown?.classList.remove('open');
-    }
-
-    if (hamburger && !hamburger.contains(e.target) && !menu.contains(e.target)) {
-      menu?.classList.remove('open');
-    }
-  });
-
-  // Close mobile menu when clicking bottom nav items (except More)
-  const bottomNavItems = document.querySelectorAll('.bottom-nav-item:not(#bottomNavMore)');
-  bottomNavItems.forEach(item => {
-    item.addEventListener('click', () => {
-      document.getElementById('societyNavMobileMenu')?.classList.remove('open');
-    });
-  });
-
-  // Wait for auth state and populate user info
-  return new Promise((resolve) => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        // Not logged in — nav won't be visible on login/register pages
-        resolve();
-        return;
-      }
-
-      try {
-        // Fetch resident data via unified-login to get proper name (V2 schema)
-        let residentName = user.displayName || 'Resident';
-        try {
-          if (!user.email) return;
-          const idToken = await user.getIdToken();
-          const residentRes = await fetch(
-            'https://telegram.psots.in/auth/unified-login',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
-              },
-              body: JSON.stringify({
-                type: 'google',
-                identifier: user.email
-              })
-            }
-          );
-          const residentData = await residentRes.json();
-          if (residentData.resident?.name) {
-            residentName = residentData.resident.name;
-          }
-        } catch (_) {}
-
-        const firstName = residentName.split(' ')[0];
-        const initials = residentName
-          .split(' ')
-          .map(n => n[0])
-          .join('')
-          .substring(0, 2)
-          .toUpperCase();
-
-        // Update desktop
-        document.getElementById('societyNavAvatar').textContent = initials;
-        document.getElementById('societyNavGreeting').textContent = `Hi ${firstName}`;
-
-        // Update mobile
-        document.getElementById('societyNavMobileAvatar').textContent = initials;
-        document.getElementById('societyNavMobileGreeting').textContent = firstName;
-        document.getElementById('societyNavMobileEmail').textContent = user.email || '';
-
-        // Check if user is admin and show admin link
-        try {
-          const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-          if (adminDoc.exists() || user.email === SUPER_ADMIN) {
-            document.getElementById('societyNavAdminLink').style.display = 'block';
-            document.getElementById('societyNavMobileAdminLink').style.display = 'block';
-          }
-        } catch (err) {
-          console.debug('Admin check failed:', err);
-        }
-
-        resolve();
-      } catch (err) {
-        console.error('SocietyNav init error:', err);
-        resolve();
-      }
-    });
-  });
 }
