@@ -511,11 +511,40 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
+      /* Account for bottom nav bar */
       .dashboard-wrapper { padding-bottom: 100px; padding-left: 16px; padding-right: 16px; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+      /* Hero */
+      .hero-greeting { padding: 28px 20px; margin-bottom: 24px; border-radius: 18px; }
+      .hero-greeting h1 { font-size: 26px; }
+      .hero-avatar { width: 56px; height: 56px; font-size: 24px; margin-top: 16px; }
+
+      /* Stats */
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px; }
+      .stat-card { padding: 18px 12px; border-radius: 14px; }
+      .stat-value { font-size: 26px; }
+      .stat-icon { font-size: 26px; margin-bottom: 8px; }
+
+      /* Quick actions */
+      .quick-actions { gap: 8px; padding: 12px 0; margin-bottom: 24px; }
+      .action-chip { padding: 10px 16px; font-size: 13px; min-height: 44px; }
+
+      /* Feature tiles */
+      .features-grid { gap: 16px; }
       .feature-content { padding: 18px; }
-      .feature-title { font-size: 16px; }
+      .feature-title { font-size: 17px; }
+      .feature-desc { font-size: 13.5px; }
+      .feature-cta { padding: 12px 18px; font-size: 13px; min-height: 44px; justify-content: center; }
+
+      /* Section headers */
+      .dashboard-section-header { font-size: 20px; margin-top: 28px; margin-bottom: 18px; }
+
+      /* Current device card */
+      #currentDeviceCard { padding: 18px; border-radius: 14px; }
+
+      /* Footer */
+      footer { padding: 20px 16px; }
     }
   </style>
 </head>
