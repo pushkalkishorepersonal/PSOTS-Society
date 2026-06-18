@@ -12,6 +12,8 @@ session.session
 service-account*.json
 .claude/
 .omc/
+chhath-source
+.pnpm-store/
 
 # Archive: non-code assets (images, PDFs, build artifacts)
 /archive/
