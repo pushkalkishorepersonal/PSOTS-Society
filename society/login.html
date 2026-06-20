@@ -412,20 +412,17 @@
         script.src = 'https://verify.msg91.com/otp-provider.js';
         script.onload = () => {
           if (typeof initSendOTP !== 'function') return;
-          initSendOTP(
-            {
-              widgetId: cfg.widgetId,
-              tokenAuth: cfg.tokenAuth,
-              identifier: ''
-            },
-            (data) => handleMsg91LoginSuccess(data),
-            (err) => {
+          initSendOTP({
+            widgetId: cfg.widgetId,
+            tokenAuth: cfg.tokenAuth,
+            identifier: '',
+            success: (data) => handleMsg91LoginSuccess(data),
+            failure: (err) => {
               document.getElementById('loginMsg91Error').innerHTML =
                 `<div class="info-box error">OTP verification failed. Please try again.</div>`;
               console.error('MSG91 error:', err);
-            },
-            'msg91WidgetContainer'
-          );
+            }
+          });
           _msg91Loaded = true;
         };
         document.head.appendChild(script);
