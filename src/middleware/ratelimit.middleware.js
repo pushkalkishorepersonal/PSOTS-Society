@@ -68,10 +68,18 @@ export async function applyRateLimit(request, env, sessionUid) {
     }
   }
 
+  // Read-only session/config checks — called on every page load, not abuse-prone.
+  // Must NOT share the strict 'auth' bucket with OTP/OAuth endpoints, or a burst
+  // of legitimate page loads exhausts the budget and /auth/me starts 429ing,
+  // which the frontend treats as "not logged in" and bounces the user to login.
+  const READ_ONLY_AUTH_PATHS = new Set(['/auth/me', '/auth/logout', '/auth/msg91-config']);
+
   let check;
   if (path === '/auth/unified-login') {
     // Higher limit for unified-login (called on every page load)
     check = await rateLimit(env, 'unified-login', sessionUid || clientIp, 60);
+  } else if (READ_ONLY_AUTH_PATHS.has(path)) {
+    check = await rateLimit(env, 'session', sessionUid || clientIp, 120);
   } else if (path.startsWith('/auth/')) {
     check = await rateLimit(env, 'auth', clientIp, 5);
   } else if (path.startsWith('/admin/') && sessionUid) {

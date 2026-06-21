@@ -571,7 +571,7 @@
         } else if (result.error === 'not_approved') {
           loginAlert.innerHTML = `<div class="info-box warn">Your account is pending approval. You'll be notified by email once approved.</div>`;
         } else if (result.error === 'not_registered') {
-          loginAlert.innerHTML = `<div class="info-box warn">This phone number is not registered. <a href="/society/register.html?flat=${encodeURIComponent(_flatNumber)}" style="color:var(--jade);font-weight:600">Register here</a></div>`;
+          loginAlert.innerHTML = `<div class="info-box warn">Flat ${_flatNumber} already has a registered profile, but this phone number isn't linked to it. If this is your number, sign in with Google instead, or ask the admin to link it to your profile.</div>`;
         } else {
           loginAlert.innerHTML = `<div class="info-box error">Sign in failed. Please try again.</div>`;
         }
