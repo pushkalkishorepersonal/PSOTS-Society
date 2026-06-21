@@ -2014,12 +2014,24 @@ export default {
       //
       // Body: { accessToken, phone }   phone in E.164 like "919XXXXXXXXX" or "+919XXX..."
       if (pathname === '/auth/sms-login' && request.method === 'POST') {
+        // This endpoint is called with credentials:'include' — a wildcard
+        // Access-Control-Allow-Origin is rejected by the browser on ANY
+        // response (not just the success path), which surfaces as an
+        // opaque "Network error" in the frontend regardless of the real
+        // cause. Every return below must use this credentialed header set.
+        const smsOrigin = request.headers.get('Origin') || '';
+        const smsAllowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(smsOrigin) ? smsOrigin : 'https://society.psots.in';
+        const smsCorsHeaders = {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': smsAllowOrigin,
+          'Access-Control-Allow-Credentials': 'true'
+        };
         try {
           const body = await request.json().catch(() => ({}));
           const { accessToken, phone } = body;
           if (!accessToken || !phone) {
             return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
-              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 400, headers: smsCorsHeaders });
           }
 
           // 1) Verify MSG91 widget access-token
@@ -2035,7 +2047,7 @@ export default {
           if (msgData.type !== 'success') {
             console.log('MSG91 verify failed:', JSON.stringify(msgData));
             return new Response(JSON.stringify({ ok: false, error: 'invalid_otp', detail: msgData.message || 'OTP verification failed' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 401, headers: smsCorsHeaders });
           }
 
           // 2) Normalize phone (E.164 without +)
@@ -2046,7 +2058,7 @@ export default {
           const credential = await db.getCredentialByTypeAndIdentifier('sms', phoneForLookup, env);
           if (!credential || !credential.residentId) {
             return new Response(JSON.stringify({ ok: false, error: 'not_registered', phone: phoneForLookup }),
-              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 404, headers: smsCorsHeaders });
           }
 
           // 4) Lookup resident
@@ -2054,11 +2066,11 @@ export default {
           if (resident?.fields) resident = parseFirestoreDoc(resident);
           if (!resident) {
             return new Response(JSON.stringify({ ok: false, error: 'resident_not_found' }),
-              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 404, headers: smsCorsHeaders });
           }
           if (resident.status !== 'approved') {
             return new Response(JSON.stringify({ ok: false, error: 'not_approved', status: resident.status || 'pending' }),
-              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+              { status: 403, headers: smsCorsHeaders });
           }
 
           // 5) Create session
@@ -2077,8 +2089,6 @@ export default {
             console.error('mintFirebaseCustomToken failed:', ctErr.message);
           }
 
-          const smsOrigin = request.headers.get('Origin') || '';
-          const smsAllowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(smsOrigin) ? smsOrigin : 'https://society.psots.in';
           const smsCookie = `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
           return new Response(JSON.stringify({
             ok: true,
@@ -2092,16 +2102,11 @@ export default {
               residentType: resident.residentType || null,
               isAdmin: resident.isAdmin || false
             }
-          }), { headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': smsAllowOrigin,
-            'Access-Control-Allow-Credentials': 'true',
-            'Set-Cookie': smsCookie
-          } });
+          }), { headers: { ...smsCorsHeaders, 'Set-Cookie': smsCookie } });
         } catch (e) {
           console.error('/auth/sms-login error:', e);
           return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+            { status: 500, headers: smsCorsHeaders });
         }
       }
 
