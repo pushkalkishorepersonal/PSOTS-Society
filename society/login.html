@@ -208,8 +208,8 @@
       text-decoration: none;
     }
     .register-link a:hover { text-decoration: underline }
-    #msg91WidgetContainer { margin-top: 1rem }
-    #msg91WidgetContainer button { width: 100% }
+    #phoneEntryRow .btn, #otpEntryRow .btn { margin-top: 0.8rem }
+    #otpEntryRow input { margin-top: 0 }
     .pending-card {
       text-align: center;
       padding: 1rem 0;
@@ -293,7 +293,26 @@
       <div class="divider">or</div>
 
       <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem">Sign in with your registered phone number</p>
-      <div id="msg91WidgetContainer"></div>
+
+      <div id="phoneEntryRow">
+        <div style="display:flex;gap:8px">
+          <div style="flex-shrink:0;display:flex;align-items:center;padding:0 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--cream);font-size:15px;color:var(--muted)">+91</div>
+          <input type="tel" id="phoneInput" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" style="flex:1" />
+        </div>
+        <button class="btn btn-jade" id="btnSendOtp">Send OTP</button>
+      </div>
+
+      <div id="otpEntryRow" style="display:none">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:0.5rem">Enter the OTP sent to <span id="otpSentPhone" style="font-weight:700;color:var(--ink)"></span></p>
+        <input type="text" id="otpInput" placeholder="6-digit OTP" maxlength="6" inputmode="numeric" />
+        <button class="btn btn-jade" id="btnVerifyOtp">Verify OTP</button>
+        <div style="text-align:center;margin-top:0.8rem;font-size:12px">
+          <a href="#" id="btnChangeNumber" style="color:var(--muted);text-decoration:none">Change number</a>
+          &nbsp;·&nbsp;
+          <a href="#" id="btnResendOtp" style="color:var(--jade);font-weight:600;text-decoration:none">Resend OTP</a>
+        </div>
+      </div>
+
       <div id="loginMsg91Error"></div>
 
       <div id="loginAlert"></div>
@@ -395,7 +414,14 @@
       window.location.href = `${WORKER}/auth/google/start?next=${next}`;
     });
 
-    // ── MSG91 Widget for SMS OTP login ──
+    // ── MSG91 SMS OTP login — custom inline UI via exposeMethods ──
+    let _msg91Ready = false;
+    let _enteredPhone = '';
+
+    function setMsg91Error(msg) {
+      document.getElementById('loginMsg91Error').innerHTML = msg ? `<div class="info-box error">${msg}</div>` : '';
+    }
+
     async function loadMsg91Widget() {
       if (_msg91Loaded) return;
       try {
@@ -407,7 +433,9 @@
           return;
         }
 
-        // Load MSG91 script dynamically
+        // Load MSG91 script dynamically — exposeMethods:true gives us
+        // window.sendOtp / window.verifyOtp / window.retryOtp to drive our
+        // own inline form instead of MSG91's popup widget.
         const script = document.createElement('script');
         script.src = 'https://verify.msg91.com/otp-provider.js';
         script.onload = () => {
@@ -416,21 +444,112 @@
             widgetId: cfg.widgetId,
             tokenAuth: cfg.tokenAuth,
             identifier: '',
-            success: (data) => handleMsg91LoginSuccess(data),
+            exposeMethods: true,
+            disableInput: true,
+            success: () => { _msg91Ready = true; },
             failure: (err) => {
-              document.getElementById('loginMsg91Error').innerHTML =
-                `<div class="info-box error">OTP verification failed. Please try again.</div>`;
-              console.error('MSG91 error:', err);
+              console.error('MSG91 init error:', err);
+              setMsg91Error('SMS login is temporarily unavailable. Please use Google.');
             }
           });
-          _msg91Loaded = true;
+          _msg91Ready = true;
         };
         document.head.appendChild(script);
+        _msg91Loaded = true;
       } catch (e) {
         document.getElementById('loginMsg91Error').innerHTML =
           '<div class="info-box warn">SMS login unavailable. Please use Google.</div>';
       }
     }
+
+    // ── Send OTP ──
+    const btnSendOtp = document.getElementById('btnSendOtp');
+    btnSendOtp.addEventListener('click', () => {
+      const phone = document.getElementById('phoneInput').value.trim();
+      setMsg91Error('');
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        setMsg91Error('Please enter a valid 10-digit mobile number.');
+        return;
+      }
+      if (!_msg91Ready || typeof window.sendOtp !== 'function') {
+        setMsg91Error('SMS login is still loading. Please wait a moment and try again.');
+        return;
+      }
+      _enteredPhone = phone;
+      btnSendOtp.disabled = true;
+      btnSendOtp.innerHTML = '<span class="spinner"></span> Sending…';
+      window.sendOtp(
+        '91' + phone,
+        () => {
+          btnSendOtp.disabled = false;
+          btnSendOtp.textContent = 'Send OTP';
+          document.getElementById('otpSentPhone').textContent = '+91 ' + phone;
+          document.getElementById('phoneEntryRow').style.display = 'none';
+          document.getElementById('otpEntryRow').style.display = 'block';
+          document.getElementById('otpInput').focus();
+        },
+        (err) => {
+          btnSendOtp.disabled = false;
+          btnSendOtp.textContent = 'Send OTP';
+          setMsg91Error((err && (err.message || err.type)) || 'Could not send OTP. Please check the number and try again.');
+          console.error('MSG91 sendOtp error:', err);
+        }
+      );
+    });
+
+    // ── Verify OTP ──
+    const btnVerifyOtp = document.getElementById('btnVerifyOtp');
+    btnVerifyOtp.addEventListener('click', () => {
+      const otp = document.getElementById('otpInput').value.trim();
+      setMsg91Error('');
+      if (!/^\d{4,6}$/.test(otp)) {
+        setMsg91Error('Please enter the OTP you received.');
+        return;
+      }
+      if (typeof window.verifyOtp !== 'function') {
+        setMsg91Error('SMS login is still loading. Please wait a moment and try again.');
+        return;
+      }
+      btnVerifyOtp.disabled = true;
+      btnVerifyOtp.innerHTML = '<span class="spinner"></span> Verifying…';
+      window.verifyOtp(
+        otp,
+        (data) => {
+          btnVerifyOtp.disabled = false;
+          btnVerifyOtp.textContent = 'Verify OTP';
+          if (!data.mobile && !data.phone) data.mobile = '91' + _enteredPhone;
+          handleMsg91LoginSuccess(data);
+        },
+        (err) => {
+          btnVerifyOtp.disabled = false;
+          btnVerifyOtp.textContent = 'Verify OTP';
+          setMsg91Error('Invalid OTP. Please try again.');
+          console.error('MSG91 verifyOtp error:', err);
+        }
+      );
+    });
+
+    // ── Resend OTP / Change number ──
+    document.getElementById('btnResendOtp').addEventListener('click', (e) => {
+      e.preventDefault();
+      setMsg91Error('');
+      if (typeof window.retryOtp !== 'function') return;
+      window.retryOtp(
+        'text',
+        () => setMsg91Error(''),
+        (err) => {
+          setMsg91Error('Could not resend OTP. Please try again.');
+          console.error('MSG91 retryOtp error:', err);
+        }
+      );
+    });
+    document.getElementById('btnChangeNumber').addEventListener('click', (e) => {
+      e.preventDefault();
+      setMsg91Error('');
+      document.getElementById('otpInput').value = '';
+      document.getElementById('otpEntryRow').style.display = 'none';
+      document.getElementById('phoneEntryRow').style.display = 'block';
+    });
 
     async function handleMsg91LoginSuccess(data) {
       const loginAlert = document.getElementById('loginAlert');
