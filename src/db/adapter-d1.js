@@ -32,6 +32,7 @@ export const getCredentialByTypeAndIdentifier = d1.getCredentialByTypeAndIdentif
 export const createCredential = d1.createCredential;
 export const updateCredentialLastUsed = d1.updateCredentialLastUsed;
 export const getCredentialsByIdentifier = d1.getCredentialsByIdentifier;
+export const getCredentialsByResident = d1.getCredentialsByResident;
 
 // Flat operations
 export const getFlatV2 = d1.getFlatV2;

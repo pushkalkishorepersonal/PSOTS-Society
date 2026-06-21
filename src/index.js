@@ -1041,29 +1041,25 @@ export default {
     try {
       const url = new URL(request.url);
       // ── CORS ──────────────────────────────────────────────
+      // Origin-reflecting + credentialed for every psots.in subdomain. Every
+      // endpoint below spreads ...CORS into its responses; many are called
+      // with fetch(..., {credentials:'include'}) from profile.html, login.html
+      // etc. A wildcard '*' Allow-Origin is silently rejected by the browser
+      // whenever credentials are sent — the response never reaches JS, and the
+      // frontend just sees a generic network error with no real signal as to
+      // why. Reflecting the actual origin (when it's a psots.in subdomain) and
+      // always allowing credentials fixes this for every endpoint at once.
+      const requestOrigin = request.headers.get('Origin') || '';
+      const isPsotsOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(requestOrigin);
       const CORS = {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': isPsotsOrigin ? requestOrigin : 'https://society.psots.in',
+        'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       };
       const pathname = url.pathname;
 
-      // Credentialed endpoints (cookie-based auth) need specific origin + credentials:true.
-      // Wildcard origin is rejected by browsers when credentials are sent.
-      const isCredentialedAuth = pathname === '/auth/me' || pathname === '/auth/logout' || pathname === '/auth/sms-login' || pathname.startsWith('/society/');
       if (request.method === 'OPTIONS') {
-        if (isCredentialedAuth) {
-          const origin = request.headers.get('Origin') || '';
-          const allowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(origin) ? origin : 'https://society.psots.in';
-          return new Response(null, {
-            headers: {
-              'Access-Control-Allow-Origin': allowOrigin,
-              'Access-Control-Allow-Credentials': 'true',
-              'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            }
-          });
-        }
         return new Response(null, { headers: CORS });
       }
 
@@ -2014,18 +2010,7 @@ export default {
       //
       // Body: { accessToken, phone }   phone in E.164 like "919XXXXXXXXX" or "+919XXX..."
       if (pathname === '/auth/sms-login' && request.method === 'POST') {
-        // This endpoint is called with credentials:'include' — a wildcard
-        // Access-Control-Allow-Origin is rejected by the browser on ANY
-        // response (not just the success path), which surfaces as an
-        // opaque "Network error" in the frontend regardless of the real
-        // cause. Every return below must use this credentialed header set.
-        const smsOrigin = request.headers.get('Origin') || '';
-        const smsAllowOrigin = /^https:\/\/([a-z0-9-]+\.)?psots\.in$/.test(smsOrigin) ? smsOrigin : 'https://society.psots.in';
-        const smsCorsHeaders = {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': smsAllowOrigin,
-          'Access-Control-Allow-Credentials': 'true'
-        };
+        const smsCorsHeaders = { 'Content-Type': 'application/json', ...CORS };
         try {
           const body = await request.json().catch(() => ({}));
           const { accessToken, phone } = body;
@@ -6265,6 +6250,9 @@ Original message: "${rec.description.substring(0, 300)}"`;
           let privacySettings = {};
           try { privacySettings = JSON.parse(residentRow.privacySettings || '{}'); } catch (_) {}
 
+          const credentials = await db.getCredentialsByResident(authCtx.uid, env);
+          const loginMethods = credentials.map(c => c.type);
+
           const resident = {
             residentId: residentRow.residentId || authCtx.uid,
             name: residentRow.name,
@@ -6277,7 +6265,10 @@ Original message: "${rec.description.substring(0, 300)}"`;
             secondaryPhone: residentRow.secondaryPhone || null,
             telegram: residentRow.telegramUsername || null,
             isAdmin: !!residentRow.isAdmin,
-            privacySettings
+            privacySettings,
+            loginMethods,
+            hasPhoneLogin: loginMethods.includes('sms'),
+            hasAltLogin: loginMethods.includes('google') || loginMethods.includes('email')
           };
 
           return new Response(JSON.stringify({ ok: true, resident }),
@@ -6348,6 +6339,78 @@ Original message: "${rec.description.substring(0, 300)}"`;
             { status: 200, headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
           return new Response(JSON.stringify({ ok: false, error: 'server_error' }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /resident/link-phone — Self-serve: link an OTP-verified phone number
+      // as an SMS-login credential to the CURRENTLY signed-in resident. Lets
+      // residents who signed up via Google/email add phone sign-in later
+      // (and vice versa) without admin involvement.
+      // Body: { accessToken, phone }   accessToken = MSG91 widget verifyOtp() token
+      if (pathname === '/resident/link-phone' && request.method === 'POST') {
+        try {
+          const authCtx = await resolveSessionAuth(request, env);
+          if (!authCtx?.uid) {
+            return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          const body = await request.json().catch(() => ({}));
+          const { accessToken, phone } = body;
+          if (!accessToken || !phone) {
+            return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          // Verify MSG91 widget access-token (same check as /auth/sms-login)
+          const msgRes = await fetch('https://control.msg91.com/api/v5/widget/verifyAccessToken', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'authkey': env.MSG91_AUTH_KEY, 'access-token': accessToken })
+          });
+          const msgData = await msgRes.json().catch(() => ({}));
+          if (msgData.type !== 'success') {
+            return new Response(JSON.stringify({ ok: false, error: 'invalid_otp', detail: msgData.message || 'OTP verification failed' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          const normalizedPhone = String(phone).replace(/\D/g, '').replace(/^0+/, '');
+          const phoneForLookup = normalizedPhone.startsWith('91') ? normalizedPhone : `91${normalizedPhone.slice(-10)}`;
+
+          // Refuse to steal a phone number already linked to a DIFFERENT resident
+          const existing = await db.getCredentialByTypeAndIdentifier('sms', phoneForLookup, env);
+          if (existing && existing.residentId && existing.residentId !== authCtx.uid) {
+            return new Response(JSON.stringify({ ok: false, error: 'phone_in_use' }),
+              { status: 409, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          if (existing && existing.residentId === authCtx.uid) {
+            return new Response(JSON.stringify({ ok: true, phone: phoneForLookup, alreadyLinked: true }),
+              { headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          const smsCredId = `cred_sms_${phoneForLookup}_${Date.now()}`;
+          const created = await db.createCredential({
+            credentialId: smsCredId,
+            residentId: authCtx.uid,
+            type: 'sms',
+            identifier: phoneForLookup,
+            firebaseUid: null,
+            createdAt: new Date().toISOString(),
+          }, env);
+          if (!created) throw new Error('Failed to create sms credential');
+
+          // Keep the resident's contact-info phone field in sync if it was empty
+          const residentRow = await db.getResidentV2(authCtx.uid, env);
+          if (residentRow && !residentRow.phone) {
+            await db.updateResident(authCtx.uid, { phone: phoneForLookup }, env);
+          }
+
+          return new Response(JSON.stringify({ ok: true, phone: phoneForLookup }),
+            { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (e) {
+          console.error('/resident/link-phone error:', e);
+          return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
             { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
       }

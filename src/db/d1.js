@@ -667,6 +667,19 @@ export async function getCredentialsByIdentifier(identifier, env) {
 }
 
 /**
+ * Get all credentials linked to a resident (e.g. to show which login
+ * methods — google, email, sms — are set up on their profile)
+ */
+export async function getCredentialsByResident(residentId, env) {
+  const result = await env.PSOTS_DB
+    .prepare('SELECT * FROM credentials WHERE resident_id = ?')
+    .bind(residentId)
+    .all();
+
+  return result.results.map(parseD1Row);
+}
+
+/**
  * Update credential last_used_at timestamp
  */
 export async function updateCredentialLastUsed(credentialId, env) {

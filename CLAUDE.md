@@ -415,7 +415,7 @@ User controls what other residents see about them:
 
 ### Storage & Retention Rules
 **Family members (access level: "family"):**
-- Store email (for notifications), DO NOT store phone
+- Store email AND phone (phone enables SMS OTP sign-in for family members too — every resident type should have at least one verified login method beyond what they registered with)
 - Display: masked to non-owners
 
 **Tenants (residentType: "tenant"):**

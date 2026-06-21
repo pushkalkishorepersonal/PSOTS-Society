@@ -822,7 +822,7 @@
             <div class="info-label">Phone Number</div>
             <div class="info-value" id="residentPhone">
               <span id="residentPhoneValue">—</span>
-              <a href="#" id="residentPhoneLink" onclick="event.preventDefault(); openEditPersonalModal(true);" style="margin-left: 8px; font-size: 12px; color: var(--jade); text-decoration: none; display: none;">Add phone</a>
+              <a href="#" id="residentPhoneLink" onclick="event.preventDefault(); openVerifyPhoneModal();" style="margin-left: 8px; font-size: 12px; color: var(--jade); text-decoration: none; display: none;">Add phone</a>
             </div>
           </div>
         </div>
@@ -1135,6 +1135,45 @@
     </div>
   </div>
 
+  <!-- Verify Phone for SMS Sign-in Modal -->
+  <div id="verifyPhoneModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeVerifyPhoneModal()">✕</button>
+      <div class="modal-header">
+        <h2>Verify Phone Number</h2>
+      </div>
+      <div id="verifyPhoneMessage" class="message"></div>
+      <div id="verifyPhoneEntryRow">
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <div style="display:flex;gap:8px">
+            <div style="flex-shrink:0;display:flex;align-items:center;padding:0 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--cream);font-size:15px;color:var(--muted)">+91</div>
+            <input type="tel" id="verifyPhoneInput" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" style="flex:1">
+          </div>
+        </div>
+        <div class="button-group">
+          <button class="btn btn-primary" id="btnVerifyPhoneSendOtp">Send OTP</button>
+          <button class="btn btn-secondary" onclick="closeVerifyPhoneModal()">Cancel</button>
+        </div>
+      </div>
+      <div id="verifyPhoneOtpRow" style="display:none">
+        <div class="form-group">
+          <label>OTP sent to <span id="verifyPhoneSentTo" style="font-weight:700"></span></label>
+          <input type="text" id="verifyPhoneOtpInput" placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+        </div>
+        <div class="button-group">
+          <button class="btn btn-primary" id="btnVerifyPhoneSubmitOtp">Verify &amp; Save</button>
+          <button class="btn btn-secondary" onclick="closeVerifyPhoneModal()">Cancel</button>
+        </div>
+        <div style="text-align:center;margin-top:10px;font-size:12px">
+          <a href="#" id="btnVerifyPhoneChangeNumber" style="color:var(--muted);text-decoration:none">Change number</a>
+          &nbsp;·&nbsp;
+          <a href="#" id="btnVerifyPhoneResend" style="color:var(--jade);font-weight:600;text-decoration:none">Resend OTP</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Contact Info Modal -->
   <div id="editContactModal" class="modal">
     <div class="modal-content">
@@ -1305,12 +1344,19 @@
         document.getElementById('residentName').textContent = resident.name || '—';
         document.getElementById('residentEmail').textContent = session.email || resident.email || '—';
         document.getElementById('residentType').textContent = ((resident.residentType || 'owner').charAt(0).toUpperCase() + (resident.residentType || 'owner').slice(1));
+        var phoneLink = document.getElementById('residentPhoneLink');
         if (resident.phone) {
           document.getElementById('residentPhoneValue').textContent = resident.phone;
-          document.getElementById('residentPhoneLink').style.display = 'none';
+          if (resident.hasPhoneLogin) {
+            phoneLink.style.display = 'none';
+          } else {
+            phoneLink.textContent = 'Verify for SMS sign-in';
+            phoneLink.style.display = 'inline';
+          }
         } else {
           document.getElementById('residentPhoneValue').textContent = '—';
-          document.getElementById('residentPhoneLink').style.display = 'inline';
+          phoneLink.textContent = 'Add phone';
+          phoneLink.style.display = 'inline';
         }
         document.getElementById('residentSecondaryEmail').textContent = resident.secondaryEmail || '—';
         document.getElementById('residentSecondaryPhone').textContent = resident.secondaryPhone || '—';
@@ -1651,12 +1697,11 @@
     }
 
     // ── EDIT PERSONAL INFO ─────────────────────────
-    function openEditPersonalModal(focusPhone) {
+    function openEditPersonalModal() {
       document.getElementById('editPersonalName').value = (currentUserData && currentUserData.name) ? currentUserData.name.trim() : '';
       document.getElementById('editPersonalPhone').value = (currentUserData && currentUserData.phone) ? currentUserData.phone.trim() : '';
       document.getElementById('editPersonalEmail').value = (currentUserData && currentUserData.email) ? currentUserData.email.trim() : '';
       document.getElementById('editPersonalModal').classList.add('show');
-      if (focusPhone) setTimeout(function() { document.getElementById('editPersonalPhone').focus(); }, 100);
     }
 
     function closeEditPersonalModal() {
@@ -1683,12 +1728,19 @@
           currentUserData.name = name;
           currentUserData.phone = phone;
           document.getElementById('residentName').textContent = name;
+          var phoneLinkEl = document.getElementById('residentPhoneLink');
           if (phone) {
             document.getElementById('residentPhoneValue').textContent = phone;
-            document.getElementById('residentPhoneLink').style.display = 'none';
+            if (currentUserData.hasPhoneLogin) {
+              phoneLinkEl.style.display = 'none';
+            } else {
+              phoneLinkEl.textContent = 'Verify for SMS sign-in';
+              phoneLinkEl.style.display = 'inline';
+            }
           } else {
             document.getElementById('residentPhoneValue').textContent = '—';
-            document.getElementById('residentPhoneLink').style.display = 'inline';
+            phoneLinkEl.textContent = 'Add phone';
+            phoneLinkEl.style.display = 'inline';
           }
           setTimeout(closeEditPersonalModal, 1500);
         } else {
@@ -1700,6 +1752,152 @@
         msgEl.textContent = '✗ ' + err.message;
       }
     }
+
+    // ── VERIFY PHONE FOR SMS SIGN-IN (self-serve credential linking) ──
+    var _verifyPhoneLoaded = false;
+    var _verifyPhoneReady = false;
+    var _verifyPhoneEntered = '';
+
+    function setVerifyPhoneMsg(msg, isError) {
+      var el = document.getElementById('verifyPhoneMessage');
+      el.className = 'message' + (msg ? (isError ? ' error show' : ' success show') : '');
+      el.textContent = msg || '';
+    }
+
+    function openVerifyPhoneModal() {
+      document.getElementById('verifyPhoneModal').classList.add('show');
+      document.getElementById('verifyPhoneEntryRow').style.display = 'block';
+      document.getElementById('verifyPhoneOtpRow').style.display = 'none';
+      document.getElementById('verifyPhoneInput').value = '';
+      document.getElementById('verifyPhoneOtpInput').value = '';
+      setVerifyPhoneMsg('');
+      loadVerifyPhoneWidget();
+    }
+
+    function closeVerifyPhoneModal() {
+      document.getElementById('verifyPhoneModal').classList.remove('show');
+    }
+
+    async function loadVerifyPhoneWidget() {
+      if (_verifyPhoneLoaded) return;
+      try {
+        var res = await fetch(WORKER + '/auth/msg91-config');
+        var cfg = await res.json();
+        if (!cfg.ok || !cfg.widgetId || !cfg.tokenAuth) {
+          setVerifyPhoneMsg('Phone verification is temporarily unavailable.', true);
+          return;
+        }
+        var script = document.createElement('script');
+        script.src = 'https://verify.msg91.com/otp-provider.js';
+        script.onload = function() {
+          if (typeof initSendOTP !== 'function') return;
+          initSendOTP({
+            widgetId: cfg.widgetId,
+            tokenAuth: cfg.tokenAuth,
+            identifier: '',
+            exposeMethods: true,
+            disableInput: true,
+            success: function() { _verifyPhoneReady = true; },
+            failure: function(err) { console.error('MSG91 init error:', err); }
+          });
+          _verifyPhoneReady = true;
+        };
+        document.head.appendChild(script);
+        _verifyPhoneLoaded = true;
+      } catch (e) {
+        setVerifyPhoneMsg('Phone verification unavailable. Please try again later.', true);
+      }
+    }
+
+    document.getElementById('btnVerifyPhoneSendOtp').addEventListener('click', function() {
+      var phone = document.getElementById('verifyPhoneInput').value.trim();
+      setVerifyPhoneMsg('');
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        setVerifyPhoneMsg('Please enter a valid 10-digit mobile number.', true);
+        return;
+      }
+      if (!_verifyPhoneReady || typeof window.sendOtp !== 'function') {
+        setVerifyPhoneMsg('Still loading, please wait a moment and try again.', true);
+        return;
+      }
+      _verifyPhoneEntered = phone;
+      var btn = document.getElementById('btnVerifyPhoneSendOtp');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      window.sendOtp('91' + phone, function() {
+        btn.disabled = false; btn.textContent = 'Send OTP';
+        document.getElementById('verifyPhoneSentTo').textContent = '+91 ' + phone;
+        document.getElementById('verifyPhoneEntryRow').style.display = 'none';
+        document.getElementById('verifyPhoneOtpRow').style.display = 'block';
+        document.getElementById('verifyPhoneOtpInput').focus();
+      }, function(err) {
+        btn.disabled = false; btn.textContent = 'Send OTP';
+        setVerifyPhoneMsg('Could not send OTP. Please check the number and try again.', true);
+        console.error('MSG91 sendOtp error:', err);
+      });
+    });
+
+    document.getElementById('btnVerifyPhoneSubmitOtp').addEventListener('click', function() {
+      var otp = document.getElementById('verifyPhoneOtpInput').value.trim();
+      setVerifyPhoneMsg('');
+      if (!/^\d{4,6}$/.test(otp)) {
+        setVerifyPhoneMsg('Please enter the OTP you received.', true);
+        return;
+      }
+      if (typeof window.verifyOtp !== 'function') {
+        setVerifyPhoneMsg('Still loading, please wait a moment and try again.', true);
+        return;
+      }
+      var btn = document.getElementById('btnVerifyPhoneSubmitOtp');
+      btn.disabled = true; btn.textContent = 'Verifying…';
+      window.verifyOtp(otp, async function(data) {
+        var accessToken = data.access_token || data.accessToken || data.message;
+        try {
+          var res = await fetch(WORKER + '/resident/link-phone', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accessToken: accessToken, phone: _verifyPhoneEntered })
+          });
+          var result = await res.json();
+          btn.disabled = false; btn.textContent = 'Verify & Save';
+          if (result.ok) {
+            setVerifyPhoneMsg('✓ Phone number verified and linked!', false);
+            currentUserData.phone = _verifyPhoneEntered;
+            currentUserData.hasPhoneLogin = true;
+            document.getElementById('residentPhoneValue').textContent = _verifyPhoneEntered;
+            document.getElementById('residentPhoneLink').style.display = 'none';
+            setTimeout(closeVerifyPhoneModal, 1500);
+          } else if (result.error === 'phone_in_use') {
+            setVerifyPhoneMsg('This phone number is already linked to a different account.', true);
+          } else {
+            setVerifyPhoneMsg('Failed to save: ' + (result.error || 'unknown error'), true);
+          }
+        } catch (e) {
+          btn.disabled = false; btn.textContent = 'Verify & Save';
+          setVerifyPhoneMsg('Network error. Please try again.', true);
+        }
+      }, function(err) {
+        btn.disabled = false; btn.textContent = 'Verify & Save';
+        setVerifyPhoneMsg('Invalid OTP. Please try again.', true);
+        console.error('MSG91 verifyOtp error:', err);
+      });
+    });
+
+    document.getElementById('btnVerifyPhoneResend').addEventListener('click', function(e) {
+      e.preventDefault();
+      setVerifyPhoneMsg('');
+      if (typeof window.retryOtp !== 'function') return;
+      window.retryOtp('text', function() {}, function(err) {
+        setVerifyPhoneMsg('Could not resend OTP.', true);
+        console.error('MSG91 retryOtp error:', err);
+      });
+    });
+    document.getElementById('btnVerifyPhoneChangeNumber').addEventListener('click', function(e) {
+      e.preventDefault();
+      setVerifyPhoneMsg('');
+      document.getElementById('verifyPhoneOtpInput').value = '';
+      document.getElementById('verifyPhoneOtpRow').style.display = 'none';
+      document.getElementById('verifyPhoneEntryRow').style.display = 'block';
+    });
 
     // ── EDIT CONTACT INFO ──────────────────────────
     function openEditContactModal() {
