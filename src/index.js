@@ -1486,29 +1486,33 @@ export default {
           const body = await request.json().catch(() => ({}));
           const { type, identifier, name, flatNumber, firebaseToken, phone, status, documentBase64, documentMimeType, verificationMethod, residentType, email, verificationResult, userConsent, userNote, mismatchDetails, verificationToken, smsVerifyToken } = body;
 
-          // SMS-based registration: require a fresh smsVerifyToken (issued by /auth/sms-verify-only)
-          // that proves the user controls the phone they're registering with.
-          if (type === 'sms') {
-            if (!smsVerifyToken) {
-              return new Response(JSON.stringify({ ok: false, error: 'sms_not_verified', message: 'Verify your phone number via OTP first.' }),
-                { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-            const smsRecord = await env.CACHE_KV.get(smsVerifyToken);
-            if (!smsRecord) {
-              return new Response(JSON.stringify({ ok: false, error: 'sms_token_expired', message: 'Phone verification expired. Request OTP again.' }),
-                { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-            const parsed = JSON.parse(smsRecord);
-            const submittedPhone = String(phone || identifier).replace(/\D/g, '');
-            const tokenPhone = String(parsed.phone || '').replace(/\D/g, '');
-            const tail = s => s.slice(-10);
-            if (tail(submittedPhone) !== tail(tokenPhone)) {
-              return new Response(JSON.stringify({ ok: false, error: 'sms_token_phone_mismatch', message: 'Phone in OTP verification does not match.' }),
-                { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-            // Consume token (one-time use)
-            await env.CACHE_KV.delete(smsVerifyToken);
+          // Phone is mandatory for every registration path (not just type==='sms')
+          // so every resident has SMS sign-in available from day one, alongside
+          // whichever method they registered with — fixes residents getting
+          // stuck with only one working login method.
+          if (!phone) {
+            return new Response(JSON.stringify({ ok: false, error: 'phone_required', message: 'Phone number is required for registration.' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
+          if (!smsVerifyToken) {
+            return new Response(JSON.stringify({ ok: false, error: 'sms_not_verified', message: 'Verify your phone number via OTP first.' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const smsRecord = await env.CACHE_KV.get(smsVerifyToken);
+          if (!smsRecord) {
+            return new Response(JSON.stringify({ ok: false, error: 'sms_token_expired', message: 'Phone verification expired. Request OTP again.' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const smsParsed = JSON.parse(smsRecord);
+          const submittedPhone = String(phone || identifier).replace(/\D/g, '');
+          const tokenPhone = String(smsParsed.phone || '').replace(/\D/g, '');
+          const tail = s => s.slice(-10);
+          if (tail(submittedPhone) !== tail(tokenPhone)) {
+            return new Response(JSON.stringify({ ok: false, error: 'sms_token_phone_mismatch', message: 'Phone in OTP verification does not match.' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          // Consume token (one-time use)
+          await env.CACHE_KV.delete(smsVerifyToken);
 
           // If verificationToken provided (pre-registration flow), validate and extract data
           let verificationData = null;
@@ -1863,14 +1867,14 @@ export default {
         const errorParam = url.searchParams.get('error');
 
         if (errorParam) {
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=${encodeURIComponent(errorParam)}`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=${encodeURIComponent(errorParam)}`, 302);
         }
         if (!code || !state) {
           return new Response('Missing code or state', { status: 400 });
         }
         const stateData = await env.CACHE_KV.get(`_oauth_state_${state}`, 'json');
         if (!stateData) {
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=invalid_state`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=invalid_state`, 302);
         }
         await env.CACHE_KV.delete(`_oauth_state_${state}`);
 
@@ -1890,11 +1894,11 @@ export default {
         if (!tokenRes.ok) {
           const errText = await tokenRes.text();
           console.error('Google token exchange failed:', tokenRes.status, errText);
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=token_exchange_failed`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=token_exchange_failed`, 302);
         }
         const tokens = await tokenRes.json();
         if (!tokens.id_token) {
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=no_id_token`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=no_id_token`, 302);
         }
 
         // Verify ID token signature against Google JWKS
@@ -1927,13 +1931,13 @@ export default {
           if (!ok) throw new Error('signature_invalid');
         } catch (e) {
           console.error('ID token verification failed:', e.message);
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=invalid_token`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=invalid_token`, 302);
         }
 
         const email = String(payload.email || '').toLowerCase();
         const name = payload.name || '';
         if (!email || !payload.email_verified) {
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=email_unverified`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=email_unverified`, 302);
         }
 
         // Look up resident by google credential (or email credential as fallback)
@@ -1941,18 +1945,25 @@ export default {
         if (!credential) credential = await db.getCredentialByTypeAndIdentifier('email', email, env);
 
         if (!credential) {
+          // Default: bounce unregistered Google sign-ins to register.html.
+          // Exception: if this OAuth round-trip started from join.html (accepting
+          // a family invite), land back there instead — that page completes
+          // the invite itself rather than starting a fresh registration.
           const regParams = new URLSearchParams({ email, name, from: 'google' });
-          return Response.redirect(`${FRONTEND_BASE}/society/register.html?${regParams}`, 302);
+          const isJoinFlow = typeof stateData.next === 'string' && stateData.next.startsWith('/society/join');
+          const dest = isJoinFlow ? stateData.next : '/society/register';
+          const sep = dest.includes('?') ? '&' : '?';
+          return Response.redirect(`${FRONTEND_BASE}${dest}${sep}${regParams}`, 302);
         }
 
         const residentId = credential.resident_id || credential.residentId;
         const resident = await db.getResidentV2(residentId, env);
         if (!resident) {
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=resident_not_found`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=resident_not_found`, 302);
         }
         const status = resident.status;
         if (status !== 'approved' && status !== 'verified_owner') {
-          return Response.redirect(`${FRONTEND_BASE}/society/login.html?oauth_error=not_approved&status=${encodeURIComponent(status)}`, 302);
+          return Response.redirect(`${FRONTEND_BASE}/society/login?oauth_error=not_approved&status=${encodeURIComponent(status)}`, 302);
         }
 
         // Issue session cookie
@@ -1970,8 +1981,8 @@ export default {
 
         const cookie = `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`;
         const nextDest = stateData.next && stateData.next.includes('register')
-          ? '/society/login.html?signed_in=1'
-          : (stateData.next || '/society/login.html');
+          ? '/society/login?signed_in=1'
+          : (stateData.next || '/society/login');
         return new Response(null, {
           status: 302,
           headers: {
@@ -4173,42 +4184,25 @@ export default {
 
           const token = generateUUID();
           const expiresAt = Date.now() + 10 * 60 * 1000;
-          const inviteData = {
+
+          const created = await db.createInvite({
             token,
-            flatNumber,
+            flatNumber: String(flatNumber),
+            createdByUid: inviterUid,
+            createdByResidentId: inviterUid,
+            type: 'family',
+            status: 'pending',
             relation,
-            createdAt: Date.now(),
-            expiresAt,
-            used: false
-          };
-
-          const invitePath = `invites/${token}`;
-          const fields = {};
-          for (const [k, v] of Object.entries(inviteData)) {
-            if (typeof v === 'string') fields[k] = { stringValue: v };
-            else if (typeof v === 'number') fields[k] = { integerValue: String(v) };
-            else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
-          }
-
-          const tokenAuth = await getServiceAccountToken(env);
-          if (!tokenAuth) {
-            return new Response(JSON.stringify({ ok: false, error: 'auth_failed' }),
+            expiresAt: new Date(expiresAt).toISOString()
+          }, env);
+          if (!created) {
+            return new Response(JSON.stringify({ ok: false, error: 'invite_create_failed' }),
               { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const base = 'https://firestore.googleapis.com/v1/projects/psots-society-25899/databases/(default)/documents';
-          const fsRes = await fetch(`${base}/${invitePath}`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fields })
-          });
-
-          if (!fsRes.ok) {
-            return new Response(JSON.stringify({ ok: false, error: 'firestore_error' }),
-              { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          // Write audit record
+          // Audit record stays in Firestore — admin.html's oversight panel
+          // (ACK / Flag / Remove / Snooze) reads this directly, unrelated to
+          // the functional invite/accept flow above.
           const auditFields = toFirestoreFields({
             token,
             status: 'created',
@@ -4224,11 +4218,15 @@ export default {
             inviterUserAgent,
             flagged: false
           });
-          await fetch(`${base}/invite_audit/${token}`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fields: auditFields })
-          }).catch(() => {});
+          const tokenAuth = await getServiceAccountToken(env);
+          if (tokenAuth) {
+            const base = 'https://firestore.googleapis.com/v1/projects/psots-society-25899/databases/(default)/documents';
+            await fetch(`${base}/invite_audit/${token}`, {
+              method: 'PATCH',
+              headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fields: auditFields })
+            }).catch(() => {});
+          }
 
           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`https://society.psots.in/society/join?token=${token}`)}`;
 
@@ -4321,7 +4319,7 @@ export default {
         }
       }
 
-      // GET /invite/validate — validate invite token
+      // GET /invite/validate — validate invite token (D1-backed)
       if (pathname.startsWith('/invite/validate') && request.method === 'GET') {
         try {
           const url = new URL(request.url);
@@ -4331,286 +4329,223 @@ export default {
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const inviteDoc = await db.firestoreGet(`invites/${token}`, env);
-          if (!inviteDoc) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
-              { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          const invite = parseFirestoreDoc(inviteDoc);
+          const invite = await db.getInvite(token, env);
           if (!invite) {
             return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
               { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          if (invite.used === true) {
-            return new Response(JSON.stringify({ ok: false, error: 'already_used' }),
+          if (invite.status !== 'pending') {
+            return new Response(JSON.stringify({ ok: false, error: invite.status === 'used' ? 'already_used' : 'expired' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          if (!invite.expiresAt || invite.expiresAt < Date.now()) {
+          const expiresAtMs = invite.expiresAt ? new Date(invite.expiresAt).getTime() : 0;
+          if (!expiresAtMs || expiresAtMs < Date.now()) {
             return new Response(JSON.stringify({ ok: false, error: 'expired' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // Get inviter name from residents collection
-          const residentsQuery = await firestoreQuery('residents', [['flatNumber', invite.flatNumber]], env);
-          const inviter = residentsQuery?.[0];
-          const inviterName = maskName(inviter?.firstName || 'Family member');
-
-          // Update audit: status=opened, openedAt, joinerIP
-          const joinerIP = request.headers.get('CF-Connecting-IP')
-            || request.headers.get('X-Forwarded-For')
-            || '';
-          await auditInvitePatch(token, toFirestoreFields({
-            status: 'opened',
-            openedAt: Date.now(),
-            joinerIP
-          }), env);
+          // Get inviter's name from the resident who created this invite
+          const inviter = invite.createdByResidentId ? await db.getResidentV2(invite.createdByResidentId, env) : null;
+          const inviterName = maskName(inviter?.name || 'Family member');
 
           return new Response(JSON.stringify({
             ok: true,
             flatNumber: invite.flatNumber,
             inviterName,
-            relation: invite.relation,
-            expiresAt: invite.expiresAt
+            relation: invite.relation || '',
+            type: invite.type,
+            expiresAt: expiresAtMs
           }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (e) {
+          console.error('/invite/validate error:', e);
           return new Response(JSON.stringify({ ok: false, error: 'server_error' }),
             { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
       }
 
       // POST /invite/accept — accept invite and create family member
+      // POST /invite/accept — D1-backed. No Firebase/Bearer auth: the joiner
+      // isn't a resident yet, so there's nothing to authenticate against.
+      // Identity is established by this call itself — Google email comes from
+      // the server-verified OAuth redirect (same trust model as /auth/register),
+      // phone comes from a verified MSG91 access-token, exactly like
+      // /resident/link-phone. Only the 'family' invite type is supported —
+      // 'tenant'/'tenant_family' have no reachable UI today (see admin.html
+      // "Add Tenant" stub), so we reject them clearly instead of pretending
+      // to support them with no path that ever creates one.
       if (pathname === '/invite/accept' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
           const body = await request.json().catch(() => ({}));
-          const { token, uid, name, loginMethod } = body;
-          if (!token || !uid) {
-            return new Response(JSON.stringify({ ok: false, error: 'token and uid required' }),
+          const { token, name, email, phone, accessToken, authMethod } = body;
+          if (!token || !name || !email || !phone || !accessToken || !authMethod) {
+            return new Response(JSON.stringify({ ok: false, error: 'missing_fields' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          if (authMethod !== 'google' && authMethod !== 'email') {
+            return new Response(JSON.stringify({ ok: false, error: 'invalid_auth_method' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const inviteDoc = await db.firestoreGet(`invites/${token}`, env);
-          if (!inviteDoc) {
+          const invite = await db.getInvite(token, env);
+          if (!invite) {
             return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
               { status: 404, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-
-          const invite = parseFirestoreDoc(inviteDoc);
-          if (!invite || invite.used || invite.expiresAt < Date.now()) {
-            return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
+          if (invite.status !== 'pending') {
+            return new Response(JSON.stringify({ ok: false, error: invite.status === 'used' ? 'already_used' : 'expired' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const expiresAtMs = invite.expiresAt ? new Date(invite.expiresAt).getTime() : 0;
+          if (!expiresAtMs || expiresAtMs < Date.now()) {
+            return new Response(JSON.stringify({ ok: false, error: 'expired' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          if (invite.type !== 'family') {
+            return new Response(JSON.stringify({ ok: false, error: 'unsupported_invite_type' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // Mark invite as used
-          const tokenAuth = await getServiceAccountToken(env);
-          if (!tokenAuth) {
-            return new Response(JSON.stringify({ ok: false, error: 'auth_failed' }),
+          const inviter = invite.createdByResidentId ? await db.getResidentV2(invite.createdByResidentId, env) : null;
+          if (!inviter) {
+            return new Response(JSON.stringify({ ok: false, error: 'inviter_not_found' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          // Verify phone via MSG91 (same check as /auth/sms-login and /resident/link-phone)
+          const msgRes = await fetch('https://control.msg91.com/api/v5/widget/verifyAccessToken', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'authkey': env.MSG91_AUTH_KEY, 'access-token': accessToken })
+          });
+          const msgData = await msgRes.json().catch(() => ({}));
+          if (msgData.type !== 'success') {
+            return new Response(JSON.stringify({ ok: false, error: 'invalid_otp', detail: msgData.message || 'OTP verification failed' }),
+              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const normalizedPhone = String(phone).replace(/\D/g, '').replace(/^0+/, '');
+          const phoneForLookup = normalizedPhone.startsWith('91') ? normalizedPhone : `91${normalizedPhone.slice(-10)}`;
+
+          // Refuse to create a duplicate identity — if either the phone or the
+          // email already has a credential, this person should sign in, not join again
+          const existingSms = await db.getCredentialByTypeAndIdentifier('sms', phoneForLookup, env);
+          if (existingSms) {
+            return new Response(JSON.stringify({ ok: false, error: 'phone_in_use' }),
+              { status: 409, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          const existingAuthCred = await db.getCredentialByTypeAndIdentifier(authMethod, email.toLowerCase(), env);
+          if (existingAuthCred) {
+            return new Response(JSON.stringify({ ok: false, error: 'email_in_use' }),
+              { status: 409, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          const residentId = `r_fam_${generateUUID()}`;
+          const residentType = inviter.residentType === 'tenant' ? 'family_of_tenant' : 'family_of_owner';
+
+          const createdResident = await db.createResidentV2({
+            residentId,
+            flatNumber: invite.flatNumber,
+            name,
+            email: email.toLowerCase(),
+            phone: phoneForLookup,
+            residentType,
+            status: 'pending',
+            linkedToResidentId: invite.createdByResidentId,
+            relation: invite.relation || '',
+            registrationMethod: authMethod,
+            invitedByFlat: invite.flatNumber
+          }, env);
+          if (!createdResident) {
+            return new Response(JSON.stringify({ ok: false, error: 'failed_to_create_resident' }),
               { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const base = 'https://firestore.googleapis.com/v1/projects/psots-society-25899/databases/(default)/documents';
-          await fetch(`${base}/invites/${token}`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fields: { used: { booleanValue: true } } })
-          });
+          await db.createCredential({
+            credentialId: `cred_${authMethod}_${email.toLowerCase()}_${Date.now()}`,
+            residentId,
+            type: authMethod,
+            identifier: email.toLowerCase(),
+            firebaseUid: null,
+            createdAt: new Date().toISOString()
+          }, env);
+          await db.createCredential({
+            credentialId: `cred_sms_${phoneForLookup}_${Date.now()}`,
+            residentId,
+            type: 'sms',
+            identifier: phoneForLookup,
+            firebaseUid: null,
+            createdAt: new Date().toISOString()
+          }, env);
 
-          // Determine invite type — family (default), tenant, or tenant_family
-          const inviteType = invite.type || 'family';
+          await db.markInviteUsed(token, residentId, env);
 
-          // Get resident's name and flat number
-          const residentDoc = await db.firestoreGet(`residents/${uid}`, env);
-          const resident = parseFirestoreDoc(residentDoc);
-
-          const joinerName = resident
-            ? ([resident.firstName, resident.lastName].filter(Boolean).join(' ').trim() || resident.name || 'Family member')
-            : 'Family member';
-          const joinerEmail = resident?.email || '';
-          const joinerUserAgent = request.headers.get('User-Agent') || '';
-
-          // Resolve tenant context for tenant / tenant_family
-          let tenantRec = null;
-          let joinerFlat = resident?.flatNumber || invite.flatNumber || '';
-          if (inviteType === 'tenant' && invite.tenantId) {
-            tenantRec = parseFirestoreDoc(await db.firestoreGet(`tenants/${invite.tenantId}`, env));
-            if (tenantRec) joinerFlat = tenantRec.ownerFlat || joinerFlat;
-          } else if (inviteType === 'tenant_family' && invite.tenantUid) {
-            const tenantRecords = await firestoreQuery('tenants', [['tenantUid', invite.tenantUid]], env);
-            tenantRec = tenantRecords[0] || null;
-            if (tenantRec) joinerFlat = tenantRec.ownerFlat || invite.flatNumber || joinerFlat;
-          }
+          // Best-effort: bump the flat's family_count, audit log, admin notification.
+          // None of these block the join itself if they fail.
+          try {
+            const flat = await db.getFlatV2(invite.flatNumber, env);
+            if (flat) await db.updateFlat(invite.flatNumber, { familyCount: (flat.familyCount || 0) + 1 }, env);
+          } catch (_e) { /* non-fatal */ }
 
           await auditInvitePatch(token, toFirestoreFields({
             status: 'completed',
             completedAt: Date.now(),
-            joinedByUid: uid,
-            joinedByName: maskName(joinerName),
-            joinedByEmail: maskEmail(joinerEmail),
-            joinedByFlat: String(joinerFlat),
-            joinedByLoginMethod: loginMethod || '',
-            joinerUserAgent
-          }), env);
+            joinedByUid: residentId,
+            joinedByName: maskName(name),
+            joinedByEmail: maskEmail(email),
+            joinedByFlat: String(invite.flatNumber),
+            joinedByLoginMethod: authMethod,
+            joinerUserAgent: request.headers.get('User-Agent') || ''
+          }), env).catch(() => {});
 
-          if (inviteType === 'tenant') {
-            // Activate tenant record + set resident accessLevel
-            if (invite.tenantId) {
-              const tenantUpd = toFirestoreFields({
-                tenantUid: uid,
-                status: 'active',
-                activatedAt: Date.now()
-              });
-              const mask = 'updateMask.fieldPaths=tenantUid&updateMask.fieldPaths=status&updateMask.fieldPaths=activatedAt';
-              await fetch(`${base}/tenants/${invite.tenantId}?${mask}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fields: tenantUpd })
-              }).catch(() => {});
+          try {
+            const adminList = (await db.listAdmins(env)).map(a => a.email).filter(Boolean);
+            if (adminList.length > 0) {
+              const html = `
+                <p>A family member has joined the society:</p>
+                <ul>
+                  <li><strong>Name:</strong> ${escapeHTML(name)}</li>
+                  <li><strong>Flat:</strong> ${escapeHTML(invite.flatNumber)}</li>
+                  <li><strong>Relation:</strong> ${escapeHTML(invite.relation || '')}</li>
+                  <li><strong>Joined:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</li>
+                </ul>
+              `;
+              const emailHtml = generateBaseEmail('Family Member Joined', 'PSOTS Society', html);
+              for (const adminEmail of adminList) {
+                await fetch('https://api.resend.com/emails', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    from: 'PSOTS Society <hello@society.psots.in>',
+                    to: adminEmail,
+                    subject: `Family Member Joined — Flat ${invite.flatNumber}`,
+                    html: emailHtml,
+                  }),
+                }).catch(() => {});
+              }
             }
-            // Patch resident doc with tenant access metadata (if resident doc exists)
-            const residentPatch = toFirestoreFields({
-              accessLevel: 'tenant',
-              status: 'active',
-              ownerUid: tenantRec?.ownerUid || '',
-              flatNumber: String(joinerFlat || ''),
-              leaseStart: tenantRec?.leaseStart || '',
-              leaseEnd: tenantRec?.leaseEnd || '',
-              joinedByFlat: String(joinerFlat || '')
-            });
-            const mask2 = 'updateMask.fieldPaths=accessLevel&updateMask.fieldPaths=status&updateMask.fieldPaths=ownerUid&updateMask.fieldPaths=flatNumber&updateMask.fieldPaths=leaseStart&updateMask.fieldPaths=leaseEnd&updateMask.fieldPaths=joinedByFlat';
-            await fetch(`${base}/residents/${uid}?${mask2}`, {
-              method: 'PATCH',
-              headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ fields: residentPatch })
-            }).catch(() => {});
-          } else if (inviteType === 'tenant_family') {
-            // Set resident accessLevel = tenant_family
-            const residentPatch = toFirestoreFields({
-              accessLevel: 'tenant_family',
-              status: 'active',
-              tenantUid: invite.tenantUid || '',
-              ownerUid: tenantRec?.ownerUid || '',
-              flatNumber: String(joinerFlat || ''),
-              leaseEnd: tenantRec?.leaseEnd || invite.leaseEnd || '',
-              joinedByFlat: String(joinerFlat || '')
-            });
-            const mask3 = 'updateMask.fieldPaths=accessLevel&updateMask.fieldPaths=status&updateMask.fieldPaths=tenantUid&updateMask.fieldPaths=ownerUid&updateMask.fieldPaths=flatNumber&updateMask.fieldPaths=leaseEnd&updateMask.fieldPaths=joinedByFlat';
-            await fetch(`${base}/residents/${uid}?${mask3}`, {
-              method: 'PATCH',
-              headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ fields: residentPatch })
-            }).catch(() => {});
-          } else {
-            // Family invite — create resident doc + add to inviter's family list
-            try {
-              console.error('invite doc:', JSON.stringify(invite));
-              const inviterQuery = await firestoreQuery('residents', [['flatNumber', invite.flatNumber]], env);
-              console.error('inviterQuery result:', JSON.stringify(inviterQuery));
+          } catch (_e) { /* non-fatal */ }
 
-              if (!inviterQuery || inviterQuery.length === 0) {
-                console.error('No resident found for flatNumber:', invite.flatNumber);
-                return new Response(JSON.stringify({ ok: false, error: 'inviter_not_found' }),
-                  { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-              }
-
-              const inviterUid = inviterQuery[0].uid;
-
-              // Create resident document for family member
-              const familyResidentFields = toFirestoreFields({
-                uid: uid,
-                flatNumber: invite.flatNumber,
-                status: 'pending',
-                relation: invite.relation || '',
-                accessLevel: 'family',
-                invitedBy: inviterUid,
-                firstName: name || resident?.firstName || 'Family Member',
-                createdAt: Date.now()
-              });
-              const maskResident = 'updateMask.fieldPaths=uid&updateMask.fieldPaths=flatNumber&updateMask.fieldPaths=status&updateMask.fieldPaths=relation&updateMask.fieldPaths=accessLevel&updateMask.fieldPaths=invitedBy&updateMask.fieldPaths=firstName&updateMask.fieldPaths=createdAt';
-              const residentRes = await fetch(`${base}/residents/${uid}?${maskResident}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fields: familyResidentFields })
-              });
-
-              if (!residentRes.ok) {
-                const err = await residentRes.text();
-                console.error('Failed to save resident:', residentRes.status, err);
-                return new Response(JSON.stringify({ ok: false, error: 'failed_to_create_resident' }),
-                  { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
-              }
-
-              // Add to inviter's family list
-              const familyMemberId = generateUUID();
-              const familyFields = {
-                name: { stringValue: name || resident?.firstName || 'Family Member' },
-                relation: { stringValue: invite.relation || '' },
-                addedAt: { integerValue: String(Date.now()) }
-              };
-              const familyRes = await fetch(`${base}/residents/${inviterUid}/family/${familyMemberId}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fields: familyFields })
-              });
-
-              if (!familyRes.ok) {
-                const err = await familyRes.text();
-                console.error('Failed to add to family list:', familyRes.status, err);
-                // Log but don't fail — resident is already created
-              }
-            } catch (familyErr) {
-              console.error('Family invite error:', familyErr);
-              return new Response(JSON.stringify({ ok: false, error: 'family_invite_failed' }),
-                { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
+          // Sign the new family member in immediately
+          const { sessionId, error: sessionError } = await db.createSession(env, residentId, {
+            flatNumber: invite.flatNumber,
+            residentType,
+          });
+          if (sessionError) {
+            return new Response(JSON.stringify({ ok: true, sessionFailed: true }),
+              { headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // Get admins for notification
-          const adminEmails = await firestoreQuery('admins', [], env);
-          const adminList = adminEmails.map(a => a.email).filter(Boolean);
-
-          // Send admin notification
-          if (adminList.length > 0) {
-            const inviteeName = resident?.firstName || 'Family member';
-            const html = `
-              <p>A family member has joined the society:</p>
-              <ul>
-                <li><strong>Name:</strong> ${escapeHTML(inviteeName)}</li>
-                <li><strong>Flat:</strong> ${escapeHTML(invite.flatNumber)}</li>
-                <li><strong>Relation:</strong> ${escapeHTML(invite.relation)}</li>
-                <li><strong>Joined:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</li>
-              </ul>
-            `;
-            const emailHtml = generateBaseEmail('Family Member Joined', 'PSOTS Society', html);
-
-            for (const email of adminList) {
-              await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  from: 'PSOTS Society <hello@society.psots.in>',
-                  to: email,
-                  subject: `Family Member Joined — Flat ${invite.flatNumber}`,
-                  html: emailHtml,
-                }),
-              }).catch(() => {});
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: {
+              'Content-Type': 'application/json',
+              ...CORS,
+              'Set-Cookie': `psots_session=${sessionId}; Path=/; Max-Age=${30 * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax; Domain=.psots.in`
             }
-          }
-
-          return new Response(JSON.stringify({ ok: true }),
-            { headers: { 'Content-Type': 'application/json', ...CORS } });
+          });
         } catch (e) {
-          return new Response(JSON.stringify({ ok: false, error: 'server_error' }),
+          console.error('/invite/accept error:', e);
+          return new Response(JSON.stringify({ ok: false, error: 'server_error', details: e.message }),
             { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
       }
@@ -4623,21 +4558,11 @@ export default {
             return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
               { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          const callerUid = authCtx.uid;
 
-          const url = new URL(request.url);
-          const flatNumber = url.searchParams.get('flatNumber');
-          if (!flatNumber) {
-            return new Response(JSON.stringify({ ok: false, error: 'flatNumber required' }),
-              { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          const familyMembers = await firestoreQuery('residents', [
-            ['flatNumber', flatNumber],
-            ['accessLevel', 'family']
-          ], env);
-
-          const masked = (familyMembers || []).map(m => sanitizeForResident(m, callerUid));
+          // Scoped by linked_to_resident_id = caller, so this always returns
+          // only the caller's own family members regardless of any query params.
+          const familyMembers = await db.listFamilyMembers(authCtx.uid, env);
+          const masked = familyMembers.map(m => sanitizeForResident(m, authCtx.uid));
 
           return new Response(JSON.stringify({ ok: true, members: masked }),
             { status: 200, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -4665,8 +4590,8 @@ export default {
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const primaryResident = parseFirestoreDoc(await db.firestoreGet(`residents/${primaryUid}`, env));
-          const memberResident = parseFirestoreDoc(await db.firestoreGet(`residents/${memberUid}`, env));
+          const primaryResident = await db.getResidentV2(primaryUid, env);
+          const memberResident = await db.getResidentV2(memberUid, env);
 
           if (!primaryResident || primaryResident.residentType !== 'owner') {
             return new Response(JSON.stringify({ ok: false, error: 'not_primary_resident' }),
@@ -4685,27 +4610,22 @@ export default {
               { status: 429, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const tokenAuth = await getServiceAccountToken(env);
-          const base = 'https://firestore.googleapis.com/v1/projects/psots-society-25899/databases/(default)/documents';
-
-          // Conditional update: only update if status is currently 'pending'
-          const currentMemberDoc = parseFirestoreDoc(await db.firestoreGet(`residents/${memberUid}`, env));
-          if (currentMemberDoc?.status !== 'pending') {
+          if (memberResident.status !== 'pending') {
             return new Response(JSON.stringify({ ok: false, error: 'already_processed' }),
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const approveRes = await fetch(`${base}/residents/${memberUid}?updateMask.fieldPaths=status`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fields: { status: { stringValue: 'approved' } } })
-          });
-          if (!approveRes.ok) throw new Error(await approveRes.text());
+          const approveOk = await db.updateResident(memberUid, {
+            status: 'approved',
+            approvedAt: new Date().toISOString(),
+            approvedBy: primaryUid
+          }, env);
+          if (!approveOk) throw new Error('Failed to update resident status');
 
           const email = memberResident.email;
           if (email) {
-            const memberName = memberResident.firstName || memberResident.name || 'there';
-            const approverName = primaryResident.firstName || primaryResident.name || 'Your family member';
+            const memberName = memberResident.name || 'there';
+            const approverName = primaryResident.name || 'Your family member';
             const emailHtml = generateBaseEmail(
               'You\'re now part of PSOTS Society!',
               'Prestige Song of the South',
@@ -4749,8 +4669,8 @@ export default {
               { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const primaryResident = parseFirestoreDoc(await db.firestoreGet(`residents/${primaryUid}`, env));
-          const memberResident = parseFirestoreDoc(await db.firestoreGet(`residents/${memberUid}`, env));
+          const primaryResident = await db.getResidentV2(primaryUid, env);
+          const memberResident = await db.getResidentV2(memberUid, env);
 
           if (!primaryResident || primaryResident.residentType !== 'owner') {
             return new Response(JSON.stringify({ ok: false, error: 'not_primary_resident' }),
@@ -4761,14 +4681,13 @@ export default {
               { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          const tokenAuth = await getServiceAccountToken(env);
-          const base = 'https://firestore.googleapis.com/v1/projects/psots-society-25899/databases/(default)/documents';
-          const rejectRes = await fetch(`${base}/residents/${memberUid}?updateMask.fieldPaths=status`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${tokenAuth}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fields: { status: { stringValue: 'rejected' } } })
-          });
-          if (!rejectRes.ok) throw new Error(await rejectRes.text());
+          const rejectOk = await db.updateResident(memberUid, {
+            status: 'rejected',
+            rejectedAt: new Date().toISOString(),
+            rejectedBy: primaryUid,
+            rejectionReason: reason
+          }, env);
+          if (!rejectOk) throw new Error('Failed to update resident status');
 
           const email = memberResident.email;
           if (email) {

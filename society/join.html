@@ -380,6 +380,41 @@
         </div>
       </div>
 
+      <!-- Step: Phone verification (required for both Google and Email paths) -->
+      <div id="step-phone" class="step">
+        <h1>One More Step</h1>
+        <p>Confirm your name and verify your phone number to finish joining.</p>
+
+        <div class="form-group">
+          <label>Your Name</label>
+          <input id="phone-step-name" placeholder="Your full name" type="text"/>
+        </div>
+
+        <div id="phoneEntryRow">
+          <div class="form-group">
+            <label>Mobile Number</label>
+            <div style="display:flex;gap:8px">
+              <div style="flex-shrink:0;display:flex;align-items:center;padding:0 12px;border:1.5px solid var(--border);border-radius:11px;background:var(--cream);font-size:15px;color:var(--muted)">+91</div>
+              <input type="tel" id="phoneInput" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" style="flex:1"/>
+            </div>
+          </div>
+          <button id="btnSendOtp">Send OTP</button>
+        </div>
+
+        <div id="otpEntryRow" style="display:none">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Enter the OTP sent to <span id="otpSentPhone" style="font-weight:700;color:var(--ink)"></span></p>
+          <div class="form-group">
+            <input type="text" id="otpInput" placeholder="6-digit OTP" maxlength="6" inputmode="numeric"/>
+          </div>
+          <button id="btnVerifyOtp">Verify &amp; Join</button>
+          <div style="text-align:center;margin-top:12px;font-size:12.5px">
+            <a href="#" id="btnChangeNumber" style="color:var(--muted);text-decoration:none">Change number</a>
+            &nbsp;·&nbsp;
+            <a href="#" id="btnResendOtp" style="color:var(--jade);font-weight:700;text-decoration:none">Resend OTP</a>
+          </div>
+        </div>
+      </div>
+
       <!-- Step 3: Success -->
       <div id="step-success" class="step">
         <h1>Welcome! 🎉</h1>
@@ -403,19 +438,18 @@
     </div>
   </div>
 
-  <script type="module">
-    import { auth, db } from '../../js/core/firebase.js';
-    import residentService from '../../js/services/resident.service.js';
-    import {
-      signInWithPopup, GoogleAuthProvider, signInWithCustomToken,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
+  <script>
     const workerUrl = 'https://telegram.psots.in';
     let inviteToken = null;
     let inviteData = null;
     let expiresAt = null;
     let timerInterval = null;
+    let joinerName = '';
+    let joinerEmail = '';
+    let joinerAuthMethod = '';
+    let _msg91Ready = false;
+    let _msg91Loaded = false;
+    let _enteredPhone = '';
 
     function showStep(stepId) {
       const steps = document.querySelectorAll('.step');
@@ -498,6 +532,20 @@
         document.getElementById('inv-flat').textContent = data.flatNumber;
         document.getElementById('inv-relation').textContent = data.relation;
 
+        // Returning from Google OAuth — Worker already verified the email
+        // server-side and appended it here. Skip straight to phone verification.
+        const fromGoogle = params.get('from') === 'google';
+        if (fromGoogle) {
+          joinerEmail = (params.get('email') || '').toLowerCase();
+          joinerName = params.get('name') || '';
+          joinerAuthMethod = 'google';
+          history.replaceState({}, '', `/society/join?token=${encodeURIComponent(inviteToken)}`);
+          showStep('step-phone');
+          document.getElementById('phone-step-name').value = joinerName;
+          loadMsg91Widget();
+          return;
+        }
+
         showStep('step-invitation');
         startExpiryTimer();
       } catch (err) {
@@ -541,26 +589,12 @@
       }
     };
 
-    window.joinWithGoogle = async function() {
+    window.joinWithGoogle = function() {
       if (!document.getElementById('join-agree').checked) {
         return showMessage('Please accept the terms and privacy policy');
       }
-
-      const btn = document.getElementById('btn-join-google');
-      setLoader(btn, true);
-
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        const idToken = await user.getIdToken();
-        await completeInvite(user.uid, user.displayName || 'Family Member', idToken, 'google');
-      } catch (err) {
-        showMessage('Registration failed: ' + err.message);
-      } finally {
-        setLoader(btn, false);
-      }
+      const next = encodeURIComponent(`/society/join?token=${inviteToken}`);
+      window.location.href = `${workerUrl}/auth/google/start?next=${next}`;
     };
 
     window.joinWithEmailOTP = async function() {
@@ -580,18 +614,22 @@
         const res = await fetch(`${workerUrl}/auth/verify-email-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ email, otp, registration: true })
         });
 
         const data = await res.json();
-        if (!data.ok || !data.token) throw new Error('OTP verification failed');
+        if (!data.ok) throw new Error(data.error || 'OTP verification failed');
 
-        const token = data.token;
-        await signInWithCustomToken(auth, token);
-        const user = auth.currentUser;
-
-        const idToken = await user.getIdToken();
-        await completeInvite(user.uid, name, idToken, 'email_otp');
+        // Email ownership confirmed — move to phone verification before
+        // actually completing the invite.
+        joinerEmail = email.toLowerCase();
+        joinerName = name;
+        joinerAuthMethod = 'email';
+        clearInterval(timerInterval);
+        showStep('step-phone');
+        document.getElementById('phone-step-name').value = joinerName;
+        loadMsg91Widget();
       } catch (err) {
         showMessage('Registration failed: ' + err.message);
       } finally {
@@ -599,26 +637,135 @@
       }
     };
 
-    async function completeInvite(uid, name, idToken, loginMethod) {
+    // ── Phone verification (MSG91 widget, inline — same pattern as login.html) ──
+    function setPhoneStepMsg(msg, isError) {
+      showMessage(msg, isError === false ? 'success' : 'error');
+    }
+
+    async function loadMsg91Widget() {
+      if (_msg91Loaded) return;
+      try {
+        const res = await fetch(`${workerUrl}/auth/msg91-config`);
+        const cfg = await res.json();
+        if (!cfg.ok || !cfg.widgetId || !cfg.tokenAuth) {
+          setPhoneStepMsg('Phone verification is temporarily unavailable.');
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://verify.msg91.com/otp-provider.js';
+        script.onload = () => {
+          if (typeof initSendOTP !== 'function') return;
+          initSendOTP({
+            widgetId: cfg.widgetId,
+            tokenAuth: cfg.tokenAuth,
+            identifier: '',
+            exposeMethods: true,
+            disableInput: true,
+            success: () => { _msg91Ready = true; },
+            failure: (err) => console.error('MSG91 init error:', err)
+          });
+          _msg91Ready = true;
+        };
+        document.head.appendChild(script);
+        _msg91Loaded = true;
+      } catch (e) {
+        setPhoneStepMsg('Phone verification unavailable. Please try again later.');
+      }
+    }
+
+    document.getElementById('btnSendOtp').addEventListener('click', () => {
+      const phone = document.getElementById('phoneInput').value.trim();
+      hideMessage();
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        return setPhoneStepMsg('Please enter a valid 10-digit mobile number.');
+      }
+      if (!_msg91Ready || typeof window.sendOtp !== 'function') {
+        return setPhoneStepMsg('Still loading, please wait a moment and try again.');
+      }
+      _enteredPhone = phone;
+      const btn = document.getElementById('btnSendOtp');
+      setLoader(btn, true);
+      window.sendOtp('91' + phone, () => {
+        setLoader(btn, false);
+        document.getElementById('otpSentPhone').textContent = '+91 ' + phone;
+        document.getElementById('phoneEntryRow').style.display = 'none';
+        document.getElementById('otpEntryRow').style.display = 'block';
+        document.getElementById('otpInput').focus();
+      }, (err) => {
+        setLoader(btn, false);
+        setPhoneStepMsg('Could not send OTP. Please check the number and try again.');
+        console.error('MSG91 sendOtp error:', err);
+      });
+    });
+
+    document.getElementById('btnVerifyOtp').addEventListener('click', () => {
+      const otp = document.getElementById('otpInput').value.trim();
+      const name = document.getElementById('phone-step-name').value.trim();
+      hideMessage();
+      if (!name) return setPhoneStepMsg('Please enter your name.');
+      if (!/^\d{4,6}$/.test(otp)) return setPhoneStepMsg('Please enter the OTP you received.');
+      if (typeof window.verifyOtp !== 'function') {
+        return setPhoneStepMsg('Still loading, please wait a moment and try again.');
+      }
+      const btn = document.getElementById('btnVerifyOtp');
+      setLoader(btn, true);
+      window.verifyOtp(otp, (data) => {
+        const accessToken = data.access_token || data.accessToken || data.message;
+        completeInvite(name, accessToken, btn);
+      }, (err) => {
+        setLoader(btn, false);
+        setPhoneStepMsg('Invalid OTP. Please try again.');
+        console.error('MSG91 verifyOtp error:', err);
+      });
+    });
+
+    document.getElementById('btnResendOtp').addEventListener('click', (e) => {
+      e.preventDefault();
+      hideMessage();
+      if (typeof window.retryOtp !== 'function') return;
+      window.retryOtp('text', () => {}, (err) => {
+        setPhoneStepMsg('Could not resend OTP.');
+        console.error('MSG91 retryOtp error:', err);
+      });
+    });
+    document.getElementById('btnChangeNumber').addEventListener('click', (e) => {
+      e.preventDefault();
+      hideMessage();
+      document.getElementById('otpInput').value = '';
+      document.getElementById('otpEntryRow').style.display = 'none';
+      document.getElementById('phoneEntryRow').style.display = 'block';
+    });
+
+    async function completeInvite(name, accessToken, btn) {
       try {
         const res = await fetch(`${workerUrl}/invite/accept`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-          },
-          body: JSON.stringify({ token: inviteToken, uid, name, loginMethod })
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            token: inviteToken,
+            name,
+            email: joinerEmail,
+            phone: _enteredPhone,
+            accessToken,
+            authMethod: joinerAuthMethod
+          })
         });
 
         const data = await res.json();
-        if (!data.ok) throw new Error('Failed to complete invitation');
+        if (btn) setLoader(btn, false);
+        if (!data.ok) {
+          if (data.error === 'phone_in_use') return setPhoneStepMsg('This phone number is already linked to another account.');
+          if (data.error === 'email_in_use') return setPhoneStepMsg('An account with this email already exists. Please sign in instead.');
+          return setPhoneStepMsg('Failed to complete invitation: ' + (data.error || 'unknown error'));
+        }
 
         document.getElementById('success-name').textContent = name;
         document.getElementById('success-flat').textContent = inviteData.flatNumber;
-        clearInterval(timerInterval);
         showStep('step-success');
       } catch (err) {
-        showMessage('Error completing registration: ' + err.message);
+        if (btn) setLoader(btn, false);
+        setPhoneStepMsg('Error completing registration: ' + err.message);
       }
     }
 

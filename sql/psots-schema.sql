@@ -27,6 +27,7 @@ CREATE TABLE residents (
   -- Admin & Access
   is_admin BOOLEAN DEFAULT 0,
   linked_to_resident_id TEXT,             -- For family members
+  relation TEXT,                          -- Family member's relation to inviter (Spouse, Child, etc.) — added 2026-06-21
   apps TEXT DEFAULT '["psots_society"]',  -- JSON array
   samiti_roles TEXT DEFAULT '[]',         -- JSON array
   vendor_id TEXT,
@@ -326,6 +327,7 @@ CREATE TABLE invites (
 
   type TEXT CHECK(type IN ('family', 'tenant', 'tenant_family')) NOT NULL,
   status TEXT CHECK(status IN ('pending', 'used', 'expired', 'revoked')) DEFAULT 'pending',
+  relation TEXT,                          -- e.g. Spouse, Child — copied onto the resident row at accept time, added 2026-06-21
 
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   expires_at DATETIME,

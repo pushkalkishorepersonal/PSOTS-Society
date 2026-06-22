@@ -34,6 +34,12 @@ export const updateCredentialLastUsed = d1.updateCredentialLastUsed;
 export const getCredentialsByIdentifier = d1.getCredentialsByIdentifier;
 export const getCredentialsByResident = d1.getCredentialsByResident;
 
+// Invite operations
+export const getInvite = d1.getInvite;
+export const createInvite = d1.createInvite;
+export const markInviteUsed = d1.markInviteUsed;
+export const listFamilyMembers = d1.listFamilyMembers;
+
 // Flat operations
 export const getFlatV2 = d1.getFlatV2;
 export const createFlatV2 = d1.createFlatV2;

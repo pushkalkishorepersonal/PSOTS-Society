@@ -36,6 +36,14 @@ export function maskName(fullName) {
  * directory, WhatsApp group). Email and phone are the high-value PII
  * and remain masked.
  */
+// D1's residents table has no accessLevel column — resident_type
+// (owner/tenant/family_of_owner/family_of_tenant) already encodes it.
+function deriveAccessLevel(r) {
+  if (r.accessLevel) return r.accessLevel;
+  if (r.residentType === 'family_of_owner' || r.residentType === 'family_of_tenant') return 'family';
+  return r.residentType || 'owner';
+}
+
 export function sanitizeForAdmin(r) {
   if (!r) return null;
   return {
@@ -47,7 +55,7 @@ export function sanitizeForAdmin(r) {
     email: maskEmail(r.email || r.secondaryEmail || ''),
     phone: maskPhone(r.phone || r.secondaryPhone || ''),
     relation: r.relation || '',
-    accessLevel: r.accessLevel || 'owner',
+    accessLevel: deriveAccessLevel(r),
     loginMethod: r.loginMethod || '',
     status: r.status || 'pending',
     createdAt: r.createdAt || '',
@@ -57,16 +65,16 @@ export function sanitizeForAdmin(r) {
 
 export function sanitizeForResident(r, requestingUid) {
   if (!r) return null;
-  if (r.uid === requestingUid) return r;
+  if (r.uid === requestingUid || r.residentId === requestingUid) return r;
   // Mask name for other residents (Option C: admins see full names, residents see masked)
   return {
-    uid: r.uid,
+    uid: r.uid || r.residentId,
     flatNumber: r.flatNumber,
     displayName: maskName(r.name || r.firstName || ''),
     email: maskEmail(r.email || ''),
     phone: maskPhone(r.phone || ''),
     relation: r.relation || '',
-    accessLevel: r.accessLevel || 'owner',
+    accessLevel: deriveAccessLevel(r),
     loginMethod: r.loginMethod || '',
     status: r.status || 'pending',
     createdAt: r.createdAt || '',

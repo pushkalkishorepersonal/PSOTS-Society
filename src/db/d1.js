@@ -690,3 +690,62 @@ export async function updateCredentialLastUsed(credentialId, env) {
 
   return result.success;
 }
+
+// ══════════════════════════════════════════════════════════════
+// INVITE OPERATIONS (family / tenant invites)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Get invite by token
+ */
+export async function getInvite(token, env) {
+  const result = await env.PSOTS_DB
+    .prepare('SELECT * FROM invites WHERE token = ?')
+    .bind(token)
+    .first();
+
+  return parseD1Row(result);
+}
+
+/**
+ * Create a new invite
+ */
+export async function createInvite(data, env) {
+  const snake = toSnakeCase(data);
+  const columns = Object.keys(snake).join(', ');
+  const placeholders = Object.keys(snake).map(() => '?').join(', ');
+  const values = Object.values(snake);
+
+  const result = await env.PSOTS_DB
+    .prepare(`INSERT INTO invites (${columns}) VALUES (${placeholders})`)
+    .bind(...values)
+    .run();
+
+  return result.success;
+}
+
+/**
+ * Mark an invite as used by a resident
+ */
+export async function markInviteUsed(token, usedByResidentId, env) {
+  const result = await env.PSOTS_DB
+    .prepare("UPDATE invites SET status = 'used', used_at = CURRENT_TIMESTAMP, used_by_uid = ? WHERE token = ?")
+    .bind(usedByResidentId, token)
+    .run();
+
+  return result.success;
+}
+
+/**
+ * List pending family members linked to an inviter (owner or tenant) —
+ * i.e. residents created via that person's family invite, awaiting or
+ * having received approval.
+ */
+export async function listFamilyMembers(inviterResidentId, env) {
+  const result = await env.PSOTS_DB
+    .prepare("SELECT * FROM residents WHERE linked_to_resident_id = ? AND resident_type IN ('family_of_owner', 'family_of_tenant')")
+    .bind(inviterResidentId)
+    .all();
+
+  return result.results.map(parseD1Row);
+}
