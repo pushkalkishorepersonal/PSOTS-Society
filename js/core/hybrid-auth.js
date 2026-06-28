@@ -89,6 +89,8 @@ async function _trackLogin(firebaseUser, residentData) {
   }
 }
 
+const LAST_EMAIL_KEY = 'psots_last_known_email';
+
 export async function setupHybridAuth() {
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -98,7 +100,26 @@ export async function setupHybridAuth() {
           if (!_currentUser) {
             _authResolved = true;
             unsubscribe();
-            resolve({ user: null, resident: null });
+
+            // Firebase's onAuthStateChanged can legitimately resolve null even
+            // for a signed-in user when the browser blocks the cross-origin
+            // storage access Firebase's authDomain iframe needs to restore the
+            // session (third-party storage partitioning, Incognito, strict
+            // tracking protection). Fall back to the email we saved at the
+            // last successful sign-in (same-origin localStorage — never
+            // subject to that cross-origin restriction) rather than treating
+            // this as a real logout.
+            let lastKnownEmail = null;
+            try { lastKnownEmail = localStorage.getItem(LAST_EMAIL_KEY); } catch (_) {}
+
+            if (lastKnownEmail) {
+              console.warn('[hybrid-auth] Firebase auth state unavailable (likely blocked storage access); falling back to last known session for', lastKnownEmail);
+              _currentUser = { email: lastKnownEmail, uid: null, isStorageFallback: true };
+              _notify();
+              resolve({ user: _currentUser, resident: null });
+            } else {
+              resolve({ user: null, resident: null });
+            }
           }
         }, 500);
         return;
@@ -108,6 +129,9 @@ export async function setupHybridAuth() {
       _currentResident = null;
 
       if (firebaseUser) {
+        if (firebaseUser.email) {
+          try { localStorage.setItem(LAST_EMAIL_KEY, firebaseUser.email); } catch (_) {}
+        }
         if (!firebaseUser.email) {
           _authResolved = true;
           _notify();
@@ -196,6 +220,7 @@ export function getResident() {
 export async function signOutUser() {
   localStorage.removeItem('psots_login_method');
   localStorage.removeItem('psots_device_token');
+  localStorage.removeItem(LAST_EMAIL_KEY);
   await signOut(auth).catch(() => {});
   window.location.href = '/society/login';
 }

@@ -2621,8 +2621,8 @@
       if (!groupTilesContainer) return;
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const groupsRes = await fetch(`${workerUrl}/admin/groups`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const groupsRes = await fetch(`${workerUrl}/admin/groups`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const groupsData = await groupsRes.json();
@@ -2645,7 +2645,7 @@
             : `<div class="group-tile-placeholder">👥</div>`;
 
           // Fetch config synchronously to determine enabled status
-          const configRes = await fetch(`${workerUrl}/admin/moderation-config?chatId=${chatId}`, {
+          const configRes = await fetch(`${workerUrl}/admin/moderation-config?chatId=${chatId}`, { credentials: 'include',
             headers: { 'Authorization': `Bearer ${idToken}` }
           });
           const configData = await configRes.json();
@@ -2752,7 +2752,7 @@
     // Fetch member count in background without blocking
     window.fetchMemberCount = async function(chatId, idToken) {
       try {
-        const groupInfoRes = await fetch(`${workerUrl}/admin/group-info?chatId=${chatId}`, {
+        const groupInfoRes = await fetch(`${workerUrl}/admin/group-info?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const groupInfoData = await groupInfoRes.json();
@@ -2832,8 +2832,8 @@
 
     window.approveResident = async function(residentId) {
       try {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/approve`, {
+        const token = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/approve`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2856,8 +2856,8 @@
     window.rejectResident = async function(residentId) {
       const reason = prompt('Reason for rejection (optional):') || '';
       try {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/reject`, {
+        const token = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/reject`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2890,8 +2890,8 @@
         showMessage('residentsMessage', flag ? '🚩 Resident flagged' : '✅ Flag removed', 'success');
         if (flag) {
           const adminName = currentAdminDoc?.name || auth.currentUser?.email || 'Admin';
-          const idToken = await auth.currentUser?.getIdToken();
-          fetch(`${workerUrl}/admin/notify-flagged-invite`, {
+          const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+          fetch(`${workerUrl}/admin/notify-flagged-invite`, { credentials: 'include',
             method: 'POST',
             headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: uid, type: 'resident', reason, flaggedByName: adminName })
@@ -2975,8 +2975,8 @@
 
     async function loadStats() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/stats`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/stats`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -2993,8 +2993,8 @@
 
     async function loadResidents() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/residents`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/residents`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -3216,8 +3216,8 @@
       }
 
       try {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/approve`, {
+        const token = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/approve`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3240,8 +3240,8 @@
     window.rejectDocumentResident = async function(residentId) {
       const reason = prompt('Reason for rejection (optional):') || '';
       try {
-        const token = await auth.currentUser.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/reject`, {
+        const token = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/reject`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3268,8 +3268,8 @@
       for (const r of residents) {
         if (r.telegramId) {
           try {
-            const idToken = await auth.currentUser?.getIdToken();
-            const res = await fetch(`${workerUrl}/admin/resident-violations?userId=${r.telegramId}`, {
+            const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+            const res = await fetch(`${workerUrl}/admin/resident-violations?userId=${r.telegramId}`, { credentials: 'include',
               headers: { 'Authorization': `Bearer ${idToken}` }
             });
             const data = await res.json();
@@ -3437,7 +3437,7 @@
     window.saveRecommendation = async function() {
       if (!currentRecId) return;
       try {
-        const token = await auth.currentUser.getIdToken();
+        const token = await auth.currentUser?.getIdToken().catch(() => null);
         const res = await fetch('https://telegram.psots.in/recommendations/update', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -3465,7 +3465,7 @@
     window.deleteRecommendation = async function(id, name) {
       if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
       try {
-        const token = await auth.currentUser.getIdToken();
+        const token = await auth.currentUser?.getIdToken().catch(() => null);
         const res = await fetch('https://telegram.psots.in/recommendations/delete', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -3510,7 +3510,7 @@
       if (action && token && uid) {
         // Process the action via the worker endpoint
         try {
-          const response = await fetch(`${workerUrl}/admin/process-action`, {
+          const response = await fetch(`${workerUrl}/admin/process-action`, { credentials: 'include',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action, token, uid })
@@ -3620,8 +3620,8 @@
     // Groups functionality
     async function loadGroups() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/groups`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/groups`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         if (!res.ok) throw new Error('Failed to load groups');
@@ -3696,7 +3696,7 @@
 
     window.muteUser = async function(groupId, userId) {
       try {
-        const res = await fetch(`${workerUrl}/admin/mute`, {
+        const res = await fetch(`${workerUrl}/admin/mute`, { credentials: 'include',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ groupId, userId, duration: 86400 }),
@@ -3711,7 +3711,7 @@
     window.banUser = async function(groupId, userId) {
       if (!confirm('Ban this user permanently?')) return;
       try {
-        const res = await fetch(`${workerUrl}/admin/ban`, {
+        const res = await fetch(`${workerUrl}/admin/ban`, { credentials: 'include',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ groupId, userId }),
@@ -3806,8 +3806,8 @@
     // Load active Telegram groups from the bot
     async function loadTelegramGroups() {
       try {
-        const res = await fetch(`${workerUrl}/admin/groups`, {
-          headers: { 'Authorization': `Bearer ${await auth.currentUser.getIdToken()}` }
+        const res = await fetch(`${workerUrl}/admin/groups`, { credentials: 'include',
+          headers: { 'Authorization': `Bearer ${await auth.currentUser?.getIdToken()}` }
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -3962,8 +3962,8 @@
       }
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/add-resident`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/add-resident`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`,
@@ -4008,8 +4008,8 @@
 
     async function loadVouchRequests() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/vouch-requests`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/vouch-requests`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -4054,8 +4054,8 @@
 
     window.approveVouch = async function(vouchId) {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/approve-vouch`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/approve-vouch`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`,
@@ -4081,8 +4081,8 @@
       if (reason === null) return;
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/reject-vouch`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/reject-vouch`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`,
@@ -4105,8 +4105,8 @@
 
     async function loadSupportRequests() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/support-requests`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/support-requests`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -4152,8 +4152,8 @@
 
     window.resolveSupport = async function(requestId) {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/resolve-support`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/resolve-support`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`,
@@ -4179,8 +4179,8 @@
 
     async function loadUserAnalytics() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/user-analytics`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/user-analytics`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -4799,7 +4799,7 @@
       flatNumber = flatNumber || selectedResidentData?.flatNumber || '';
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
 
         // Show loading state
         const button = event?.target;
@@ -4811,7 +4811,7 @@
         }
 
         // Send email via backend
-        const res = await fetch(`${workerUrl}/admin/send-invite`, {
+        const res = await fetch(`${workerUrl}/admin/send-invite`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`,
@@ -4971,8 +4971,8 @@
 
       // Fetch actual bot capabilities from the Telegram API
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const statusRes = await fetch(`${workerUrl}/admin/bot-status?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const statusRes = await fetch(`${workerUrl}/admin/bot-status?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const statusData = await statusRes.json();
@@ -4992,8 +4992,8 @@
       }
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
 
@@ -5322,8 +5322,8 @@
       document.getElementById('logsTable').innerHTML          = '';
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/moderation-logs?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/moderation-logs?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -5389,8 +5389,8 @@
       };
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/group-settings`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(settings)
@@ -5433,8 +5433,8 @@
 
     async function loadKeywords(chatId) {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/keywords?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/keywords?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -5459,8 +5459,8 @@
 
     async function loadMessages(chatId) {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -5483,8 +5483,8 @@
       const notifyAdminFrom = parseInt(document.getElementById('notifyAdminFrom')?.value || 2);
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/group-settings`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -5501,8 +5501,8 @@
 
     async function loadViolations(chatId) {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/violations?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/violations?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -5550,8 +5550,8 @@
       if (!chatId) return;
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/violations/reset`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/violations/reset`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ chatId, userId })
@@ -5570,8 +5570,8 @@
       const duration = parseInt(document.getElementById(`mute-mins-${userId}`)?.value || '60');
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/violations/mute`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/violations/mute`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ chatId, userId, duration })
@@ -5588,8 +5588,8 @@
 
       const chatId = document.getElementById('modGroupSelect').value;
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/violations/ban`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/violations/ban`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ chatId, userId })
@@ -5613,8 +5613,8 @@
     // Load groups for moderation tab from Worker, filtered by admin permissions
     async function loadModGroups() {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/groups`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/groups`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         if (!res.ok) throw new Error('Failed to fetch groups');
@@ -5654,8 +5654,8 @@
 
     async function loadReactions(chatId) {
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const data = await res.json();
@@ -5722,7 +5722,7 @@
       };
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
         const settings = {
           chatId,
           botActive: document.getElementById('botActive').checked,
@@ -5755,7 +5755,7 @@
           }
         };
 
-        const res = await fetch(`${workerUrl}/admin/group-settings`, {
+        const res = await fetch(`${workerUrl}/admin/group-settings`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(settings)
@@ -6023,8 +6023,8 @@
         showMessage('familyInvitesMessage', flag ? '🚩 Invite flagged' : '✅ Flag removed', 'success');
         if (flag) {
           const adminName = currentAdminDoc?.name || auth.currentUser?.email || 'Admin';
-          const idToken = await auth.currentUser?.getIdToken();
-          fetch(`${workerUrl}/admin/notify-flagged-invite`, {
+          const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+          fetch(`${workerUrl}/admin/notify-flagged-invite`, { credentials: 'include',
             method: 'POST',
             headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ token, type: 'invite', reason, flaggedByName: adminName })
@@ -6190,8 +6190,8 @@
         return;
       }
       try {
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/settings/bot`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/settings/bot`, { credentials: 'include',
           method: 'POST',
           headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ botToken: token, adminGroupId: adminGroupId || '-1001328126394' })
@@ -6248,7 +6248,7 @@
       loading.style.display = 'block';
 
       try {
-        const idToken = await auth.currentUser?.getIdToken();
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
 
         // Get the selected group from the dropdown
         const modGroupSelect = document.getElementById('modGroupSelect');
@@ -6259,7 +6259,7 @@
         }
 
         // Get all groups to find the selected one
-        const groupsRes = await fetch(`${workerUrl}/admin/groups`, {
+        const groupsRes = await fetch(`${workerUrl}/admin/groups`, { credentials: 'include',
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
         const groupsData = await groupsRes.json();
@@ -6283,7 +6283,7 @@
         {
           const chatId = String(group.chatId);
           const groupInfo = group;
-          const configRes = await fetch(`${workerUrl}/admin/moderation-config?chatId=${chatId}`, {
+          const configRes = await fetch(`${workerUrl}/admin/moderation-config?chatId=${chatId}`, { credentials: 'include',
             headers: { 'Authorization': `Bearer ${idToken}` }
           });
           const configData = await configRes.json();
@@ -6386,9 +6386,9 @@
           // Fetch live group info and update member count
           console.log('Fetching group info for:', chatId);
           try {
-            const freshToken = await auth.currentUser?.getIdToken();
+            const freshToken = await auth.currentUser?.getIdToken().catch(() => null);
             console.log('Got fresh token, making fetch request...');
-            const groupInfoRes = await fetch(`${workerUrl}/admin/group-info?chatId=${chatId}`, {
+            const groupInfoRes = await fetch(`${workerUrl}/admin/group-info?chatId=${chatId}`, { credentials: 'include',
               headers: { 'Authorization': `Bearer ${freshToken}` }
             });
             console.log('Fetch response received, status:', groupInfoRes.status);
@@ -6436,8 +6436,8 @@
           .map(a => a.trim().toLowerCase())
           .filter(a => a.length > 0);
 
-        const idToken = await auth.currentUser?.getIdToken();
-        const res = await fetch(`${workerUrl}/admin/moderation-config`, {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/moderation-config`, { credentials: 'include',
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`,

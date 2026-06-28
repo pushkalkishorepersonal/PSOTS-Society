@@ -513,6 +513,24 @@ async function resolveSessionAuth(request, env) {
   return null;
 }
 
+// Resolves an admin identity from either the psots_session cookie or a
+// Bearer Firebase token — same dual-mode lookup as resolveSessionAuth, plus
+// the admin-doc/superadmin check every /admin/* route needs. Additive: routes
+// can adopt this without breaking callers still sending only a Bearer token.
+async function resolveAdminAuth(request, env) {
+  const authCtx = await resolveSessionAuth(request, env);
+  if (!authCtx?.uid) return null;
+
+  if (authCtx.email === 'pushkalkishore@gmail.com') {
+    return { uid: authCtx.uid, email: authCtx.email, isSuperadmin: true, adminDoc: { isSuperadmin: true } };
+  }
+
+  const adminDoc = parseFirestoreDoc(await db.firestoreGet(`admins/${authCtx.uid}`, env));
+  if (!adminDoc) return null;
+
+  return { uid: authCtx.uid, email: authCtx.email, isSuperadmin: !!adminDoc.isSuperadmin, adminDoc };
+}
+
 // ── INVITE AUDIT HELPER ──────────────────────────────────────
 async function auditInvitePatch(token, fields, env) {
   try {
@@ -2998,42 +3016,10 @@ export default {
       // GET /admin/groups - List all managed Telegram groups
       if (pathname === '/admin/groups' && request.method === 'GET') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          }
-
-          // Early superadmin bypass: extract email without crypto verification
-          const token = authHeader.slice(7);
-          const parts = token.split('.');
-          let earlyEmail = '';
-          try {
-            let p = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-            while (p.length % 4) p += '=';
-            const ep = JSON.parse(atob(p));
-            earlyEmail = ep.email || '';
-          } catch (_) {}
-          const isSuperAdmin = earlyEmail === 'pushkalkishore@gmail.com';
-
-          let payload, uid;
-          if (!isSuperAdmin) {
-            payload = await verifyFirebaseToken(authHeader, env);
-            if (!payload) {
-              console.error('[/admin/groups] Token verification failed');
-              return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }),
-                { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-            uid = payload?.user_id || payload?.sub || '';
-            if (!uid) {
-              return new Response(JSON.stringify({ ok: false, error: 'invalid_auth' }),
-                { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-            const adminDoc = parseFirestoreDoc(await db.firestoreGet(`admins/${uid}`, env));
-            if (!adminDoc) {
-              return new Response(JSON.stringify({ ok: false, error: 'not_admin' }),
-                { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }),
+              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
           const groupsJson = await env.VIOLATIONS.get('_groups');
@@ -3088,6 +3074,13 @@ export default {
       // POST /admin/mute { groupId, userId, duration } - Mute user in group for duration seconds
       if (pathname === '/admin/mute' && request.method === 'POST') {
         try {
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }), {
+              status: 403, headers: { 'Content-Type': 'application/json', ...CORS }
+            });
+          }
+
           const body = await request.json().catch(() => ({}));
           const { groupId, userId, duration } = body;
 
@@ -3142,6 +3135,13 @@ export default {
       // POST /admin/ban { groupId, userId } - Ban user from group permanently
       if (pathname === '/admin/ban' && request.method === 'POST') {
         try {
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }), {
+              status: 403, headers: { 'Content-Type': 'application/json', ...CORS }
+            });
+          }
+
           const body = await request.json().catch(() => ({}));
           const { groupId, userId } = body;
 
@@ -3458,6 +3458,11 @@ export default {
       // POST /admin/moderation-config
       if (pathname === '/admin/moderation-config' && request.method === 'POST') {
         try {
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
           const body = await request.json();
           const { chatId, config } = body;
           if (!chatId || !config) return new Response(JSON.stringify({ ok: false, error: 'chatId and config required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -3590,14 +3595,12 @@ export default {
       // GET /admin/residents — get all residents for admin approval tab
       if (pathname === '/admin/residents' && request.method === 'GET') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }),
+              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-
-          const payload = decodeJwtPayload(authHeader);
-          const adminUid = payload?.user_id || payload?.sub;
+          const adminUid = adminCtx.uid;
 
           const residents = await firestoreQuery('residents', [], env);
           if (!Array.isArray(residents)) {
@@ -3641,10 +3644,10 @@ export default {
       // GET /admin/stats — stats for admin dashboard
       if (pathname === '/admin/stats' && request.method === 'GET') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return new Response(JSON.stringify({ ok: false, error: 'missing_auth' }),
-              { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }),
+              { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
           const residents = await firestoreQuery('residents', [], env);
@@ -6923,13 +6926,8 @@ Return JSON only, no explanation:
       // POST /admin/settings/bot — save bot token and group IDs
       if (pathname === '/admin/settings/bot' && request.method === 'POST') {
         try {
-          const auth = request.headers.get('Authorization');
-          if (!auth) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          const payload = await verifyFirebaseToken(auth, env);
-          if (!payload) return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-          const adminUid = payload?.user_id || payload?.sub;
-          const adminDoc = parseFirestoreDoc(await db.firestoreGet(`admins/${adminUid}`, env));
-          if (!adminDoc?.isSuperAdmin && adminUid !== 'pushkalkishore@gmail.com') {
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx?.isSuperadmin) {
             return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
@@ -6954,33 +6952,9 @@ Return JSON only, no explanation:
       // POST /admin/approve — Approve pending resident registration
       if (pathname === '/admin/approve' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-
-          // Early superadmin bypass: extract email without crypto verification
-          const token = authHeader.slice(7);
-          const parts = token.split('.');
-          let earlyEmail = '';
-          try {
-            let p = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-            while (p.length % 4) p += '=';
-            const ep = JSON.parse(atob(p));
-            earlyEmail = ep.email || '';
-          } catch (_) {}
-          const isSuperAdmin = earlyEmail === 'pushkalkishore@gmail.com';
-
-          let adminUid;
-          if (!isSuperAdmin) {
-            const payload = await verifyFirebaseToken(authHeader, env);
-            if (!payload) return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-            adminUid = payload?.user_id || payload?.sub;
-            const adminDoc = parseFirestoreDoc(await db.firestoreGet(`admins/${adminUid}`, env));
-            if (!adminDoc) {
-              return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-          } else {
-            adminUid = earlyEmail;
-          }
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const adminUid = adminCtx.uid;
 
           const body = await request.json().catch(() => ({}));
           const { residentId } = body;
@@ -7024,33 +6998,9 @@ Return JSON only, no explanation:
       // POST /admin/reject — Reject pending resident registration
       if (pathname === '/admin/reject' && request.method === 'POST') {
         try {
-          const authHeader = request.headers.get('Authorization');
-          if (!authHeader) return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-
-          // Early superadmin bypass: extract email without crypto verification
-          const token = authHeader.slice(7);
-          const parts = token.split('.');
-          let earlyEmail = '';
-          try {
-            let p = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-            while (p.length % 4) p += '=';
-            const ep = JSON.parse(atob(p));
-            earlyEmail = ep.email || '';
-          } catch (_) {}
-          const isSuperAdmin = earlyEmail === 'pushkalkishore@gmail.com';
-
-          let adminUid;
-          if (!isSuperAdmin) {
-            const payload = await verifyFirebaseToken(authHeader, env);
-            if (!payload) return new Response(JSON.stringify({ ok: false, error: 'invalid_token' }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
-            adminUid = payload?.user_id || payload?.sub;
-            const adminDoc = parseFirestoreDoc(await db.firestoreGet(`admins/${adminUid}`, env));
-            if (!adminDoc) {
-              return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
-            }
-          } else {
-            adminUid = earlyEmail;
-          }
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) return new Response(JSON.stringify({ ok: false, error: 'forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          const adminUid = adminCtx.uid;
 
           const body = await request.json().catch(() => ({}));
           const { residentId, reason } = body;
