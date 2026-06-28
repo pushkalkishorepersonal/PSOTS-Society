@@ -5,6 +5,48 @@
 import { auth } from '../core/firebase.js';
 
 const workerUrl = 'https://telegram.psots.in';
+let selectedGroupId = null;
+let allMembers = [];
+let _logsCache = [];      // full log list for client-side filter
+    let _logsFilter = 'all';  // active filter
+    let _logsRefreshTimer = null;
+
+    
+    
+    
+    
+    
+    
+    
+    
+    // Auto-refresh every 60 s while Logs tab is active
+        
+    
+
+    
+
+    const DEFAULT_MESSAGE_LEVELS = [
+      {
+        atCount: 1, muteMinutes: 0, sendAs: 'dm',
+        text: '⚠️ Hi {name}, your message was removed as it violated our community guidelines.\n\nThis is violation #1. Please review the community rules.\n\nView your record: {profile}'
+      },
+      {
+        atCount: 2, muteMinutes: 0, sendAs: 'dm',
+        text: '⚠️ Hi {name}, this is your 2nd violation. Your message has been removed.\n\nReason: {reason}\n\nRepeated violations will result in being muted.\n\nView & appeal: {profile}'
+      },
+      {
+        atCount: 3, muteMinutes: 60, sendAs: 'dm',
+        text: '🔇 Hi {name}, you have been muted for 60 minutes (violation #3).\n\nReason: {reason}\n\nYou may appeal at: {profile}'
+      },
+      {
+        atCount: 5, muteMinutes: 1440, sendAs: 'group',
+        text: '🔇 Hi {name}, you have been muted for 24 hours (violation #{count}).\n\nThis is a serious violation. Admin has been notified.\n\nAppeal: {profile}'
+      },
+      {
+        atCount: 10, muteMinutes: 99999, sendAs: 'group',
+        text: '⛔ Hi {name}, you have reached the maximum violation limit (#{count}).\n\nYou are indefinitely muted pending admin review.\n\nTo appeal: {profile}'
+      }
+    ];
 window.toggleBotGuide = function() {
       const content = document.getElementById('botGuideContent');
       const chevron = document.getElementById('botGuideChevron');
@@ -51,7 +93,7 @@ window.renderGroupTiles = async function() {
           const tile = document.createElement('div');
           tile.className = 'group-tile';
           tile.setAttribute('data-chatid', chatId);
-          tile.onclick = () => selectGroup(chatId);
+          tile.onclick = () => window.selectGroup(chatId);
           tile.innerHTML = `
             ${photoHtml}
             <div class="group-tile-name">${window.escapeHTML(group.title)}</div>
@@ -65,13 +107,13 @@ window.renderGroupTiles = async function() {
         // PHASE 2: Fetch member counts in background (non-blocking)
         for (const group of groupsData.groups) {
           const chatId = String(group.chatId);
-          fetchMemberCount(chatId, idToken);
+          window.fetchMemberCount(chatId, idToken);
         }
 
         // Auto-select first group
         if (groupsData.groups.length > 0) {
           const firstChatId = String(groupsData.groups[0].chatId);
-          selectGroup(firstChatId);
+          window.selectGroup(firstChatId);
         }
       } catch (err) {
         console.error('Error rendering group tiles:', err);
@@ -90,7 +132,7 @@ window.fetchMemberCount = async function(chatId, idToken) {
             memberCountEl.textContent = `${groupInfoData.memberCount.toLocaleString()}`;
           }
         }
-      } catch (e) {
+      } catch (_e) {
         console.log('Could not fetch live member count for', chatId);
       }
     };
@@ -115,7 +157,7 @@ window.selectGroup = async function(chatId) {
       }
 
       // Reload moderation data for selected group
-      await loadModGroupData();
+      await window.loadModGroupData();
     };
 window.loadGroupMembers = async function() {
       const groupId = document.getElementById('groupSelect').value;
@@ -137,7 +179,7 @@ window.loadGroupMembers = async function() {
         allMembers = data.members || [];
         renderMembers(allMembers);
         document.getElementById('membersList').style.display = 'block';
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error loading members', 'error');
       }
     };
@@ -175,7 +217,7 @@ window.muteUser = async function(groupId, userId) {
         });
         if (!res.ok) throw new Error('Failed to mute user');
         window.showMessage('moderationMessage', 'User muted for 24 hours', 'success');
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error muting user', 'error');
       }
     };
@@ -189,16 +231,13 @@ window.banUser = async function(groupId, userId) {
         });
         if (!res.ok) throw new Error('Failed to ban user');
         window.showMessage('moderationMessage', 'User banned', 'success');
-        loadGroupMembers();
-      } catch (err) {
+        window.loadGroupMembers();
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error banning user', 'error');
       }
     };
 window.loadModGroupData = async function() {
       const chatId = document.getElementById('modGroupSelect').value;
-      const groupSelect = document.getElementById('modGroupSelect');
-      const selectedOption = groupSelect.options[groupSelect.selectedIndex];
-      const groupTitle = selectedOption?.text || '';
 
       if (!chatId) {
         document.getElementById('modSubTabs').style.display = 'none';
@@ -256,40 +295,40 @@ window.loadModGroupData = async function() {
       }
     };
 function populateModSettings(settings) {
-      let botActive = document.getElementById('botActive');
+      const botActive = document.getElementById('botActive');
       if (botActive) botActive.checked = settings.botActive !== false;
-      let botInactive = document.getElementById('botInactive');
+      const botInactive = document.getElementById('botInactive');
       if (botInactive) botInactive.checked = !settings.botActive;
-      let warnAt = document.getElementById('warnAt');
+      const warnAt = document.getElementById('warnAt');
       if (warnAt) warnAt.value = settings.thresholds?.warn || 1;
-      let muteAt = document.getElementById('muteAt');
+      const muteAt = document.getElementById('muteAt');
       if (muteAt) muteAt.value = settings.thresholds?.mute || 3;
-      let muteDuration = document.getElementById('muteDuration');
+      const muteDuration = document.getElementById('muteDuration');
       if (muteDuration) muteDuration.value = settings.thresholds?.muteDuration || 60;
-      let banLimit = document.getElementById('banLimit');
+      const banLimit = document.getElementById('banLimit');
       if (banLimit) banLimit.value = settings.thresholds?.ban || 10;
-      let geminiEnabled = document.getElementById('geminiEnabled');
+      const geminiEnabled = document.getElementById('geminiEnabled');
       if (geminiEnabled) geminiEnabled.checked = settings.gemini?.enabled !== false;
-      let geminiSensitivity = document.getElementById('geminiSensitivity');
+      const geminiSensitivity = document.getElementById('geminiSensitivity');
       if (geminiSensitivity) geminiSensitivity.value = settings.gemini?.sensitivity || 'medium';
-      let geminiContextMessages = document.getElementById('geminiContextMessages');
+      const geminiContextMessages = document.getElementById('geminiContextMessages');
       if (geminiContextMessages) geminiContextMessages.value = settings.gemini?.contextMessages || 10;
-      let dmThreshold = document.getElementById('dmThreshold');
+      const dmThreshold = document.getElementById('dmThreshold');
       if (dmThreshold) dmThreshold.value = settings.warningMessages?.dmThreshold || 3;
-      let notifyAdminFrom = document.getElementById('notifyAdminFrom');
+      const notifyAdminFrom = document.getElementById('notifyAdminFrom');
       if (notifyAdminFrom) notifyAdminFrom.value = settings.warningMessages?.notifyAdminFrom || 2;
 
       // Predefined keywords
       const predefined = settings.keywords?.predefined || {};
-      let kwSpam = document.getElementById('kw-spam');
+      const kwSpam = document.getElementById('kw-spam');
       if (kwSpam) kwSpam.checked = predefined.spam !== false;
-      let kwAbuse = document.getElementById('kw-abuse');
+      const kwAbuse = document.getElementById('kw-abuse');
       if (kwAbuse) kwAbuse.checked = predefined.abuse !== false;
-      let kwLinks = document.getElementById('kw-links');
+      const kwLinks = document.getElementById('kw-links');
       if (kwLinks) kwLinks.checked = predefined.links !== false;
-      let kwAds = document.getElementById('kw-ads');
+      const kwAds = document.getElementById('kw-ads');
       if (kwAds) kwAds.checked = predefined.ads !== false;
-      let kwHate = document.getElementById('kw-hate');
+      const kwHate = document.getElementById('kw-hate');
       if (kwHate) kwHate.checked = predefined.hate !== false;
 
       // Custom keywords
@@ -330,7 +369,7 @@ window.switchModTab = function(tabName, btn) {
       document.querySelectorAll('#modSettings, #modConfig, #modKeywords, #modMessages, #modReactions, #modLogs, #modViolations').forEach(el => el.style.display = 'none');
       document.querySelectorAll('#modSubTabs .tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById('mod' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
-      (btn || event?.target)?.classList.add('active');
+      (btn || window.event?.target)?.classList.add('active');
       const chatId = document.getElementById('modGroupSelect').value;
       if (tabName === 'config'     && chatId) loadModConfig();
       if (tabName === 'keywords'   && chatId) loadKeywords(chatId);
@@ -384,14 +423,14 @@ window.saveModSettings = async function() {
         });
         const data = await res.json();
         window.showMessage('moderationMessage', data.ok ? '✅ Settings saved!' : 'Error saving settings', data.ok ? 'success' : 'error');
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error saving settings', 'error');
       }
     };
 window.saveModKeywords = async function() {
       const chatId = document.getElementById('modGroupSelect').value;
       if (!chatId) return;
-      await saveModSettings();
+      await window.saveModSettings();
     };
 async function loadKeywords(chatId) {
       try {
@@ -438,7 +477,7 @@ window.saveModMessages = async function() {
         });
         const data = await res.json();
         window.showMessage('moderationMessage', data.ok ? '✅ Messages saved!' : 'Error saving messages', data.ok ? 'success' : 'error');
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error saving messages', 'error');
       }
     };
@@ -452,7 +491,7 @@ async function loadViolations(chatId) {
         if (data.ok && data.violations) {
           renderViolations(data.violations);
         }
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error loading violations', 'error');
       }
     }
@@ -500,7 +539,7 @@ window.resetViolations = async function(userId) {
         const data = await res.json();
         window.showMessage('moderationMessage', data.ok ? '✅ Violation count reset!' : 'Error resetting', data.ok ? 'success' : 'error');
         if (data.ok) loadViolations(chatId);
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error resetting violations', 'error');
       }
     };
@@ -518,7 +557,7 @@ window.muteViolator = async function(userId) {
         });
         const data = await res.json();
         window.showMessage('moderationMessage', data.ok ? `✅ Muted for ${duration} minutes!` : 'Error muting', data.ok ? 'success' : 'error');
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error muting user', 'error');
       }
     };
@@ -536,7 +575,7 @@ window.banViolator = async function(userId) {
         const data = await res.json();
         window.showMessage('moderationMessage', data.ok ? '✅ User banned!' : 'Error banning', data.ok ? 'success' : 'error');
         if (data.ok) loadViolations(chatId);
-      } catch (err) {
+      } catch (_err) {
         window.showMessage('moderationMessage', 'Error banning user', 'error');
       }
     };
@@ -852,6 +891,380 @@ window.saveModConfigForGroup = async function(chatId) {
         alert('❌ Error: ' + err.message);
       }
     };
+function _escHtml(str) {
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+function collectMessageLevels() {
+      const count = document.querySelectorAll('#messageLevelsList > div[data-ml-index]').length;
+      const levels = [];
+      for (let i = 0; i < count; i++) {
+        const sendAsEl = document.querySelector(`input[name="ml-${i}-sendAs"]:checked`);
+        levels.push({
+          atCount:     parseInt(document.getElementById(`ml-${i}-count`)?.value  || i + 1),
+          text:        document.getElementById(`ml-${i}-text`)?.value             || '',
+          muteMinutes: parseInt(document.getElementById(`ml-${i}-mute`)?.value   || 0),
+          sendAs:      sendAsEl?.value || 'dm'
+        });
+      }
+      return levels;
+    }
+
+function renderMessageLevels(levels) {
+      const container = document.getElementById('messageLevelsList');
+      if (!levels.length) {
+        container.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No levels configured. Click "+ Add Level" to get started.</p>';
+        return;
+      }
+      container.innerHTML = levels.filter(level => level != null).map((level, i) => {
+        if (!level) return '';
+        const sendAs = level.sendAs || 'dm';
+        return `
+        <div data-ml-index="${i}" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--cream);">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">At violation #</label>
+              <input type="number" id="ml-${i}-count" value="${_escHtml(level.atCount)}" min="1"
+                style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px;" />
+            </div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Mute duration (minutes)</label>
+              <input type="number" id="ml-${i}-mute" value="${_escHtml(level.muteMinutes ?? 0)}" min="0"
+                style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px;" />
+              <div style="font-size: 11px; color: var(--muted); margin-top: 3px;">0 = warn only</div>
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Message</label>
+            <textarea id="ml-${i}-text" rows="4"
+              style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; resize: vertical; font-family: inherit;">${_escHtml(level.text)}</textarea>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+              Send as:
+              <label style="font-weight: 400; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <input type="radio" name="ml-${i}-sendAs" id="ml-${i}-sendAs-dm" value="dm" ${sendAs === 'dm' ? 'checked' : ''} />
+                DM only
+              </label>
+              <label style="font-weight: 400; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <input type="radio" name="ml-${i}-sendAs" id="ml-${i}-sendAs-group" value="group" ${sendAs === 'group' ? 'checked' : ''} />
+                Group message
+              </label>
+            </div>
+            <button onclick="removeMessageLevel(${i})"
+              style="background: var(--terra); color: white; padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+              🗑 Remove
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+window.addMessageLevel = function() {
+      const current = collectMessageLevels();
+      renderMessageLevels([...current, {
+        atCount: current.length + 1, text: '⚠️ Your message was removed.', muteMinutes: 0, sendAs: 'dm'
+      }]);
+    };
+
+window.removeMessageLevel = function(index) {
+      const current = collectMessageLevels();
+      current.splice(index, 1);
+      renderMessageLevels(current);
+    };
+
+function _fmtLogTime(ts) {
+      if (!ts) return '—';
+      const d = new Date(ts);
+      const now = new Date();
+      const todayStr = now.toDateString();
+      const timeStr  = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+      if (d.toDateString() === todayStr) return `Today ${timeStr}`;
+      const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+      if (d.toDateString() === yesterday.toDateString()) return `Yesterday ${timeStr}`;
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ', ' + timeStr;
+    }
+
+function _geminiCell(log) {
+      const v = log.geminiVerdict || log.gemini?.verdict;
+      if (!v || v === 'skip')  return `<span style="color:#aaa; font-size:12px;">⏭ Skip</span>`;
+      if (v === 'pass')        return `<span style="color:#16a34a; font-size:12px; font-weight:600;">✅ Pass</span>`;
+      return                          `<span style="color:#dc2626; font-size:12px; font-weight:600;">🚩 Flag</span>`;
+    }
+
+function _actionBadge(action) {
+      const map = {
+        passed:  ['badge-passed',  'Passed'],
+        warned:  ['badge-warned',  'Warned'],
+        deleted: ['badge-deleted', 'Deleted'],
+        muted:   ['badge-muted',   'Muted'],
+        banned:  ['badge-banned',  'Banned'],
+        flagged: ['badge-deleted', 'Flagged'],
+      };
+      const [cls, label] = map[action] || ['badge-passed', action || 'Unknown'];
+      return `<span class="action-badge ${cls}">${label}</span>`;
+    }
+
+function _contextBubbles(context) {
+      if (!context?.length) return '<span style="color:var(--muted);font-size:12px;">No context captured.</span>';
+      return context.map(m => `
+        <div style="padding: 6px 10px; margin-bottom: 6px; background: white; border: 1px solid var(--border);
+                    border-radius: 8px; font-size: 12px; max-width: 90%;">
+          <span style="font-weight:600; color:var(--jade);">@${_escHtml(m.username || 'unknown')}</span>
+          <span style="color:var(--muted); margin-left:6px; font-size:11px;">${_fmtLogTime(m.ts)}</span><br>
+          <span style="color:var(--ink);">${_escHtml(m.text || '')}</span>
+        </div>
+      `).join('');
+    }
+
+function renderLogs(logs) {
+      const tbody = document.getElementById('logsTable');
+      const empty = document.getElementById('logsEmptyState');
+
+      const filtered = _logsFilter === 'all' ? logs
+        : _logsFilter === 'flagged'
+          ? logs.filter(l => (l.geminiVerdict || l.gemini?.verdict) === 'flag' || l.flagged)
+          : logs.filter(l => (l.actionTaken || l.action || '').toLowerCase() === _logsFilter);
+
+      if (!filtered.length) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      tbody.innerHTML = filtered.map((log, i) => {
+        const id      = `log-detail-${i}`;
+        const msg     = log.message || log.text || '';
+        const snippet = msg.length > 100 ? msg.slice(0, 100) + '…' : msg;
+        const action  = 'flagged';
+        const username = log.from?.username || log.username || log.user || '—';
+
+        const detailHtml = `
+          <tr id="${id}" class="log-detail" style="display:none;">
+            <td colspan="6" style="padding: 16px 20px;">
+              <div style="margin-bottom:12px;">
+                <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Full Message</div>
+                <pre style="background: var(--cream); padding: 10px; border-radius:6px; font-size:12px;
+                            white-space: pre-wrap; word-break:break-word; margin:0; font-family:inherit;">${_escHtml(msg)}</pre>
+              </div>
+              ${log.context?.length ? `
+              <div style="margin-bottom:12px;">
+                <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Context (prior messages)</div>
+                ${_contextBubbles(log.context)}
+              </div>` : ''}
+              <div>
+                <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Violation Reason</div>
+                <div style="background: white; border: 1px solid var(--border); border-radius:6px; padding:10px; font-size:12px;">
+                  ${_escHtml(log.reason || 'Flagged message')}
+                </div>
+              </div>
+              <div style="margin-top:12px;">
+                <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Action Taken</div>
+                <div style="font-size:12px;">${_actionBadge(action)} at ${_fmtLogTime(log.flaggedAt || log.timestamp || log.ts)}</div>
+              </div>
+            </td>
+          </tr>`;
+
+        return `
+          <tr class="log-row" onclick="toggleLogDetail('${id}')" style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 10px 12px; font-size: 12px; color:var(--muted); white-space:nowrap;">${_fmtLogTime(log.flaggedAt || log.timestamp || log.ts)}</td>
+            <td style="padding: 10px 12px; font-size: 13px;">@${_escHtml(username)}</td>
+            <td style="padding: 10px 12px; font-size: 12px; color:var(--ink-soft); max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${_escHtml(msg)}">${_escHtml(snippet)}</td>
+            <td style="padding: 10px 12px; font-size: 12px;">${_escHtml(log.reason || '—')}</td>
+            <td style="padding: 10px 12px;"><span style="color:#dc2626; font-size:12px; font-weight:600;">🚩 Flagged</span></td>
+            <td style="padding: 10px 12px;">${_actionBadge(action)}</td>
+          </tr>
+          ${detailHtml}`;
+      }).join('');
+    }
+
+window.toggleLogDetail = function(id) {
+      const row = document.getElementById(id);
+      if (!row) return;
+      const isHidden = row.style.display === 'none';
+      // Collapse all others first
+      document.querySelectorAll('.log-detail').forEach(r => r.style.display = 'none');
+      row.style.display = isHidden ? 'table-row' : 'none';
+    };
+
+window.setLogsFilter = function(filter, btn) {
+      _logsFilter = filter;
+      document.querySelectorAll('.logs-filter-btn').forEach(b => b.classList.remove('active'));
+      btn?.classList.add('active');
+      renderLogs(_logsCache);
+    };
+
+async function loadLogs(chatId) {
+      if (!chatId) return;
+      document.getElementById('logsSpinner').style.display    = 'block';
+      document.getElementById('logsEmptyState').style.display = 'none';
+      document.getElementById('logsTable').innerHTML          = '';
+
+      try {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/moderation-logs?chatId=${chatId}`, { credentials: 'include',
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const data = await res.json();
+        _logsCache = data.ok ? (data.logs || []) : [];
+        renderLogs(_logsCache);
+      } catch (_err) {
+        window.showMessage('moderationMessage', 'Error loading moderation logs', 'error');
+        _logsCache = [];
+        renderLogs([]);
+      } finally {
+        document.getElementById('logsSpinner').style.display = 'none';
+      }
+    }
+
+function _startLogsRefresh(chatId) {
+      _stopLogsRefresh();
+      _logsRefreshTimer = setInterval(() => {
+        if (document.getElementById('modLogs')?.style.display !== 'none') {
+          loadLogs(chatId);
+        } else {
+          _stopLogsRefresh();
+        }
+      }, 60_000);
+    }
+
+function _stopLogsRefresh() {
+      if (_logsRefreshTimer) { clearInterval(_logsRefreshTimer); _logsRefreshTimer = null; }
+    }
+
+async function loadMessages(chatId) {
+      try {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, { credentials: 'include',
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const data = await res.json();
+        const levels = data.ok && data.settings?.warningMessages?.levels?.length
+          ? data.settings.warningMessages.levels
+          : DEFAULT_MESSAGE_LEVELS;
+        renderMessageLevels(levels);
+      } catch (_err) {
+        renderMessageLevels(DEFAULT_MESSAGE_LEVELS);
+        window.showMessage('moderationMessage', 'Could not load saved messages — showing defaults', 'warn');
+      }
+    }
+
+async function loadReactions(chatId) {
+      try {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const res = await fetch(`${workerUrl}/admin/group-settings?chatId=${chatId}`, { credentials: 'include',
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const data = await res.json();
+        if (data.ok && data.settings) {
+          populateReactions(data.settings.reactions || { enabled: false, rules: [] });
+        }
+      } catch (err) {
+        console.error('Error loading reactions:', err);
+      }
+    }
+
+function populateReactions(reactions) {
+      document.getElementById('reactionsEnabled').checked = reactions.enabled || false;
+      const defaults = {
+        'happy birthday': '🎂',
+        'congratulations': '🎉',
+        'welcome': '👋',
+        'thank you': '🙏',
+        'good morning': '☀️'
+      };
+      const rules = reactions.rules && reactions.rules.length > 0 ? reactions.rules : Object.entries(defaults).map(([k, v]) => ({ keyword: k, emoji: v }));
+      renderReactionsTable(rules);
+    }
+
+function renderReactionsTable(rules) {
+      const tbody = document.getElementById('reactionsTable');
+      tbody.innerHTML = rules.map(rule => `
+        <tr style="border-bottom: 1px solid var(--border);">
+          <td style="padding: 12px;"><input type="text" value="${rule.keyword}" class="reaction-keyword" style="width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px;" /></td>
+          <td style="padding: 12px;"><input type="text" value="${rule.emoji}" class="reaction-emoji" style="width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; text-align: center;" maxlength="2" /></td>
+          <td style="padding: 12px; text-align: center;"><button onclick="removeReactionRule(this)" style="background: #fee; color: #c33; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-weight: 600;">Remove</button></td>
+        </tr>
+      `).join('');
+    }
+
+window.addReactionRule = function() {
+      const tbody = document.getElementById('reactionsTable');
+      const newRow = document.createElement('tr');
+      newRow.style.borderBottom = '1px solid var(--border)';
+      newRow.innerHTML = `
+        <td style="padding: 12px;"><input type="text" placeholder="keyword" class="reaction-keyword" style="width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px;" /></td>
+        <td style="padding: 12px;"><input type="text" placeholder="emoji" class="reaction-emoji" style="width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; text-align: center;" maxlength="2" /></td>
+        <td style="padding: 12px; text-align: center;"><button onclick="removeReactionRule(this)" style="background: #fee; color: #c33; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-weight: 600;">Remove</button></td>
+      `;
+      tbody.appendChild(newRow);
+    };
+
+window.removeReactionRule = function(btn) {
+      btn.closest('tr').remove();
+    };
+
+window.saveReactions = async function() {
+      const chatId = document.getElementById('modGroupSelect').value;
+      if (!chatId) return;
+
+      const rules = Array.from(document.querySelectorAll('#reactionsTable tr')).map(row => ({
+        keyword: row.querySelector('.reaction-keyword').value.trim(),
+        emoji: row.querySelector('.reaction-emoji').value.trim()
+      })).filter(r => r.keyword && r.emoji);
+
+      const reactions = {
+        enabled: document.getElementById('reactionsEnabled').checked,
+        rules: rules
+      };
+
+      try {
+        const idToken = await auth.currentUser?.getIdToken().catch(() => null);
+        const settings = {
+          chatId,
+          botActive: document.getElementById('botActive').checked,
+          reactions: reactions,
+          thresholds: {
+            warn: parseInt(document.getElementById('warnAt').value),
+            mute: parseInt(document.getElementById('muteAt').value),
+            muteDuration: parseInt(document.getElementById('muteDuration').value),
+            ban: parseInt(document.getElementById('banLimit').value)
+          },
+          gemini: {
+            enabled: document.getElementById('geminiEnabled').checked,
+            sensitivity: document.getElementById('geminiSensitivity').value,
+            contextMessages: parseInt(document.getElementById('geminiContextMessages').value)
+          },
+          keywords: {
+            predefined: {
+              spam: document.getElementById('kw-spam').checked,
+              abuse: document.getElementById('kw-abuse').checked,
+              links: document.getElementById('kw-links').checked,
+              ads: document.getElementById('kw-ads').checked,
+              hate: document.getElementById('kw-hate').checked
+            },
+            custom: Array.from(document.querySelectorAll('#customKeywordsList > div')).map(el => el.textContent.replace('×', '').trim())
+          },
+          warningMessages: {
+            dmThreshold: parseInt(document.getElementById('dmThreshold').value),
+            notifyAdminFrom: parseInt(document.getElementById('notifyAdminFrom').value),
+            levels: collectMessageLevels()
+          }
+        };
+
+        const res = await fetch(`${workerUrl}/admin/group-settings`, { credentials: 'include',
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(settings)
+        });
+        const data = await res.json();
+        window.showMessage('moderationMessage', data.ok ? '✅ Reactions saved!' : 'Error saving reactions', data.ok ? 'success' : 'error');
+      } catch (_err) {
+        window.showMessage('moderationMessage', 'Error saving reactions', 'error');
+      }
+    };
+
 // Plain (non-window) declarations above are not global by default in a
 // module — expose the ones admin.html calls by bare name or via onclick="".
 window.loadModGroups = loadModGroups;
