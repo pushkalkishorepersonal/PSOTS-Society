@@ -2538,7 +2538,6 @@
     console.log('[admin.html] Version: v2.1.0 - Login tracking enabled');
 
     import { db } from '../../js/core/firebase.js';
-    import { setupHybridAuth, getUser } from '../js/core/hybrid-auth.js';
     import '../js/admin/moderation.js';
     import { collection, query, orderBy, getDocs, getDoc, updateDoc, doc, addDoc, serverTimestamp, deleteDoc, setDoc, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -2548,8 +2547,20 @@
     const workerUrl = 'https://telegram.psots.in';
     const SUPER_ADMIN = 'pushkalkishore@gmail.com';
 
-    // Setup hybrid auth (Firebase + Telegram session)
-    await setupHybridAuth();
+    // Admin login (Google OAuth via /auth/google/start) is a server-side
+    // Worker flow that issues a psots_session cookie — it never signs into
+    // Firebase client Auth. Gating this page on Firebase's onAuthStateChanged
+    // (the old hybrid-auth.js approach) was structurally unable to work: it
+    // depends on a sign-in that never happens for this login method, and
+    // additionally breaks when the browser blocks the cross-origin storage
+    // Firebase's authDomain iframe needs. The cookie session is the actual
+    // source of truth here, same as SocietyNav.js already uses.
+    let _session = null;
+    try {
+      const sessionRes = await fetch(`${workerUrl}/auth/me`, { credentials: 'include' });
+      const sessionData = await sessionRes.json();
+      if (sessionData.ok && sessionData.user) _session = sessionData.user;
+    } catch (_e) { /* falls through to the no-session redirect below */ }
 
     let currentFilter = 'all';
     let allResidents = [];
@@ -2846,7 +2857,7 @@
     };
 
     // Render shared nav
-    await renderSocietyNav('societyNav', 'admin');
+    await renderSocietyNav('societyNav', 'admin', _session);
 
     // Get visible tabs based on permissions
     function getVisibleTabs(user, adminDoc) {
@@ -3376,8 +3387,8 @@
     };
 
     // Auth and access control
-    // Verify admin access (supports both Firebase and Telegram session auth)
-    const user = getUser();
+    // Verify admin access using the psots_session cookie (see note above).
+    const user = _session;
     if (!user) {
       window.location.href = '/society/login.html?redirect=/society/admin.html';
     } else {
