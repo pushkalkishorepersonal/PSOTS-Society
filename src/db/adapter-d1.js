@@ -153,7 +153,7 @@ export async function firestoreGet(path, env) {
         .prepare('SELECT * FROM group_settings WHERE chat_id = ?')
         .bind(id)
         .first();
-      return convertToFirestoreFormat(groupSetting);
+      return convertToFirestoreFormat(parseD1Row(groupSetting));
 
     case 'violations':
       // Path format: violations/{chatId}/members/{userId}
@@ -165,7 +165,7 @@ export async function firestoreGet(path, env) {
           .prepare('SELECT * FROM violations WHERE chat_id = ? AND user_id = ?')
           .bind(chatId, userId)
           .first();
-        return convertToFirestoreFormat(violation);
+        return convertToFirestoreFormat(parseD1Row(violation));
       }
       return null;
 
@@ -222,6 +222,7 @@ export async function firestoreSet(path, data, env) {
       // Upsert group settings
       const snakeData = {};
       for (const [key, value] of Object.entries(data)) {
+        if (key === 'chatId' || key === 'chat_id') continue;
         const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
         snakeData[snakeKey] = typeof value === 'object' ? JSON.stringify(value) : value;
       }
@@ -240,10 +241,10 @@ export async function firestoreSet(path, data, env) {
       if (parts.length === 4 && parts[2] === 'members') {
         const [, chatId, , userId] = parts;
         // Upsert violation
-        const { count, lastViolation } = data;
+        const { count, lastViolation, username = '', name = '' } = data;
         await env.PSOTS_DB
-          .prepare(`INSERT INTO violations (chat_id, user_id, count, last_violation) VALUES (?, ?, ?, ?) ON CONFLICT(chat_id, user_id) DO UPDATE SET count = ?, last_violation = ?`)
-          .bind(chatId, userId, count, lastViolation, count, lastViolation)
+          .prepare(`INSERT INTO violations (chat_id, user_id, username, name, count, last_violation) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(chat_id, user_id) DO UPDATE SET username = ?, name = ?, count = ?, last_violation = ?`)
+          .bind(chatId, userId, username, name, count, lastViolation, username, name, count, lastViolation)
           .run();
         return true;
       }

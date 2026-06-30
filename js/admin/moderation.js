@@ -44,7 +44,7 @@ let _logsCache = [];      // full log list for client-side filter
       },
       {
         atCount: 10, muteMinutes: 99999, sendAs: 'group',
-        text: '⛔ Hi {name}, you have reached the maximum violation limit (#{count}).\n\nYou are indefinitely muted pending admin review.\n\nTo appeal: {profile}'
+        text: '⛔ Hi {name}, you have reached the maximum violation limit (#{count}).\n\nYou are muted pending admin review. Bans are admin-only.\n\nTo appeal: {profile}'
       }
     ];
 window.toggleBotGuide = function() {
@@ -306,9 +306,9 @@ function populateModSettings(settings) {
       const muteDuration = document.getElementById('muteDuration');
       if (muteDuration) muteDuration.value = settings.thresholds?.muteDuration || 60;
       const banLimit = document.getElementById('banLimit');
-      if (banLimit) banLimit.value = settings.thresholds?.ban || 10;
+      if (banLimit) banLimit.value = settings.thresholds?.ban || 0;
       const geminiEnabled = document.getElementById('geminiEnabled');
-      if (geminiEnabled) geminiEnabled.checked = settings.gemini?.enabled !== false;
+      if (geminiEnabled) geminiEnabled.checked = settings.gemini?.enabled === true;
       const geminiSensitivity = document.getElementById('geminiSensitivity');
       if (geminiSensitivity) geminiSensitivity.value = settings.gemini?.sensitivity || 'medium';
       const geminiContextMessages = document.getElementById('geminiContextMessages');
@@ -1035,9 +1035,9 @@ function renderLogs(logs) {
 
       tbody.innerHTML = filtered.map((log, i) => {
         const id      = `log-detail-${i}`;
-        const msg     = log.message || log.text || '';
+        const msg     = log.message || log.text || log.messageText || '';
         const snippet = msg.length > 100 ? msg.slice(0, 100) + '…' : msg;
-        const action  = 'flagged';
+        const action  = (log.actionTaken || log.action || 'flagged').toLowerCase();
         const username = log.from?.username || log.username || log.user || '—';
 
         const detailHtml = `
@@ -1056,7 +1056,7 @@ function renderLogs(logs) {
               <div>
                 <div style="font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase;">Violation Reason</div>
                 <div style="background: white; border: 1px solid var(--border); border-radius:6px; padding:10px; font-size:12px;">
-                  ${_escHtml(log.reason || 'Flagged message')}
+                  ${_escHtml(log.reason || log.matched || 'Flagged message')}
                 </div>
               </div>
               <div style="margin-top:12px;">
@@ -1071,8 +1071,8 @@ function renderLogs(logs) {
             <td style="padding: 10px 12px; font-size: 12px; color:var(--muted); white-space:nowrap;">${_fmtLogTime(log.flaggedAt || log.timestamp || log.ts)}</td>
             <td style="padding: 10px 12px; font-size: 13px;">@${_escHtml(username)}</td>
             <td style="padding: 10px 12px; font-size: 12px; color:var(--ink-soft); max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${_escHtml(msg)}">${_escHtml(snippet)}</td>
-            <td style="padding: 10px 12px; font-size: 12px;">${_escHtml(log.reason || '—')}</td>
-            <td style="padding: 10px 12px;"><span style="color:#dc2626; font-size:12px; font-weight:600;">🚩 Flagged</span></td>
+            <td style="padding: 10px 12px; font-size: 12px;">${_escHtml(log.reason || log.matched || '—')}</td>
+            <td style="padding: 10px 12px;"><span style="color:#dc2626; font-size:12px; font-weight:600;">${_escHtml(log.geminiVerdict || log.confidence || 'rule')}</span></td>
             <td style="padding: 10px 12px;">${_actionBadge(action)}</td>
           </tr>
           ${detailHtml}`;

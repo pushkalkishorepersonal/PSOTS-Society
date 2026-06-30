@@ -316,7 +316,18 @@ function parseFirestoreDoc(data) {
   if (!data || !data.fields) return null;
   const obj = {};
   for (const [k, v] of Object.entries(data.fields)) {
-    if (v.stringValue !== undefined) obj[k] = v.stringValue;
+    if (v.stringValue !== undefined) {
+      const str = v.stringValue;
+      if (typeof str === 'string' && (str.trim().startsWith('{') || str.trim().startsWith('['))) {
+        try {
+          obj[k] = JSON.parse(str);
+        } catch (_) {
+          obj[k] = str;
+        }
+      } else {
+        obj[k] = str;
+      }
+    }
     else if (v.integerValue !== undefined) obj[k] = parseInt(v.integerValue);
     else if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
     else if (v.arrayValue?.values) obj[k] = v.arrayValue.values.map(i => i.stringValue || i.integerValue);
@@ -802,8 +813,8 @@ function generateRegistrationInviteEmail(residentName, flatNumber, adminContact 
 // ── DEFAULT GROUP SETTINGS ────────────────────────────────────
 const DEFAULT_SETTINGS = {
   botActive: true,
-  thresholds: { warn: 1, mute: 3, muteDuration: 60, ban: 10 },
-  gemini: { enabled: true, sensitivity: 'medium', contextMessages: 10 },
+  thresholds: { warn: 1, mute: 3, muteDuration: 60, ban: 0 },
+  gemini: { enabled: false, sensitivity: 'medium', contextMessages: 10 },
   keywords: {
     predefined: { spam: true, abuse: true, links: false, ads: false, hate: true },
     custom: []
@@ -820,6 +831,88 @@ const DEFAULT_SETTINGS = {
     ]
   }
 };
+
+const DEFAULT_BOT_SETTINGS = {
+  adminChatId: String(ADMIN_GROUP_ID),
+  mainGroupId: '',
+  botUsername: 'psots_telegram_bot',
+  aiContextChecking: false,
+  aiSensitivity: 'medium'
+};
+
+function clampNumber(value, min, max, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, Math.trunc(parsed)));
+}
+
+function normalizeGroupSettings(settings = {}) {
+  const thresholds = { ...DEFAULT_SETTINGS.thresholds, ...(settings.thresholds || {}) };
+  const warningMessages = { ...DEFAULT_SETTINGS.warningMessages, ...(settings.warningMessages || {}) };
+  const gemini = { ...DEFAULT_SETTINGS.gemini, ...(settings.gemini || {}) };
+  const keywords = {
+    predefined: { ...DEFAULT_SETTINGS.keywords.predefined, ...(settings.keywords?.predefined || {}) },
+    custom: Array.isArray(settings.keywords?.custom) ? settings.keywords.custom : DEFAULT_SETTINGS.keywords.custom
+  };
+
+  return {
+    ...DEFAULT_SETTINGS,
+    ...settings,
+    botActive: settings.botActive !== false,
+    thresholds: {
+      warn: clampNumber(thresholds.warn, 1, 20, DEFAULT_SETTINGS.thresholds.warn),
+      mute: clampNumber(thresholds.mute, 1, 20, DEFAULT_SETTINGS.thresholds.mute),
+      muteDuration: clampNumber(thresholds.muteDuration, 1, 24 * 60, DEFAULT_SETTINGS.thresholds.muteDuration),
+      ban: clampNumber(thresholds.ban, 0, 100, DEFAULT_SETTINGS.thresholds.ban)
+    },
+    gemini: {
+      enabled: Boolean(gemini.enabled),
+      sensitivity: ['low', 'medium', 'high'].includes(gemini.sensitivity) ? gemini.sensitivity : 'medium',
+      contextMessages: clampNumber(gemini.contextMessages, 1, 20, DEFAULT_SETTINGS.gemini.contextMessages)
+    },
+    keywords,
+    warningMessages: {
+      ...warningMessages,
+      dmThreshold: clampNumber(warningMessages.dmThreshold, 0, 20, DEFAULT_SETTINGS.warningMessages.dmThreshold),
+      notifyAdminFrom: clampNumber(warningMessages.notifyAdminFrom, 0, 20, DEFAULT_SETTINGS.warningMessages.notifyAdminFrom),
+      levels: Array.isArray(warningMessages.levels) && warningMessages.levels.length
+        ? warningMessages.levels
+        : DEFAULT_SETTINGS.warningMessages.levels
+    }
+  };
+}
+
+function normalizeBotSettings(settings = {}) {
+  return {
+    ...DEFAULT_BOT_SETTINGS,
+    ...settings,
+    adminChatId: settings.adminChatId ? String(settings.adminChatId) : DEFAULT_BOT_SETTINGS.adminChatId,
+    aiContextChecking: Boolean(settings.aiContextChecking),
+    aiSensitivity: ['low', 'medium', 'high'].includes(settings.aiSensitivity) ? settings.aiSensitivity : 'medium'
+  };
+}
+
+async function getBotSettings(env) {
+  const raw = await env.VIOLATIONS.get('_bot_settings_global');
+  return normalizeBotSettings(raw ? JSON.parse(raw) : {});
+}
+
+async function getGroupSettings(chatId, env) {
+  const stored = parseFirestoreDoc(await db.firestoreGet(`group_settings/${chatId}`, env));
+  return normalizeGroupSettings(stored || {});
+}
+
+async function writeModerationLog(env, log) {
+  const now = new Date().toISOString();
+  const key = `_mod_log_${Date.now()}_${log.chatId}_${log.userId || 'unknown'}`;
+  await env.VIOLATIONS.put(key, JSON.stringify({
+    id: key,
+    timestamp: now,
+    flaggedAt: now,
+    reviewed: false,
+    ...log
+  }));
+}
 
 // ── NOTIFICATION HELPERS ──────────────────────────────────────
 
@@ -921,8 +1014,8 @@ Respond in JSON only:
 }
 
 async function moderateMessage(message, chatId, botToken, env) {
-  const settings = parseFirestoreDoc(await db.firestoreGet(`group_settings/${chatId}`, env));
-  if (!settings || !settings.botActive) return;
+  const settings = await getGroupSettings(chatId, env);
+  if (!settings.botActive) return;
 
   // Build keyword list
   const PREDEFINED = {
@@ -945,10 +1038,32 @@ async function moderateMessage(message, chatId, botToken, env) {
   // Gemini context check
   const context = await getRecentMessages(chatId, env.VIOLATIONS);
   let verdict = { verdict: 'flag', reason: 'Keyword match' };
-  if (settings.gemini?.enabled) {
+  if (settings.gemini?.enabled && env.GEMINI_API_KEY) {
     verdict = await checkWithGemini(message, context, settings.gemini, env);
   }
-  if (verdict.verdict === 'pass') return;
+  const userId = String(message.from.id);
+  const username = message.from.username || '';
+  const name = `${message.from.first_name || ''} ${message.from.last_name || ''}`.trim() || message.from.first_name || 'Resident';
+  const messageText = message.text || message.caption || '';
+  if (verdict.verdict === 'pass') {
+    await writeModerationLog(env, {
+      chatId: String(chatId),
+      chatTitle: message.chat?.title || '',
+      userId,
+      username,
+      name,
+      messageId: message.message_id,
+      message: messageText.substring(0, 1000),
+      matched,
+      reason: verdict.reason || 'Allowed by context check',
+      geminiVerdict: 'pass',
+      action: 'passed',
+      actionTaken: 'passed',
+      count: 0,
+      context
+    });
+    return;
+  }
 
   // Delete message
   await fetch(`https://api.telegram.org/bot${botToken}/deleteMessage`, {
@@ -958,7 +1073,6 @@ async function moderateMessage(message, chatId, botToken, env) {
   });
 
   // Get/update violation count
-  const userId = String(message.from.id);
   const violationPath = `violations/${chatId}/members/${userId}`;
   const violationDoc = parseFirestoreDoc(await db.firestoreGet(violationPath, env));
   const currentCount = violationDoc?.count || 0;
@@ -966,8 +1080,8 @@ async function moderateMessage(message, chatId, botToken, env) {
 
   await firestoreSet(violationPath, {
     userId: message.from.id,
-    username: message.from.username || '',
-    name: `${message.from.first_name} ${message.from.last_name || ''}`.trim(),
+    username,
+    name,
     count: newCount,
     lastViolation: new Date().toISOString()
   }, env);
@@ -980,10 +1094,11 @@ async function moderateMessage(message, chatId, botToken, env) {
   const levels = settings.warningMessages?.levels || DEFAULT_SETTINGS.warningMessages.levels;
   const levelConfig = [...levels].reverse().find(l => newCount >= l.atCount)
     || { text: '⚠️ Your message was removed for violating community guidelines.', muteMinutes: 0 };
+  const muteMinutes = clampNumber(levelConfig.muteMinutes, 0, 999999, 0);
 
   // Replace placeholders
   const warningText = levelConfig.text
-    .replace(/{name}/g, message.from.first_name)
+    .replace(/{name}/g, message.from.first_name || 'Resident')
     .replace(/{count}/g, newCount)
     .replace(/{reason}/g, verdict.reason)
     .replace(/{profile}/g, 'society.psots.in/society/profile');
@@ -997,26 +1112,47 @@ async function moderateMessage(message, chatId, botToken, env) {
   });
 
   // Mute if configured
-  if (levelConfig.muteMinutes > 0) {
+  let actionTaken = 'deleted';
+  if (muteMinutes > 0) {
     await fetch(`https://api.telegram.org/bot${botToken}/restrictChatMember`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: chatId, user_id: message.from.id,
         permissions: { can_send_messages: false },
-        until_date: Math.floor(Date.now() / 1000) + (levelConfig.muteMinutes * 60)
+        until_date: Math.floor(Date.now() / 1000) + (muteMinutes * 60)
       })
     });
+    actionTaken = `muted ${muteMinutes}min`;
   }
+
+  await writeModerationLog(env, {
+    chatId: String(chatId),
+    chatTitle: message.chat?.title || '',
+    userId,
+    username,
+    name,
+    messageId: message.message_id,
+    message: messageText.substring(0, 1000),
+    matched,
+    reason: verdict.reason,
+    geminiVerdict: verdict.verdict,
+    confidence: verdict.confidence || 'n/a',
+    action: muteMinutes > 0 ? 'muted' : 'deleted',
+    actionTaken,
+    count: newCount,
+    context
+  });
 
   // Notify admin group
   const notifyAdmin = settings.warningMessages?.notifyAdminFrom ?? 1;
   if (newCount >= notifyAdmin) {
-    const adminMsg = `🚨 <b>Moderation Alert</b>\n\nGroup: ${chatId}\nUser: @${message.from.username || message.from.first_name}\nViolation #${newCount}\nKeyword: "${matched}"\nGemini: ${verdict.reason}\n\nMessage: "${message.text?.substring(0, 150)}"\n\nAction: ${levelConfig.muteMinutes > 0 ? `Muted ${levelConfig.muteMinutes}min` : 'Warned'}\n\n⚠️ BAN requires manual admin action in Admin Panel.`;
+    const botSettings = await getBotSettings(env);
+    const adminMsg = `🚨 <b>Moderation Alert</b>\n\nGroup: ${message.chat?.title || chatId}\nUser: @${username || message.from.first_name}\nViolation #${newCount}\nKeyword: "${matched}"\nReason: ${verdict.reason}\n\nMessage: "${messageText.substring(0, 150)}"\n\nAction: ${actionTaken}\n\n⚠️ BAN requires manual admin action in Admin Panel.`;
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: ADMIN_GROUP_ID, text: adminMsg, parse_mode: 'HTML' })
+      body: JSON.stringify({ chat_id: botSettings.adminChatId || ADMIN_GROUP_ID, text: adminMsg, parse_mode: 'HTML' })
     }).catch(() => {});
   }
 }
@@ -3260,37 +3396,13 @@ export default {
           }
 
           // Always return defaults if not found
-          if (!settings) {
-            settings = {
-              active: true,
-              warnAt: 1,
-              muteAt: 3,
-              muteDuration: 60,
-              banLimit: 10,
-              geminiEnabled: true,
-              sensitivity: 'medium',
-              contextMessages: 10,
-              dmThreshold: 3,
-              notifyFrom: 2
-            };
-          }
+          settings = normalizeGroupSettings(settings || {});
 
           return new Response(JSON.stringify({ ok: true, settings }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
           console.log('group-settings GET error:', err.message);
           // Return defaults even on error - never fail
-          const defaults = {
-            active: true,
-            warnAt: 1,
-            muteAt: 3,
-            muteDuration: 60,
-            banLimit: 10,
-            geminiEnabled: true,
-            sensitivity: 'medium',
-            contextMessages: 10,
-            dmThreshold: 3,
-            notifyFrom: 2
-          };
+          const defaults = normalizeGroupSettings({});
           return new Response(JSON.stringify({ ok: true, settings: defaults }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         }
       }
@@ -3320,7 +3432,8 @@ export default {
           const { chatId, reactions } = body;
           if (!chatId) return new Response(JSON.stringify({ ok: false, error: 'chatId required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
 
-          await firestoreSet(`group_settings/${chatId}`, body, env);
+          const normalized = normalizeGroupSettings(body);
+          await firestoreSet(`group_settings/${chatId}`, normalized, env);
           if (reactions) {
             await env.VIOLATIONS.put(`_reactions_${chatId}`, JSON.stringify(reactions));
           }
@@ -3337,10 +3450,21 @@ export default {
           const chatId = url.searchParams.get('chatId');
           if (!chatId) return new Response(JSON.stringify({ ok: false, error: 'chatId required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
 
-          // Get all violations for this chat by querying Firestore
-          const path = `violations/${chatId}/members`;
-          // For now, return empty array — full collection query requires more complex Firestore API
-          return new Response(JSON.stringify({ ok: true, violations: [] }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+          const result = await env.PSOTS_DB
+            .prepare('SELECT chat_id, user_id, username, name, count, last_violation, muted_until, banned FROM violations WHERE chat_id = ? ORDER BY count DESC, last_violation DESC LIMIT 100')
+            .bind(String(chatId))
+            .all();
+          const violations = (result.results || []).map(row => ({
+            chatId: row.chat_id,
+            userId: row.user_id,
+            username: row.username || '',
+            name: row.name || '',
+            count: row.count || 0,
+            lastViolation: row.last_violation,
+            mutedUntil: row.muted_until,
+            banned: Boolean(row.banned)
+          }));
+          return new Response(JSON.stringify({ ok: true, violations }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
           return new Response(JSON.stringify({ ok: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
@@ -3408,10 +3532,13 @@ export default {
           const chatId = url.searchParams.get('chatId');
           if (!chatId) return new Response(JSON.stringify({ ok: false, error: 'chatId required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
 
-          const list = await env.VIOLATIONS.list({ prefix: '_flagged_msg_' });
+          const [modList, flaggedList] = await Promise.all([
+            env.VIOLATIONS.list({ prefix: '_mod_log_' }),
+            env.VIOLATIONS.list({ prefix: '_flagged_msg_' })
+          ]);
           const logs = [];
 
-          for (const item of list.keys) {
+          for (const item of [...modList.keys, ...flaggedList.keys]) {
             const raw = await env.VIOLATIONS.get(item.name);
             if (raw) {
               const log = JSON.parse(raw);
@@ -3421,7 +3548,7 @@ export default {
             }
           }
 
-          logs.sort((a, b) => (b.flaggedAt || 0) - (a.flaggedAt || 0));
+          logs.sort((a, b) => new Date(b.flaggedAt || b.timestamp || b.ts || 0) - new Date(a.flaggedAt || a.timestamp || a.ts || 0));
           return new Response(JSON.stringify({ ok: true, logs: logs.slice(0, 50) }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
           return new Response(JSON.stringify({ ok: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -3434,8 +3561,11 @@ export default {
           const userId = url.searchParams.get('userId');
           if (!userId) return new Response(JSON.stringify({ ok: false, error: 'userId required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
 
-          const data = await getUserViolations(userId, env.VIOLATIONS);
-          const violationCount = data ? (data.count || 0) : 0;
+          const row = await env.PSOTS_DB
+            .prepare('SELECT SUM(count) AS total_count FROM violations WHERE user_id = ?')
+            .bind(String(userId))
+            .first();
+          const violationCount = row?.total_count || 0;
           return new Response(JSON.stringify({ ok: true, userId, violationCount }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
           return new Response(JSON.stringify({ ok: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -3469,6 +3599,38 @@ export default {
 
           await saveModerationConfig(env.VIOLATIONS, String(chatId), config);
           return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (err) {
+          return new Response(JSON.stringify({ ok: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // GET /admin/bot-settings
+      if (pathname === '/admin/bot-settings' && request.method === 'GET') {
+        try {
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          const settings = await getBotSettings(env);
+          return new Response(JSON.stringify({ ok: true, settings }), { headers: { 'Content-Type': 'application/json', ...CORS } });
+        } catch (err) {
+          return new Response(JSON.stringify({ ok: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      // POST /admin/bot-settings
+      if (pathname === '/admin/bot-settings' && request.method === 'POST') {
+        try {
+          const adminCtx = await resolveAdminAuth(request, env);
+          if (!adminCtx) {
+            return new Response(JSON.stringify({ ok: false, error: 'not_admin' }), { status: 403, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+
+          const body = await request.json().catch(() => ({}));
+          const settings = normalizeBotSettings(body.settings || body || {});
+          await env.VIOLATIONS.put('_bot_settings_global', JSON.stringify(settings));
+          return new Response(JSON.stringify({ ok: true, settings }), { headers: { 'Content-Type': 'application/json', ...CORS } });
         } catch (err) {
           return new Response(JSON.stringify({ ok: false, error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
         }
@@ -8224,23 +8386,29 @@ Return JSON only, no explanation:
               const resident = residentData ? JSON.parse(residentData) : null;
               const flatNumber = resident?.flatNumber || 'Unknown';
               const timestamp = new Date().toISOString();
+              const listingType = state.listingType || 'sell';
               const listingData = {
-                itemName: state.itemName,
-                price: state.price,
+                listingId: `tg_${Date.now()}_${userId}`,
+                title: state.itemName,
+                price: Number(String(state.price).replace(/[^\d.]/g, '')) || 0,
                 category: state.category,
-                condition: state.condition,
-                description: state.description,
-                flatNumber: flatNumber,
-                userId: userId,
+                description: `${listingType === 'rent' ? '[RENT] ' : ''}${state.description || ''}${state.condition ? `\nCondition: ${state.condition}` : ''}`.trim(),
+                sellerUid: `tg_${userId}`,
+                sellerResidentId: resident?.residentId || null,
+                sellerName: resident?.name || resident?.firstName || cb.from.first_name || 'Telegram resident',
+                sellerEmail: resident?.email || '',
+                sellerFlat: flatNumber,
+                telegramUsername: cb.from.username || '',
                 createdAt: timestamp,
-                updatedAt: timestamp,
-                status: 'active'
+                status: 'active',
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
               };
-              await firestoreSet(`marketplace_listings/${timestamp}`, listingData, env);
+              await db.createMarketplaceListing(listingData, env);
               const adminGroupId = ADMIN_GROUP_ID;
-              const adminMsg = `🛒 <b>New Listing</b>\n<b>${state.itemName}</b> — ₹${state.price}\n${state.category} · ${state.condition}\nFlat ${flatNumber}`;
+              const listingLabel = listingType === 'rent' ? 'Rental Listing' : 'Listing';
+              const adminMsg = `🛒 <b>New ${listingLabel}</b>\n<b>${state.itemName}</b> — ₹${state.price}\n${state.category} · ${state.condition}\nFlat ${flatNumber}`;
               await sendMessage(adminGroupId, adminMsg, botToken);
-              await sendMessage(userId, `✅ <b>Listed!</b>\n\nView your listing: <a href="https://society.psots.in/society/marketplace">PSOTS Marketplace</a>`, botToken);
+              await sendMessage(userId, `✅ <b>${listingLabel} posted!</b>\n\nView your listing: <a href="https://society.psots.in/society/marketplace">PSOTS Marketplace</a>`, botToken);
               await env.VIOLATIONS.delete(`_bot_state_${userId}`);
             }
             await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
@@ -8251,8 +8419,13 @@ Return JSON only, no explanation:
           }
           if (data.startsWith('sell_edit_')) {
             const userId = parseInt(data.replace('sell_edit_', ''));
-            await env.VIOLATIONS.put(`_bot_state_${userId}`, JSON.stringify({ step: 1, timestamp: Date.now() }), { expirationTtl: 600 });
-            await sendMessage(userId, '✏️ Let\'s start over.\n\n📦 What are you selling? (item name)', botToken);
+            const existingRaw = await env.VIOLATIONS.get(`_bot_state_${userId}`);
+            const existing = existingRaw ? JSON.parse(existingRaw) : {};
+            const listingType = existing.listingType || 'sell';
+            await env.VIOLATIONS.put(`_bot_state_${userId}`, JSON.stringify({ step: 1, listingType, timestamp: Date.now() }), { expirationTtl: 600 });
+            await sendMessage(userId, listingType === 'rent'
+              ? '✏️ Let\'s start over.\n\n🏠 What are you renting out?'
+              : '✏️ Let\'s start over.\n\n📦 What are you selling? (item name)', botToken);
             await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -8384,8 +8557,14 @@ Return JSON only, no explanation:
           }
 
           if (text === '/sell') {
-            await env.VIOLATIONS.put(`_bot_state_${userId}`, JSON.stringify({ step: 1, timestamp: Date.now() }), { expirationTtl: 600 });
+            await env.VIOLATIONS.put(`_bot_state_${userId}`, JSON.stringify({ step: 1, listingType: 'sell', timestamp: Date.now() }), { expirationTtl: 600 });
             await sendMessage(userId, '📦 What are you selling? (item name)', botToken);
+            return new Response('OK');
+          }
+
+          if (text === '/rent') {
+            await env.VIOLATIONS.put(`_bot_state_${userId}`, JSON.stringify({ step: 1, listingType: 'rent', timestamp: Date.now() }), { expirationTtl: 600 });
+            await sendMessage(userId, '🏠 What are you renting out? (flat, parking slot, item, etc.)', botToken);
             return new Response('OK');
           }
 
@@ -8401,7 +8580,7 @@ Return JSON only, no explanation:
               state.itemName = text.trim();
               state.step = 2;
               await env.VIOLATIONS.put(stateKey, JSON.stringify(state), { expirationTtl: 600 });
-              await sendMessage(userId, `💰 What's the price? (₹ amount or 'Free')`, botToken);
+              await sendMessage(userId, state.listingType === 'rent' ? `💰 What's the rent/price? (₹ amount)` : `💰 What's the price? (₹ amount or 'Free')`, botToken);
               return new Response('OK');
             }
             if (state.step === 2) {
